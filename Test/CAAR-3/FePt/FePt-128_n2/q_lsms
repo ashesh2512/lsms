@@ -1,0 +1,28 @@
+#!/bin/bash
+# Begin Slurm directives
+#SBATCH -A stf006_frontier
+#SBATCH -J LSMS-FePt
+#SBATCH -o FePt.stdout
+#SBATCH -t 00:30:00
+#SBATCH -p batch
+#SBATCH -N 2
+# End LSF directives and begin shell commands
+
+# module load PrgEnv-gnu
+module load PrgEnv-amd
+module load rocm
+module swap cray-libsci cray-libsci/21.08.1.2
+module list
+
+export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
+echo LD_LIBRARY_PATH = $LD_LIBRARY_PATH
+
+export LSMS_ROOT=$HOME/frontier.software/lsms
+# cd $MEMBERWORK/stf006/Fe
+cd $SLURM_SUBMIT_DIR
+
+date
+export OMP_NUM_THREADS=1
+# export OMP_NUM_THREADS=8
+srun -n16 -N2 -c1 --ntasks-per-node=8 --gpu-bind=closest --gpus-per-task=1 --gpus-per-node=8 $LSMS_ROOT/bin/lsms i_lsms
+
