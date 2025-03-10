@@ -861,9 +861,9 @@ local.tmatStore(iie*local.blkSizeTmatStore + , atom.LIZStoreIdx[ir1]) *
   Matrix<Complex> mCPU(nrmat_ns, nrmat_ns);
   Matrix<Complex> mGPU(nrmat_ns, nrmat_ns);
 
-  cudaMemcpy(&mGPU(0, 0), devM, nrmat_ns * nrmat_ns * sizeof(Complex),
-             cudaMemcpyDeviceToHost);
-  buildKKRMatrixCPU(lsms, local, atom, iie, energy, prel, mCPU);
+  ret = deviceMemcpy(&mGPU(0, 0), devM, nrmat_ns * nrmat_ns * sizeof(Complex),
+             deviceMemcpyDeviceToHost);
+  buildKKRMatrixCPU(lsms, local, atom, ispin, iie, energy, prel, mCPU);
 
   for (int i = 0; i < nrmat_ns; i++)
     for (int j = 0; j < nrmat_ns; j++) {

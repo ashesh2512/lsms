@@ -599,7 +599,7 @@ void buildKKRMatrixLMaxDifferentCPU(LSMSSystemParameters &lsms,
   }
 #ifdef COMPARE_ORIGINAL
   bool exitCompare = false;
-  int ispin = 0;
+  // int ispin = 0;
   Matrix<Complex> mTest(nrmat_ns, nrmat_ns);
   buildKKRMatrix(lsms, local, atom, ispin, energy, prel, iie, mTest);
   for (int i = 0; i < nrmat_ns; i++)
