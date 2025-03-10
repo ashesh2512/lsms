@@ -184,13 +184,13 @@ void buildBGijCPU(LSMSSystemParameters &lsms, AtomData &atom, int ir1, int ir2,
   int lmax = lsms.maxlmax;
   int kkrsz = (lmax + 1) * (lmax + 1);
   makegij_(&atom.LIZlmax[ir1], &kkr1, &atom.LIZlmax[ir2], &kkr2, &lsms.maxlmax,
-           &kkrsz, &lsms.angularMomentumIndices.ndlj,
-           &lsms.angularMomentumIndices.ndlm, &prel, &rij[0], &sinmp[0],
-           &cosmp[0], &sphericalHarmonicsCoeficients.clm[0], &plm[0],
-           &gauntCoeficients.cgnt(0, 0, 0), &gauntCoeficients.lmax,
-           &lsms.angularMomentumIndices.lofk[0],
-           &lsms.angularMomentumIndices.mofk[0], &iFactors.ilp1[0],
-           &iFactors.illp(0, 0), &hfn[0], &dlm[0], &gijTest(0, 0), &pi4,
+           &kkrsz, &AngularMomentumIndices::ndlj,
+           &AngularMomentumIndices::ndlm, &prel, &rij[0], &sinmp[0],
+           &cosmp[0], &SphericalHarmonicsCoeficients::clm[0], &plm[0],
+           &GauntCoeficients::cgnt(0, 0, 0), &GauntCoeficients::lmax,
+           &AngularMomentumIndices::lofk[0],
+           &AngularMomentumIndices::mofk[0], &IFactors::ilp1[0],
+           &IFactors::illp(0, 0), &hfn[0], &dlm[0], &gijTest(0, 0), &pi4,
            &lsms.global.iprint, lsms.global.istop, 32);
   int idx = 0;
   for (int i = 0; i < kkri; i++)

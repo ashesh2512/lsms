@@ -2,6 +2,8 @@
 #include <cmath>
 #include <vector>
 
+#include <hdf5.h>
+
 #include "Complex.hpp"
 #include "PhysicalConstants.hpp"
 #include "Real.hpp"
@@ -558,25 +560,55 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
       char fname[256];
       snprintf(fname, 200, "kkrmat_%03d.dat",iie);
       FILE *f1 = fopen(fname, "w");
-      snprintf(fname, 200, "kkrmat_%03d.pattern",iie);
-      FILE *f2 = fopen(fname, "w");
+      snprintf(fname, 200, "kkrmat_%03d.h5",iie);
+      hid_t h5_f1 = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
       snprintf(fname, 200, "tmat_%03d.dat",iie);
       FILE *f3 = fopen(fname, "w");
+      snprintf(fname, 200, "tmat_%03d.h5",iie);
+      hid_t h5_f3 = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+      Complex tmp;
+      hid_t h5_complex = H5Tcreate(H5T_COMPOUND, sizeof(Complex));
+      H5Tinsert (h5_complex, "real", 0, H5T_NATIVE_DOUBLE);
+      H5Tinsert (h5_complex, "imag", sizeof(Real), H5T_NATIVE_DOUBLE);
+      hsize_t kkrmat_dims[2]; kkrmat_dims[0] = kkrmat_dims[1] = nrmat_ns;
+      hid_t h5_kkrmat_space = H5Screate_simple(2, kkrmat_dims, NULL);
+      hid_t ds_kkrmat_r = H5Dcreate2(h5_f1, "kkrmat", h5_complex, h5_kkrmat_space,
+                                     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); 
+
+      H5Dwrite(ds_kkrmat_r, h5_complex, H5S_ALL, H5S_ALL, H5P_DEFAULT, &m(0,0));
+      H5Dclose(ds_kkrmat_r);
+      H5Sclose(h5_kkrmat_space);
+
+      hsize_t tmat_dims[2]; tmat_dims[0] = tmat_dims[1] = kkrsz_ns;
+      hid_t h5_tmat_space = H5Screate_simple(2, tmat_dims, NULL);
+      hid_t ds_tmat_r = H5Dcreate2(h5_f3, "tmat", h5_complex, h5_tmat_space,
+                                     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+      H5Dwrite(ds_tmat_r, h5_complex, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+         &local.tmatStore(iie * local.blkSizeTmatStore, atom.LIZStoreIdx[0]));
+      H5Dclose(ds_tmat_r);
+      H5Sclose(h5_tmat_space);
+
+      // snprintf(fname, 200, "kkrmat_%03d.pattern",iie);
+      // FILE *f2 = fopen(fname, "w");
+      
       fprintf(f1, "# %6d x %6d\n", nrmat_ns, nrmat_ns);
       fprintf(f1, "# energy: %lg %lg\n", std::real(energy), std::imag(energy));
       fprintf(f3, "# %3d x %3d\n", kkrsz_ns, kkrsz_ns);
       fprintf(f3, "# energy: %lg %lg\n", std::real(energy), std::imag(energy));
       for (int i = 0; i < nrmat_ns; i++) {
-        fprintf(f2, "%5d ", i);
+        // fprintf(f2, "%5d ", i);
         for (int j = 0; j < nrmat_ns; j++) {
           fprintf(f1, "%6d %6d %lg %lg\n", i, j, std::real(m(i, j)),
                   std::imag(m(i, j)));
-          if (std::abs(m(i, j)) < 0.000001)
-            fprintf(f2, ".");
-          else
-            fprintf(f2, "x");
+          // if (std::abs(m(i, j)) < 0.000001)
+          //   fprintf(f2, ".");
+          // else
+          //   fprintf(f2, "x");
         }
-        fprintf(f2, "\n");
+        // fprintf(f2, "\n");
       }
 
       if (lsms.n_spin_pola == lsms.n_spin_cant) {  // non polarized or spin canted
@@ -606,8 +638,11 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
       }
 
       fclose(f1);
-      fclose(f2);
+      H5Tclose(h5_complex);
+      H5Fclose(h5_f1);
+      // fclose(f2);
       fclose(f3);
+      H5Fclose(h5_f3);
     }
     // exitLSMS(comm, 0);
   }
