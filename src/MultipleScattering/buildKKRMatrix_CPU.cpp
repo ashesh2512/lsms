@@ -20,6 +20,27 @@
 
 // #define COMPARE_ORIGINAL 1
 
+#ifdef COMPARE_ORIGINAL
+#define TOLERANCE 1e-10
+
+// if value is greater than 1, use relative value, else
+// use absolute value for comparison to avoid artificially big differences
+inline bool comp(Real val, Real test) {
+  bool comp = true;
+  if (std::abs(test) > 1.0) {
+    if (std ::abs((val - test) / test) > TOLERANCE) {
+      comp = false;
+    }
+  }
+  else {
+    if (std ::abs(val - test) > TOLERANCE) {
+      comp = false;
+    }
+  }
+  return comp;
+}
+#endif
+
 inline void calculateHankel(Complex prel, Real r, int lend, Complex *hfn) {
   const Complex sqrtm1(0.0, 1.0);
   Complex z = prel * r;
@@ -195,12 +216,12 @@ void buildBGijCPU(LSMSSystemParameters &lsms, AtomData &atom, int ir1, int ir2,
   int idx = 0;
   for (int i = 0; i < kkri; i++)
     for (int j = 0; j < kkrj; j++) {
-      if (bgij(iOffset + i, jOffset + j) != gijTest(i, j))
-      // if(bgij[idx] != gijTest[idx])
+      if (!comp(bgij(iOffset + i, jOffset + j).real(), gijTest(i, j).real()) ||
+          !comp(bgij(iOffset + i, jOffset + j).imag(), gijTest(i, j).imag()))
       {
         printf(
-            "buildBGijCPU [idx=%d]: bgij(%d + %d, %d + %d) [%g + %gi] != "
-            "gijTest(%d, %d) [%g + %gi]\n",
+            "buildBGijCPU [idx=%d]: bgij(%d + %d, %d + %d) [%.15f + %.15fi] != "
+            "gijTest(%d, %d) [%.15f + %.15fi]\n",
             idx, iOffset, i, jOffset, j, bgij(iOffset + i, jOffset + j).real(),
             bgij(iOffset + i, jOffset + j).imag(), i, j, gijTest(i, j).real(),
             gijTest(i, j).imag());
@@ -224,11 +245,12 @@ void buildBGijCPU(LSMSSystemParameters &lsms, AtomData &atom, int ir1, int ir2,
   idx = 0;
   for (int i = 0; i < 2 * kkri; i++)
     for (int j = 0; j < 2 * kkrj; j++) {
-      // if(bgij(iOffset + i, jOffset + j) != bgijTest(i,j))
-      if (bgij[idx] != bgijTest[idx]) {
+      if (!comp(bgij(iOffset + i, jOffset + j).real(), bgijTest(i, j).real()) ||
+          !comp(bgij(iOffset + i, jOffset + j).imag(), bgijTest(i, j).imag()))
+      {
         printf(
-            "buildBGijCPU  [idx=%d]: bgij(%d + %d, %d + %d) [%g + %gi] != "
-            "bgijTest(%d, %d) [%g + %gi]\n",
+            "buildBGijCPU  [idx=%d]: bgij[%d + %d, %d + %d) [%.15f + %.15fi] != "
+            "bgijTest(%d, %d) [%.15f + %.15fi]\n",
             idx, iOffset, i, jOffset, j, bgij(iOffset + i, jOffset + j).real(),
             bgij(iOffset + i, jOffset + j).imag(), i, j, bgijTest(i, j).real(),
             bgijTest(i, j).imag());
@@ -240,7 +262,7 @@ void buildBGijCPU(LSMSSystemParameters &lsms, AtomData &atom, int ir1, int ir2,
 
   if ((ir1 == 1 && ir2 == 0) || (ir1 == 10 && ir2 == 0)) {
     printf("ir1=%d, ir2=%d: bgij(0,0) = %g + %gi; bgijTest(0,0) = %g + %gi\n",
-           ir1, ir2, bgij(0, 0).real(), bgij(0, 0).imag(),
+           ir1, ir2, bgij(iOffset + 0, jOffset + 0).real(), bgij(iOffset + 0, jOffset + 0).imag(),
            bgijTest(0, 0).real(), bgijTest(0, 0).imag());
     printf("    rij = %g %g %g;  prel=%g + %gi\n", rij[0], rij[1], rij[2],
            prel.real(), prel.imag());
@@ -340,15 +362,14 @@ void buildKKRMatrixLMaxIdenticalCPU(LSMSSystemParameters &lsms,
         for (int i = 0; i < 2 * kkri; i++)
           for (int j = 0; j < 2 * kkrj; j++) {
             int jm = i + j * 2 * kkri;
-            if (tmat_n(i, j) !=
-                local.tmatStore(iie * local.blkSizeTmatStore + jm,
-                                atom.LIZStoreIdx[ir1]))
-            // if(tmat_n[idx] !=
-            // local.tmatStore(iie*local.blkSizeTmatStore+idx,atom.LIZStoreIdx[ir1]))
+            if (!comp(tmat_n(i, j).real(), local.tmatStore(iie * local.blkSizeTmatStore + jm,
+                                                           atom.LIZStoreIdx[ir1]).real()) ||
+                !comp(tmat_n(i, j).imag(), local.tmatStore(iie * local.blkSizeTmatStore + jm,
+                                                           atom.LIZStoreIdx[ir1]).imag()))
             {
               printf(
-                  "buildKKRMatrix...CPU [idx=%d]: tmat_n(%d, %d) [%g + %gi] != "
-                  "tmatStore(%d + %d, %d) [%g + %gi]\n",
+                  "buildKKRMatrix...CPU [idx=%d]: tmat_n(%d, %d) [%.15f + %.15fi] != "
+                  "tmatStore(%d + %d, %d) [%.15f + %.15fi]\n",
                   idx, i, j, tmat_n(i, j).real(), tmat_n(i, j).imag(),
                   iie * local.blkSizeTmatStore, jm, atom.LIZStoreIdx[ir1],
                   local
@@ -434,12 +455,12 @@ void buildKKRMatrixLMaxIdenticalCPU(LSMSSystemParameters &lsms,
   int idx = 0;
   for (int j = 0; j < nrmat_ns; j++)
     for (int i = 0; i < nrmat_ns; i++) {
-      if (m(i, j) != mTest(i, j))
-      // if(m[idx] != mTest[idx])
+      if (!comp(m(i, j).real(), mTest(i, j).real()) ||
+          !comp(m(i, j).imag(), mTest(i, j).imag()))
       {
         printf(
-            "buildKKRMatrix...CPU [idx=%d]: m(%d, %d) [%g + %gi] != mTest(%d, "
-            "%d) [%g + %gi]\n",
+            "buildKKRMatrix...CPU [idx=%d]: m(%d, %d) [%.15f + %.15fi] != mTest(%d, "
+            "%d) [%.15f + %.15fi]\n",
             idx, i, j, m(i, j).real(), m(i, j).imag(), i, j, mTest(i, j).real(),
             mTest(i, j).imag());
         exitCompare = true;
@@ -541,12 +562,14 @@ void buildKKRMatrixLMaxDifferentCPU(LSMSSystemParameters &lsms,
         for (int i = 0; i < 2 * kkri; i++)
           for (int j = 0; j < 2 * kkrj; j++) {
             int jm = i + j * 2 * kkri;
-            if (tmat_n(i, j) !=
-                local.tmatStore(iie * local.blkSizeTmatStore + jm,
-                                atom.LIZStoreIdx[ir1])) {
+            if (!comp(tmat_n(i, j).real(), local.tmatStore(iie * local.blkSizeTmatStore + jm,
+                                                           atom.LIZStoreIdx[ir1]).real()) ||
+                !comp(tmat_n(i, j).imag(), local.tmatStore(iie * local.blkSizeTmatStore + jm,
+                                                           atom.LIZStoreIdx[ir1]).imag()))
+            {
               printf(
-                  "buildKKRMatrixLMaxDifferentCPU: tmat_n(%d, %d) [%g + %gi] "
-                  "!= tmatStore(%d + %d, %d) [%g + %gi]\n",
+                  "buildKKRMatrixLMaxDifferentCPU: tmat_n(%d, %d) [%.15f + %.15fi] "
+                  "!= tmatStore(%d + %d, %d) [%.15f + %.15fi]\n",
                   i, j, tmat_n(i, j).real(), tmat_n(i, j).imag(),
                   iie * local.blkSizeTmatStore, jm, atom.LIZStoreIdx[ir1],
                   local
@@ -604,10 +627,12 @@ void buildKKRMatrixLMaxDifferentCPU(LSMSSystemParameters &lsms,
   buildKKRMatrix(lsms, local, atom, ispin, energy, prel, iie, mTest);
   for (int i = 0; i < nrmat_ns; i++)
     for (int j = 0; j < nrmat_ns; j++) {
-      if (m(i, j) != mTest(i, j)) {
+      if (!comp(m(i, j).real(), mTest(i, j).real()) ||
+          !comp(m(i, j).imag(), mTest(i, j).imag()))
+      {
         printf(
-            "buildKKRMatrixLMaxDifferentCPU: m(%d, %d) [%g + %gi] != mTest(%d, "
-            "%d) [%g + %gi]\n",
+            "buildKKRMatrixLMaxDifferentCPU: m(%d, %d) [%.15f + %.15fi] != mTest(%d, "
+            "%d) [%.15f + %.15fi]\n",
             i, j, m(i, j).real(), m(i, j).imag(), i, j, mTest(i, j).real(),
             mTest(i, j).imag());
         exitCompare = true;
