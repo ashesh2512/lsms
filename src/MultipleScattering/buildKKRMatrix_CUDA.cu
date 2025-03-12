@@ -26,6 +26,27 @@
 
 // #define COMPARE_ORIGINAL 1
 
+#ifdef COMPARE_ORIGINAL
+#define TOLERANCE 1e-10
+
+// if value is greater than 1, use relative value, else
+// use absolute value for comparison to avoid artificially big differences
+inline bool comp(Real val, Real test) {
+  bool comp = true;
+  if (std::abs(test) > 1.0) {
+    if (std ::abs((val - test) / test) > TOLERANCE) {
+      comp = false;
+    }
+  }
+  else {
+    if (std ::abs(val - test) > TOLERANCE) {
+      comp = false;
+    }
+  }
+  return comp;
+}
+#endif
+
 // Fortran layout for matrix
 // #define IDX(i, j, lDim) (((j)*(lDim))+(i))
 #define IDX3(i, j, k, lDim, mDim) (((k)*(lDim)*(mDim)) + ((j)*(lDim)) + (i))
@@ -603,15 +624,15 @@ void buildKKRMatrixLMaxIdenticalCuda(LSMSSystemParameters &lsms, LocalTypeInfo &
   cudaMemcpy(testSinmp, devTestSM + sinmpOffset, (2*lsms.maxlmax + 1)*sizeof(Real), cudaMemcpyDeviceToHost);
   cudaMemcpy(testCosmp, devTestSM + cosmpOffset, (2*lsms.maxlmax + 1)*sizeof(Real), cudaMemcpyDeviceToHost);
   cudaMemcpy(testPlm, devTestSM + plmOffset, AngularMomentumIndices::ndlm*sizeof(Real), cudaMemcpyDeviceToHost);
-  cudaMemcpy(testDlm, devTestSM + dlmOffset, AngularMomentumIndices::ndlj*sizeof(Complex), cudaMemcpyDeviceToHost);
+  // cudaMemcpy(testDlm, devTestSM + dlmOffset, AngularMomentumIndices::ndlj*sizeof(Complex), cudaMemcpyDeviceToHost);
 
   for(int i = 0; i < atom.numLIZ; i++)
   {
-    if(atom.LIZPos(0,i) != testLIZPos(0,i) ||
-       atom.LIZPos(1,i) != testLIZPos(1,i) ||
-       atom.LIZPos(2,i) != testLIZPos(2,i))
+    if(!comp(atom.LIZPos(0,i), testLIZPos(0,i)) ||
+       !comp(atom.LIZPos(1,i), testLIZPos(1,i)) ||
+       !comp(atom.LIZPos(2,i), testLIZPos(2,i)))
     {
-      printf("atom.LIZPos(*,%d) [%lf,%lf,%lf] != devAtom.LIZPos(*,%d) [%lf,%lf,%lf]\n",
+      printf("atom.LIZPos(*,%d) [%.15f,%.15f,%.15f] != devAtom.LIZPos(*,%d) [%.15f,%.15f,%.15f]\n",
              i,atom.LIZPos(0,i),atom.LIZPos(1,i),atom.LIZPos(2,i),
              i,testLIZPos(0,i),testLIZPos(1,i),testLIZPos(2,i));
     }
@@ -660,12 +681,13 @@ void buildKKRMatrixLMaxIdenticalCuda(LSMSSystemParameters &lsms, LocalTypeInfo &
         {
           for(int l=0; l<=atom.LIZlmax[ir1]+atom.LIZlmax[ir2]; l++)
           {
-            if(sinmp[l] != testSinmp[l])
-              printf("sinmp[%d] (%g) != testSinmp[%d] (%g)\n", l, sinmp[l], l, testSinmp[l]);
-            if(cosmp[l] != testCosmp[l])
-              printf("cosmp[%d] (%g) != testCosmp[%d] (%g)\n", l, cosmp[l], l, testCosmp[l]);
-            if(hfn[l] != testHfn[l])
-              printf("hfn[%d] (%g + %gi) != testHfn[%d] (%g + %gi)\n", l, hfn[l].real(), hfn[l].imag(), l, testHfn[l].real(), testHfn[l].imag());
+            if (!comp(sinmp[l], testSinmp[l]))
+              printf("sinmp[%d] (%.15f) != testSinmp[%d] (%.15f)\n", l, sinmp[l], l, testSinmp[l]);
+            if (!comp(cosmp[l], testCosmp[l]))
+              printf("cosmp[%d] (%.15f) != testCosmp[%d] (%.15f)\n", l, cosmp[l], l, testCosmp[l]);
+            if (!comp(hfn[l].real(), testHfn[l].real()) ||
+                !comp(hfn[l].imag(), testHfn[l].imag()))
+              printf("hfn[%d] (%.15f + %.15fi) != testHfn[%d] (%.15f + %.15fi)\n", l, hfn[l].real(), hfn[l].imag(), l, testHfn[l].real(), testHfn[l].imag());
           }
         }
 
@@ -673,33 +695,31 @@ void buildKKRMatrixLMaxIdenticalCuda(LSMSSystemParameters &lsms, LocalTypeInfo &
         for(int i=0; i<kkri; i++)
           for(int j=0; j<kkrj; j++)
           {
-            if(bgij(iOffset + i, jOffset + j) != gijTest(i,j))
-              // if(bgij[idx] != gijTest[idx])
+            if(!comp(bgij(iOffset + i, jOffset + j).real(), gijTest(i,j).real()) ||
+               !comp(bgij(iOffset + i, jOffset + j).imag(), gijTest(i,j).imag()))
             {
-              printf("buildBGijCPU [idx=%d]: bgij(%d + %d, %d + %d) [%g + %gi] != gijTest(%d, %d) [%g + %gi]\n", idx,
+              printf("buildBGijCPU [idx=%d]: bgij(%d + %d, %d + %d) [%.15f + %.15fi] != gijTest(%d, %d) [%.15f + %.15fi]\n", idx,
                      iOffset, i, jOffset, j, bgij(iOffset + i, jOffset + j).real(), bgij(iOffset + i, jOffset + j).imag(),
                      i, j, gijTest(i,j).real(), gijTest(i,j).imag());
               exitCompare = true;
             }
-            if(bgij(iOffset + kkri + i, jOffset + kkrj + j) != gijTest(i,j))
-              // if(bgij[idx] != gijTest[idx])
+            if(!comp(bgij(iOffset + kkri + i, jOffset + kkrj + j).real(), gijTest(i,j).real()) ||
+               !comp(bgij(iOffset + kkri + i, jOffset + kkrj + j).imag(), gijTest(i,j).imag()))
             {
-              printf("buildBGijCPU : bgij(%d + %d, %d + %d) [%g + %gi] != gijTest(%d, %d) [%g + %gi]\n",
+              printf("buildBGijCPU : bgij(%d + %d, %d + %d) [%.15f + %.15fi] != gijTest(%d, %d) [%.15f + %.15fi]\n",
                      iOffset, i+kkri, jOffset, j+kkrj, bgij(iOffset + kkri + i, jOffset + kkrj + j).real(), bgij(iOffset + kkri + i, jOffset + kkrj + j).imag(),
                      i, j, gijTest(i,j).real(), gijTest(i,j).imag());
               exitCompare = true;
             }
             if(bgij(iOffset + kkri + i, jOffset + j) != 0.0) //gijTest(i+kkri,j))
-              // if(bgij[idx] != gijTest[idx])
             {
-              printf("buildBGijCPU : bgij(%d + %d, %d + %d) [%g + %gi] != 0.0\n",
+              printf("buildBGijCPU : bgij(%d + %d, %d + %d) [%.15f + %.15fi] != 0.0\n",
                      iOffset, i+kkri, jOffset, j, bgij(iOffset + kkri + i, jOffset + j).real(), bgij(iOffset + kkri + i, jOffset + j).imag());
               exitCompare = true;
             }
             if(bgij(iOffset + i, jOffset + kkrj + j) != 0.0) //gijTest(i,j+kkrj))
-              // if(bgij[idx] != gijTest[idx])
             {
-              printf("buildBGijCPU : bgij(%d + %d, %d + %d) [%g + %gi] != 0.0\n",
+              printf("buildBGijCPU : bgij(%d + %d, %d + %d) [%.15f + %.15fi] != 0.0\n",
                      iOffset, i, jOffset, j+kkrj, bgij(iOffset + i, jOffset + kkrj + j).real(), bgij(iOffset + i, jOffset + kkrj + j).imag());
               exitCompare = true;
             }
@@ -823,15 +843,15 @@ void buildKKRMatrixLMaxIdenticalCuda(LSMSSystemParameters &lsms, LocalTypeInfo &
   Matrix<Complex> mGPU(nrmat_ns,nrmat_ns);
 
   cudaMemcpy(&mGPU(0,0), devM, nrmat_ns*nrmat_ns*sizeof(Complex), cudaMemcpyDeviceToHost);
-  buildKKRMatrixCPU(lsms, local, atom, iie, energy, prel, mCPU);
+  buildKKRMatrixCPU(lsms, local, atom, ispin, iie, energy, prel, mCPU);
 
   for(int i=0; i<nrmat_ns; i++)
     for(int j=0; j<nrmat_ns; j++)
         {
-            if(mCPU(i,j) != mGPU(i,j))
-              // if(bgij[idx] != gijTest[idx])
+            if(!comp(mCPU(i,j).real(), mGPU(i,j).real()) ||
+               !comp(mCPU(i,j).imag(), mGPU(i,j).imag()))
             {
-              printf("buildBGijCPU : mCPU(%d, %d) [%g + %gi] != mGPU(%d, %d) [%g + %gi]\n",
+              printf("buildBGijCPU : mCPU(%d, %d) [%.15f + %.15fi] != mGPU(%d, %d) [%.15f + %.15fi]\n",
                      i, j, mCPU(i, j).real(), mCPU(i, j).imag(),
                      i, j, mGPU(i,j).real(), mGPU(i,j).imag());
               exitCompare = true;
