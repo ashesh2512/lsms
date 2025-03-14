@@ -283,7 +283,7 @@ void buildKKRMatrixLMaxIdenticalCPU(LSMSSystemParameters &lsms,
   Complex czero = 0.0;
 
   Matrix<Complex> bgij(nrmat_ns, nrmat_ns);
-  Matrix<Complex> bgijSmall(kkrsz_ns, kkrsz_ns);
+  // Matrix<Complex> bgijSmall(kkrsz_ns, kkrsz_ns);
 
   m = 0.0;
   bgij = 0.0;
@@ -398,11 +398,11 @@ void buildKKRMatrixLMaxIdenticalCPU(LSMSSystemParameters &lsms,
                      &m(iOffset, jOffset), &nrmat_ns);
         */
         if ((ir1 == 1 && ir2 == 0) || (ir1 == 10 && ir2 == 0)) {
-          Complex p = -tmat_n(0, 0) * bgijSmall(0, 0);
+          Complex p = -tmat_n(0, 0) * bgij(0, 0);
           printf(
-              "ir1=%d, ir2=%d: bgijSmall(0,0) = %g +%g i; tmat_n(0,0) = %g + "
+              "ir1=%d, ir2=%d: bgij(0,0) = %g +%g i; tmat_n(0,0) = %g + "
               "%gi; -product =  %g + %gi\n",
-              ir1, ir2, bgijSmall(0, 0).real(), bgijSmall(0, 0).imag(),
+              ir1, ir2, bgij(0, 0).real(), bgij(0, 0).imag(),
               tmat_n(0, 0).real(), tmat_n(0, 0).imag(), p.real(), p.imag());
         }
 #endif
