@@ -1,0 +1,26 @@
+# Toolchain for building LSMS with HIP on OLCF Frontier with amd compiler
+
+set(CMAKE_BUILD_TYPE Release)
+set(BUILD_TESTING OFF)
+
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+
+set(SEARCH_LAPACK OFF)
+set(SEARCH_BLAS OFF)
+
+set(BUILD_WITH_OPENMP OFF)
+
+set(USE_ACCELERATOR_CUDA_C ON)
+
+set(BLAS_LIBRARIES "$ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_nvidia.a")
+set(LAPACK_LIBRARIES "$ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_nvidia.a")
+
+set(CMAKE_CUDA_ARCHITECTURES "80")
+
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -I/opt/cray/pe/mpich/8.1.32//ofi/nvidia/23.3/include/")
+
+set(MST_LINEAR_SOLVER_DEFAULT 0x0013)
+set(MST_BUILD_KKR_MATRIX_DEFAULT 0x3000)
+
+
+
