@@ -17,7 +17,8 @@ set(LAPACK_LIBRARIES "$ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_nvidia.a")
 
 set(CMAKE_CUDA_ARCHITECTURES "80")
 
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -I/opt/cray/pe/mpich/8.1.32//ofi/nvidia/23.3/include/")
+set(MPI_CXX_COMPILER mpicxx)
+#set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -I/opt/cray/pe/mpich/8.1.32//ofi/nvidia/23.3/include/")
 
 set(MST_LINEAR_SOLVER_DEFAULT 0x0013)
 set(MST_BUILD_KKR_MATRIX_DEFAULT 0x3000)
