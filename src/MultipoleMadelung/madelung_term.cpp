@@ -9,8 +9,8 @@
 #include "SphericalHarmonics.hpp"
 
 void lsms::dlsum(std::vector<Real> &aij, matrix<Real> &rslat, int nrslat,
-                 int ibegin, matrix<Real> &knlat, int nknlat, double omega,
-                 int lmax_mad, double eta, std::vector<Complex> &dlm) {
+                 int ibegin, matrix<Real> &knlat, int nknlat, Real omega,
+                 int lmax_mad, Real eta, std::vector<Complex> &dlm) {
   auto kmax_mad = (lmax_mad + 1) * (lmax_mad + 1);
   std::vector<Complex> Ylm((lmax_mad + 1) * (lmax_mad + 1), Complex(0.0, 0.0));
   std::vector<Real> Plm((lmax_mad + 1) * (lmax_mad + 2) / 2, 0.0);
@@ -19,16 +19,16 @@ void lsms::dlsum(std::vector<Real> &aij, matrix<Real> &rslat, int nrslat,
 
   std::vector<Real> vec(3);
 
-  std::fill(dlm.begin(), dlm.end(), std::complex<double>(0, 0));
+  std::fill(dlm.begin(), dlm.end(), std::complex<Real>(0, 0));
 
-  auto aij2 = std::inner_product(aij.begin(), aij.end(), aij.begin(), 0.0);
+  Real aij2 = std::inner_product(aij.begin(), aij.end(), aij.begin(), 0.0);
 
   for (int i = nrslat - 1; i >= ibegin; i--) {
     for (int j = 0; j < 3; j++) {
       vec[j] = aij[j] + rslat(j, i);
     }
 
-    auto vlen = norm(vec.begin(), vec.end());
+    Real vlen = norm(vec.begin(), vec.end());
 
     // Ylm
     sph.computeYlm(lmax_mad, vec, Ylm);
@@ -40,11 +40,11 @@ void lsms::dlsum(std::vector<Real> &aij, matrix<Real> &rslat, int nrslat,
 
     for (auto kl = kmax_mad - 1; kl > 0; kl--) {
       auto l = AngularMomentumIndices::lofk[kl];
-      dlm[kl] = dlm[kl] + gamma_l[l] * Ylm[kl] / std::pow(vhalf, l + 1);
+      dlm[kl] = dlm[kl] + gamma_l[l] * Ylm[kl] / toReal(std::pow(vhalf, l + 1));
     }
   }
 
-  auto rfac = 4.0 * std::sqrt(M_PI);
+  Real rfac = 4.0 * std::sqrt(M_PI);
   for (int i = 1; i < kmax_mad; ++i) {
     dlm[i] *= rfac;
   }
@@ -64,7 +64,7 @@ void lsms::dlsum(std::vector<Real> &aij, matrix<Real> &rslat, int nrslat,
     // Ylm
     sph.computeYlm(lmax_mad, vec, Ylm);
 
-    auto expfac = std::exp(rfac * knlatsq) / knlatsq;
+    Real expfac = std::exp(rfac * knlatsq) / knlatsq;
 
     Real tfac, sintfac, costfac;
 

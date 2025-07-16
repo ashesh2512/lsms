@@ -6,50 +6,78 @@ local_src := $(addprefix $(local_dir)/,\
         bulirsch_stoer.f \
         bulirschStoerIntegrator.cpp \
         calculateGauntCoeficients.cpp \
-        cgaunt_c.f \
+        cgaunt_c.f90 \
+				cgaunt_c_sp.f90 \
         clock_time.c \
         cinterp.f \
+				cinterp_sp.f \
         clebsch.f \
+				clebsch_sp.f \
         cmtruni.f \
         cnewint.f \
         Coeficients.cpp \
         congauss_c.f \
+				congauss_c_sp.f \
         constraint.f \
+				constraint_sp.f \
         dfv.f \
+				dfv_sp.f \
         dfv_new.f \
+				dfv_new_sp.f \
         essl_workaround.f \
         fit.f \
+				fit_sp.f \
         fitpot.f \
+				fitpot_sp.f \
         fnpi.f \
         fstop.f \
         gaunt.f \
+				gaunt_sp.f \
         getclm.f \
         ifacts_c.f \
+				ifacts_c_sp.f \
         initwave.f \
+				initwave_sp.f \
         interp.f \
+				interp_sp.f \
         matr.f \
+				matr_sp.f \
         matrot1.f \
+				matrot1_sp.f \
         mbeqa.f \
+				mbeqa_sp.f \
         mod_midpoint.f \
         newder.f \
         newint.f \
+				newint_sp.f \
         plglmax.f \
         quadrature.cpp \
         readLastLine.cpp \
         ricbes.f \
+				ricbes_sp.f \
         rotmat.f \
+				rotmat_sp.f \
         rsimp.f \
         rwave.f \
+				rwave_sp.f \
         rzextr.f \
         spin_trafo.f \
+				spin_trafo_sp.f \
         trltog.f \
+				trltog_sp.f \
         u_sigma_u.f \
+				u_sigma_u_sp.f \
         v_plus_minus.f \
+				v_plus_minus_sp.f \
         wrtmtx.f \
+				wrtmtx_sp.f \
         ylag.f \
         zeroout.f \
+				zeroout_sp.f \
         zsphbes.f \
         zsphbesj.f \
-        zsphbesjh.f)
+				zsphbesj_sp.f \
+        zsphbesjh.f \
+				zsphbesjh_sp.f)
 
 sources += $(local_src)

@@ -27,7 +27,7 @@ std::string XCLDA::get_name() {
 }
 
 void XCLDA::evaluate(const std::vector<Real> &r_mesh,
-                     double h,
+                     Real h,
                      const Matrix<Real> &rho_in,
                      int jmt,
                      Matrix<Real> &xc_energy_out,
@@ -38,7 +38,7 @@ void XCLDA::evaluate(const std::vector<Real> &r_mesh,
     for (int i = 0; i < jmt; i++) {
 
       VxcRLDA(r_mesh[i],
-              rho_in(i, 0) / (4.0 * r_mesh[i] * r_mesh[i] * M_PI),
+              rho_in(i, 0) / toReal(4.0 * r_mesh[i] * r_mesh[i] * M_PI),
               xc_pot_out(i, 0),
               xc_energy_out(i, 0)
       );
@@ -50,7 +50,7 @@ void XCLDA::evaluate(const std::vector<Real> &r_mesh,
     for (int i = 0; i < jmt; i++) {
 
       VxcLDA(r_mesh[i],
-             rho_in(i, 0) / (4.0 * r_mesh[i] * r_mesh[i] * M_PI),
+             rho_in(i, 0) / toReal(4.0 * r_mesh[i] * r_mesh[i] * M_PI),
              xc_pot_out(i, 0),
              xc_energy_out(i, 0)
       );

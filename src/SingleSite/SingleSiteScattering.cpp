@@ -17,6 +17,16 @@ void calculateSingleScattererSolution(LSMSSystemParameters &lsms, AtomData &atom
 
   if(lsms.n_spin_pola==1) // non spin polarized
   {
+#if SP
+    single_scatterer_nonrel_sp_(&lsms.nrelv, &lsms.clight, &atom.lmax, &atom.kkrsz,
+                             &energy,&prel,&pnrel,
+                             &vr(0,0),&atom.r_mesh[0],&atom.h,&atom.jmt,&atom.jws,
+                             &solution.tmat_l(0,0,0),&solution.matom(0,0),
+                             &solution.zlr(0,0,0),&solution.jlr(0,0,0),
+                             &r_sph,
+                             &iprpts,
+                             &lsms.global.iprint,lsms.global.istop,32);
+#else
     single_scatterer_nonrel_(&lsms.nrelv, &lsms.clight, &atom.lmax, &atom.kkrsz,
                              &energy,&prel,&pnrel,
                              &vr(0,0),&atom.r_mesh[0],&atom.h,&atom.jmt,&atom.jws,
@@ -25,19 +35,35 @@ void calculateSingleScattererSolution(LSMSSystemParameters &lsms, AtomData &atom
                              &r_sph,
                              &iprpts,
                              &lsms.global.iprint,lsms.global.istop,32);
+#endif    
+
     int kkrszsqr=atom.kkrsz*atom.kkrsz;
     int one=1;
+
+#if SP
+    BLAS::ccopy_(&kkrszsqr,&solution.tmat_l(0,0,0),&one,&solution.tmat_g(0,0),&one);
+#else
     BLAS::zcopy_(&kkrszsqr,&solution.tmat_l(0,0,0),&one,&solution.tmat_g(0,0),&one);
+#endif    
   } else {
 
     for (int is = 0; is < lsms.n_spin_pola; is++) {
 
+#if SP
+      single_scatterer_nonrel_sp_(
+          &lsms.nrelv, &lsms.clight, &atom.lmax, &atom.kkrsz, &energy, &prel,
+          &pnrel, &vr(0, is), &atom.r_mesh[0], &atom.h, &atom.jmt, &atom.jws,
+          &solution.tmat_l(0, 0, is), &solution.matom(0, is),
+          &solution.zlr(0, 0, is), &solution.jlr(0, 0, is), &r_sph, &iprpts,
+          &lsms.global.iprint, lsms.global.istop, 32);
+#else
       single_scatterer_nonrel_(
           &lsms.nrelv, &lsms.clight, &atom.lmax, &atom.kkrsz, &energy, &prel,
           &pnrel, &vr(0, is), &atom.r_mesh[0], &atom.h, &atom.jmt, &atom.jws,
           &solution.tmat_l(0, 0, is), &solution.matom(0, is),
           &solution.zlr(0, 0, is), &solution.jlr(0, 0, is), &r_sph, &iprpts,
           &lsms.global.iprint, lsms.global.istop, 32);
+#endif
 
     }
     if(lsms.n_spin_cant>1)
@@ -47,8 +73,14 @@ void calculateSingleScattererSolution(LSMSSystemParameters &lsms, AtomData &atom
     } else {
       int kkrszsqr=atom.kkrsz*atom.kkrsz;
       int one=1;
+ 
+#if SP      
+      BLAS::ccopy_(&kkrszsqr,&solution.tmat_l(0,0,0),&one,&solution.tmat_g(0,0),&one);
+      BLAS::ccopy_(&kkrszsqr,&solution.tmat_l(0,0,1),&one,&solution.tmat_g(0,atom.kkrsz),&one);
+#else
       BLAS::zcopy_(&kkrszsqr,&solution.tmat_l(0,0,0),&one,&solution.tmat_g(0,0),&one);
       BLAS::zcopy_(&kkrszsqr,&solution.tmat_l(0,0,1),&one,&solution.tmat_g(0,atom.kkrsz),&one);
+#endif
     }
   }
 }
@@ -109,6 +141,17 @@ void calculateSingleScattererSolution(LSMSSystemParameters &lsms, AtomData &atom
    // printf("iprpts = %d    ir = %d\n", iprpts, ir);
    // exit(1);
 
+#if SP
+   single_scatterer_rel_sp_(&energy, &psq, &atom.lmax, &kmymax,
+                         &vacuumId, &v0,
+                         &vrr[0], &brr[0], &boprr(0,0),
+                         &atom.h, &ir, &atom.r_mesh[ir-1],
+                         &solution.tmat_g(0,0),
+                         &solution.gz(0,0,0), &solution.fz(0,0,0),
+                         &solution.gj(0,0,0), &solution.fj(0,0,0),
+                         &solution.nuz[0], &solution.indz(0,0), &iflag, &soscal,
+                         &iprpts, &lsms.global.iprint,lsms.global.istop,32);
+#else
    single_scatterer_rel_(&energy, &psq, &atom.lmax, &kmymax,
                          &vacuumId, &v0,
                          &vrr[0], &brr[0], &boprr(0,0),
@@ -118,6 +161,7 @@ void calculateSingleScattererSolution(LSMSSystemParameters &lsms, AtomData &atom
                          &solution.gj(0,0,0), &solution.fj(0,0,0),
                          &solution.nuz[0], &solution.indz(0,0), &iflag, &soscal,
                          &iprpts, &lsms.global.iprint,lsms.global.istop,32);
+#endif
 
 /*
     for(int j1=0; j1<solution.gz.n_row(); j1++)

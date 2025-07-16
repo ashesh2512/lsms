@@ -20,7 +20,7 @@ void solveSingleScatterers(
     std::vector<NonRelativisticSingleScattererSolution> &solution, int iie) {
   int one = 1;
   // ========================== SINGLE SCATTERER STUFF
-  Complex prel = std::sqrt(energy * (1.0 + energy * c2inv));
+  Complex prel = std::sqrt(energy * (toReal(1.0) + energy * c2inv));
   Complex pnrel = std::sqrt(energy);
 
   for (int i = 0; i < local.num_local; i++)
@@ -57,14 +57,29 @@ void solveSingleScatterers(
       Complex *pmat = new Complex[kkrszsqr];
       Complex *wbig = new Complex[kkrszsqr];
       Complex *pmat_m_ptr = &local.atom[i].pmat_m[iie](0, 0);
+#if SP
+      BLAS::ccopy_(&kkrszsqr, &solution[i].tmat_l(0, 0, 0), &one, pmat, &one);
+      BLAS::ccopy_(&kkrszsqr, &solution[i].tmat_l(0, 0, 1), &one, pmat_m_ptr,
+                   &one);
+#else
       BLAS::zcopy_(&kkrszsqr, &solution[i].tmat_l(0, 0, 0), &one, pmat, &one);
       BLAS::zcopy_(&kkrszsqr, &solution[i].tmat_l(0, 0, 1), &one, pmat_m_ptr,
                    &one);
+#endif
+
+#if SP
+      LAPACK::cgetrf_(&kkrsz, &kkrsz, pmat_m_ptr, &kkrsz, ipvt, &info);
+      LAPACK::cgetri_(&kkrsz, pmat_m_ptr, &kkrsz, ipvt, wbig, &kkrszsqr, &info);
+      //    -------------------------------------------------------------
+      LAPACK::cgetrf_(&kkrsz, &kkrsz, pmat, &kkrsz, ipvt, &info);
+      LAPACK::cgetri_(&kkrsz, pmat, &kkrsz, ipvt, wbig, &kkrszsqr, &info);
+#else
       LAPACK::zgetrf_(&kkrsz, &kkrsz, pmat_m_ptr, &kkrsz, ipvt, &info);
       LAPACK::zgetri_(&kkrsz, pmat_m_ptr, &kkrsz, ipvt, wbig, &kkrszsqr, &info);
       //    -------------------------------------------------------------
       LAPACK::zgetrf_(&kkrsz, &kkrsz, pmat, &kkrsz, ipvt, &info);
       LAPACK::zgetri_(&kkrsz, pmat, &kkrsz, ipvt, wbig, &kkrszsqr, &info);
+#endif
 
       for (int j = 0; j < kkrszsqr; j++) pmat_m_ptr[j] -= pmat[j];
 

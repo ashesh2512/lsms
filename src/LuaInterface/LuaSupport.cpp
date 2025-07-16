@@ -123,7 +123,7 @@ bool luaGetRealFieldInTable(lua_State *L, const char *name, const char *field,
     lua_pop(L, 2);
     return false;
   }
-  *val = lua_tonumber(L, -1);
+  *val = toReal(lua_tonumber(L, -1));
   lua_pop(L, 2);
   return true;
 }
@@ -161,18 +161,6 @@ bool luaGetIntegerPositionInTable(lua_State *L, const char *name, int idx,
   }
   *val = lua_tointeger(L, -1);
   lua_pop(L, 2);
-  return true;
-}
-
-bool luaGetRealPositionFromStack(lua_State *L, int idx, Real *val) {
-  lua_pushinteger(L, idx);
-  lua_gettable(L, -2);
-  if (!lua_isnumber(L, -1)) {
-    lua_pop(L, 1);
-    return false;
-  }
-  *val = lua_tonumber(L, -1);
-  lua_pop(L, 1);
   return true;
 }
 

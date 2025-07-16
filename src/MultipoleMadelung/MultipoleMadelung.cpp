@@ -19,30 +19,41 @@ lsms::MultipoleMadelung::MultipoleMadelung(LSMSSystemParameters &lsms,
     : num_atoms{crystal.num_atoms},
       lmax{lmax},
       local_num_atoms{local.num_local} {
-  auto r_brav = crystal.bravais;
-  auto k_brav = crystal.bravais;
 
   int kmax = (lmax + 1) * (lmax + 1);
   int jmax = (lmax + 1) * (lmax + 2) / 2;
 
   // Scaling factors for the optimal truncation sphere
+#if SP
+  Matrix<float> bravais_sp(crystal.bravais.l_dim(),crystal.bravais.n_col());
+  std::transform(crystal.bravais.get_data(),
+                 crystal.bravais.get_data() + crystal.bravais.size(),
+                 bravais_sp.get_data(),
+                 [](double value) { return static_cast<float>(value); });
+  auto r_brav = bravais_sp;
+  auto k_brav = bravais_sp;
+  scaling_factor = lsms::scaling_factor(bravais_sp, lmax);
+#else
+  auto r_brav = crystal.bravais;
+  auto k_brav = crystal.bravais;
   scaling_factor = lsms::scaling_factor(crystal.bravais, lmax);
+#endif
 
-  r_brav.scale(1.0 / scaling_factor);
+  r_brav.scale(toReal(1.0) / scaling_factor);
   reciprocal_lattice(r_brav, k_brav, scaling_factor);
 
   // Calculate truncation spheres
   auto eta = lsms::calculate_eta(r_brav);
 
   // Real-space cutoffs
-  double timeRealSpace = MPI_Wtime();
+  Real timeRealSpace = MPI_Wtime();
   r_nm = lsms::real_space_multiplication(r_brav, lmax, eta);
   rscut = lsms::rs_trunc_radius(r_brav, lmax, eta, r_nm);
   nrslat = num_latt_vectors(r_brav, rscut, r_nm);
   timeRealSpace = MPI_Wtime() - timeRealSpace;
 
   // Reciprocal-space cutoffs
-  double timeReciprocalSpace = MPI_Wtime();
+  Real timeReciprocalSpace = MPI_Wtime();
   k_nm = lsms::reciprocal_space_multiplication(k_brav, lmax, eta);
   kncut = lsms::kn_trunc_radius(k_brav, lmax, eta, k_nm);
   nknlat = num_latt_vectors(k_brav, kncut, k_nm);
@@ -58,11 +69,11 @@ lsms::MultipoleMadelung::MultipoleMadelung(LSMSSystemParameters &lsms,
   }
 
   // Create the lattice vectors
-  matrix<double> rslat;
-  std::vector<double> rslatsq;
+  matrix<Real> rslat;
+  std::vector<Real> rslatsq;
 
-  matrix<double> knlat;
-  std::vector<double> knlatsq;
+  matrix<Real> knlat;
+  std::vector<Real> knlatsq;
 
   std::tie(rslat, rslatsq) =
       lsms::create_lattice_and_sq(r_brav, rscut, r_nm, nrslat);
@@ -93,11 +104,11 @@ lsms::MultipoleMadelung::MultipoleMadelung(LSMSSystemParameters &lsms,
   if (jmax > 1) {
     for (auto j = 0; j < local.num_local; j++) {
       local.atom[j].multipoleMadelung.resize(kmax, crystal.num_atoms);
-      local.atom[j].multipoleMadelung = std::complex<double>(0.0, 0.0);
+      local.atom[j].multipoleMadelung = std::complex<Real>(0.0, 0.0);
     }
   }
 
-  double timeLoopSpace = MPI_Wtime();
+  Real timeLoopSpace = MPI_Wtime();
 
   // Smaller object for positons
   auto position = crystal.position;
@@ -107,8 +118,8 @@ lsms::MultipoleMadelung::MultipoleMadelung(LSMSSystemParameters &lsms,
     term0) shared(local, eta, omega, jmax, kmax, lmax, alat) default(none)
   for (int atom_i = 0; atom_i < num_atoms; atom_i++) {
     for (int local_i = 0; local_i < local_num_atoms; local_i++) {
-      std::vector<double> aij(3);
-      double r0tm;
+      std::vector<Real> aij(3);
+      Real r0tm;
       int ibegin;
 
       // Global index
@@ -145,7 +156,7 @@ lsms::MultipoleMadelung::MultipoleMadelung(LSMSSystemParameters &lsms,
         local.atom[local_i].multipoleMadelung(0, atom_i) =
             local.atom[local_i].madelungMatrix[atom_i] * Y0inv;
 
-        std::vector<Complex> dlm(kmax, std::complex<double>(0, 0));
+        std::vector<Complex> dlm(kmax, std::complex<Real>(0, 0));
 
         lsms::dlsum(aij, rslat, nrslat, ibegin, knlat, nknlat, omega, lmax, eta,
                     dlm);
@@ -154,7 +165,7 @@ lsms::MultipoleMadelung::MultipoleMadelung(LSMSSystemParameters &lsms,
         for (int kl = 1; kl < kmax; kl++) {
           auto l = AngularMomentumIndices::lofk[kl];
           local.atom[local_i].multipoleMadelung(kl, atom_i) =
-              dlm[kl] * std::pow(alat / scaling_factor, l) / scaling_factor;
+              dlm[kl] * toReal(std::pow(alat / scaling_factor, l)) / scaling_factor;
         }
       }
     }
@@ -179,7 +190,7 @@ lsms::MultipoleMadelung::MultipoleMadelung(LSMSSystemParameters &lsms,
     // Variable
     lsms.dl_factor.resize(kmax, jmax);
 
-    std::vector<double> factmat(lmax + 1);
+    std::vector<Real> factmat(lmax + 1);
     factmat[0] = 1.0;
     for (int l = 1; l <= lmax; l++) {
       factmat[l] = factmat[l - 1] / (2.0 * l + 1.0);
@@ -212,16 +223,16 @@ lsms::MultipoleMadelung::MultipoleMadelung(LSMSSystemParameters &lsms,
   }
 }
 
-__attribute__((unused)) double lsms::MultipoleMadelung::getScalingFactor()
+__attribute__((unused)) Real lsms::MultipoleMadelung::getScalingFactor()
 const {
   return scaling_factor;
 }
 
-__attribute__((unused)) double lsms::MultipoleMadelung::getRsCut() const {
+__attribute__((unused)) Real lsms::MultipoleMadelung::getRsCut() const {
   return rscut;
 }
 
-__attribute__((unused)) double lsms::MultipoleMadelung::getKnCut() const {
+__attribute__((unused)) Real lsms::MultipoleMadelung::getKnCut() const {
   return kncut;
 }
 

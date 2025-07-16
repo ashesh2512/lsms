@@ -31,8 +31,8 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
                            CrystalParameters &crystal,
                            lsms::MixingParameterPack &mix,
                            AlloyMixingDesc &alloyDesc) {
-  const int s = sizeof(LSMSSystemParameters) + 9 * sizeof(Real) + sizeof(int) +
-                10 + sizeof(lsms::MixingParameterPack) + 5 * sizeof(int) +
+  const int s = sizeof(LSMSSystemParameters) + 9 * sizeof(double) + sizeof(int) +
+                sizeof(lsms::MixingParameterPack) +
                 sizeof(int);  // <-- +1 for no. alloy classes
 
   char buf[s];
@@ -70,24 +70,24 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
     MPI_Pack(&lsms.fixRMT, 1, MPI_INT, buf, s, &pos, comm.comm);
     MPI_Pack(&lsms.nscf, 1, MPI_INT, buf, s, &pos, comm.comm);
     MPI_Pack(&lsms.writeSteps, 1, MPI_INT, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.temperature, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.clight, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.temperature, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.clight, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
 
     MPI_Pack(&lsms.energyContour.grid, 1, MPI_INT, buf, s, &pos, comm.comm);
     MPI_Pack(&lsms.energyContour.npts, 1, MPI_INT, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.energyContour.ebot, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.energyContour.etop, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.energyContour.eibot, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.energyContour.eitop, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.energyContour.ebot, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.energyContour.etop, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.energyContour.eibot, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.energyContour.eitop, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
     MPI_Pack(&lsms.energyContour.maxGroupSize, 1, MPI_INT, buf, s, &pos,
              comm.comm);
 
-    MPI_Pack(&lsms.adjustContourBottom, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.adjustContourBottom, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
 
     MPI_Pack(&lsms.mixing, 1, MPI_INT, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.alphaDV, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.rmsTolerance, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.energyTolerance, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.alphaDV, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.rmsTolerance, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.energyTolerance, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
     MPI_Pack(&lsms.zblockLUSize, 1, MPI_INT, buf, s, &pos, comm.comm);
 
     MPI_Pack(&lsms.global.iprpts, 1, MPI_INT, buf, s, &pos, comm.comm);
@@ -100,10 +100,10 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
     MPI_Pack((int *)&lsms.global.linearSolver, 32, MPI_INT, buf, s, &pos,
              comm.comm);
 
-    MPI_Pack(&lsms.efermi, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.rmin, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.rmax, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&lsms.h_step, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.efermi, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.rmin, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.rmax, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&lsms.h_step, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
 
     MPI_Pack(&lsms.global.debug_atomic, 1, MPI_CXX_BOOL, buf, s, &pos,comm.comm);
     MPI_Pack(&lsms.global.debug_chem_pot, 1, MPI_CXX_BOOL, buf, s, &pos,comm.comm);
@@ -135,45 +135,45 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
     MPI_Pack(&mix.init_mixer_type, 1, MPI_UNSIGNED, buf, s, &pos, comm.comm);
     MPI_Pack(&mix.init_spd_mixer_type, 1, MPI_UNSIGNED, buf, s, &pos, comm.comm);
 
-    MPI_Pack(&mix.chdMixingParameter.alpha, 1, MPI_DOUBLE, buf, s, &pos,
+    MPI_Pack(&mix.chdMixingParameter.alpha, 1, TypeTraits<Real>::mpiType(), buf, s, &pos,
              comm.comm);
-    MPI_Pack(&mix.chdMixingParameter.w0, 1, MPI_DOUBLE, buf, s, &pos,
+    MPI_Pack(&mix.chdMixingParameter.w0, 1, TypeTraits<Real>::mpiType(), buf, s, &pos,
              comm.comm);
     MPI_Pack(&mix.chdMixingParameter.max_broyden, 1, MPI_UNSIGNED, buf, s, &pos,
              comm.comm);
     MPI_Pack(&mix.chdMixingParameter.iter_reset, 1, MPI_UNSIGNED, buf, s, &pos,
              comm.comm);
 
-    MPI_Pack(&mix.spdMixingParameter.alpha, 1, MPI_DOUBLE, buf, s, &pos,
+    MPI_Pack(&mix.spdMixingParameter.alpha, 1, TypeTraits<Real>::mpiType(), buf, s, &pos,
              comm.comm);
-    MPI_Pack(&mix.spdMixingParameter.w0, 1, MPI_DOUBLE, buf, s, &pos,
+    MPI_Pack(&mix.spdMixingParameter.w0, 1, TypeTraits<Real>::mpiType(), buf, s, &pos,
              comm.comm);
     MPI_Pack(&mix.spdMixingParameter.max_broyden, 1, MPI_UNSIGNED, buf, s, &pos,
              comm.comm);
     MPI_Pack(&mix.spdMixingParameter.iter_reset, 1, MPI_UNSIGNED, buf, s, &pos,
              comm.comm);
 
-    MPI_Pack(&mix.potMixingParameter.alpha, 1, MPI_DOUBLE, buf, s, &pos,
+    MPI_Pack(&mix.potMixingParameter.alpha, 1, TypeTraits<Real>::mpiType(), buf, s, &pos,
              comm.comm);
-    MPI_Pack(&mix.potMixingParameter.w0, 1, MPI_DOUBLE, buf, s, &pos,
+    MPI_Pack(&mix.potMixingParameter.w0, 1, TypeTraits<Real>::mpiType(), buf, s, &pos,
              comm.comm);
     MPI_Pack(&mix.potMixingParameter.max_broyden, 1, MPI_UNSIGNED, buf, s, &pos,
              comm.comm);
     MPI_Pack(&mix.potMixingParameter.iter_reset, 1, MPI_UNSIGNED, buf, s, &pos,
              comm.comm);
 
-    MPI_Pack(&mix.initMixingParameter.alpha, 1, MPI_DOUBLE, buf, s, &pos,
+    MPI_Pack(&mix.initMixingParameter.alpha, 1, TypeTraits<Real>::mpiType(), buf, s, &pos,
              comm.comm);
-    MPI_Pack(&mix.initMixingParameter.w0, 1, MPI_DOUBLE, buf, s, &pos,
+    MPI_Pack(&mix.initMixingParameter.w0, 1, TypeTraits<Real>::mpiType(), buf, s, &pos,
              comm.comm);
     MPI_Pack(&mix.initMixingParameter.max_broyden, 1, MPI_UNSIGNED, buf, s, &pos,
              comm.comm);
     MPI_Pack(&mix.initMixingParameter.iter_reset, 1, MPI_UNSIGNED, buf, s, &pos,
              comm.comm);
 
-    MPI_Pack(&mix.initSpdMixingParameter.alpha, 1, MPI_DOUBLE, buf, s, &pos,
+    MPI_Pack(&mix.initSpdMixingParameter.alpha, 1, TypeTraits<Real>::mpiType(), buf, s, &pos,
              comm.comm);
-    MPI_Pack(&mix.initSpdMixingParameter.w0, 1, MPI_DOUBLE, buf, s, &pos,
+    MPI_Pack(&mix.initSpdMixingParameter.w0, 1, TypeTraits<Real>::mpiType(), buf, s, &pos,
              comm.comm);
     MPI_Pack(&mix.initSpdMixingParameter.max_broyden, 1, MPI_UNSIGNED, buf, s, &pos,
              comm.comm);
@@ -214,29 +214,29 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
     MPI_Unpack(buf, s, &pos, &lsms.fixRMT, 1, MPI_INT, comm.comm);
     MPI_Unpack(buf, s, &pos, &lsms.nscf, 1, MPI_INT, comm.comm);
     MPI_Unpack(buf, s, &pos, &lsms.writeSteps, 1, MPI_INT, comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.temperature, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.clight, 1, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &lsms.temperature, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &lsms.clight, 1, TypeTraits<Real>::mpiType(), comm.comm);
 
     MPI_Unpack(buf, s, &pos, &lsms.energyContour.grid, 1, MPI_INT, comm.comm);
     MPI_Unpack(buf, s, &pos, &lsms.energyContour.npts, 1, MPI_INT, comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.energyContour.ebot, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &lsms.energyContour.ebot, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.energyContour.etop, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &lsms.energyContour.etop, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.energyContour.eibot, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &lsms.energyContour.eibot, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.energyContour.eitop, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &lsms.energyContour.eitop, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
     MPI_Unpack(buf, s, &pos, &lsms.energyContour.maxGroupSize, 1, MPI_INT,
                comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &lsms.adjustContourBottom, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &lsms.adjustContourBottom, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
 
     MPI_Unpack(buf, s, &pos, &lsms.mixing, 1, MPI_INT, comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.alphaDV, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.rmsTolerance, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.energyTolerance, 1, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &lsms.alphaDV, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &lsms.rmsTolerance, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &lsms.energyTolerance, 1, TypeTraits<Real>::mpiType(), comm.comm);
     MPI_Unpack(buf, s, &pos, &lsms.zblockLUSize, 1, MPI_INT, comm.comm);
 
     MPI_Unpack(buf, s, &pos, &lsms.global.iprpts, 1, MPI_INT, comm.comm);
@@ -250,10 +250,10 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
     MPI_Unpack(buf, s, &pos, (int *)&lsms.global.linearSolver, 32, MPI_INT,
                comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &lsms.efermi, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.rmin, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.rmax, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &lsms.h_step, 1, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &lsms.efermi, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &lsms.rmin, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &lsms.rmax, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &lsms.h_step, 1, TypeTraits<Real>::mpiType(), comm.comm);
 
     MPI_Unpack(buf, s, &pos, &lsms.global.debug_atomic, 1, MPI_CXX_BOOL,
                comm.comm);
@@ -291,45 +291,45 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
     MPI_Unpack(buf, s, &pos, &mix.init_mixer_type, 1, MPI_UNSIGNED, comm.comm);
     MPI_Unpack(buf, s, &pos, &mix.init_spd_mixer_type, 1, MPI_UNSIGNED, comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &mix.chdMixingParameter.alpha, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &mix.chdMixingParameter.alpha, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
-    MPI_Unpack(buf, s, &pos, &mix.chdMixingParameter.w0, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &mix.chdMixingParameter.w0, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
     MPI_Unpack(buf, s, &pos, &mix.chdMixingParameter.max_broyden, 1,
                MPI_UNSIGNED, comm.comm);
     MPI_Unpack(buf, s, &pos, &mix.chdMixingParameter.iter_reset, 1,
                MPI_UNSIGNED, comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &mix.spdMixingParameter.alpha, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &mix.spdMixingParameter.alpha, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
-    MPI_Unpack(buf, s, &pos, &mix.spdMixingParameter.w0, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &mix.spdMixingParameter.w0, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
     MPI_Unpack(buf, s, &pos, &mix.spdMixingParameter.max_broyden, 1,
                MPI_UNSIGNED, comm.comm);
     MPI_Unpack(buf, s, &pos, &mix.spdMixingParameter.iter_reset, 1,
                MPI_UNSIGNED, comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &mix.potMixingParameter.alpha, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &mix.potMixingParameter.alpha, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
-    MPI_Unpack(buf, s, &pos, &mix.potMixingParameter.w0, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &mix.potMixingParameter.w0, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
     MPI_Unpack(buf, s, &pos, &mix.potMixingParameter.max_broyden, 1,
                MPI_UNSIGNED, comm.comm);
     MPI_Unpack(buf, s, &pos, &mix.potMixingParameter.iter_reset, 1,
                MPI_UNSIGNED, comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &mix.initMixingParameter.alpha, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &mix.initMixingParameter.alpha, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
-    MPI_Unpack(buf, s, &pos, &mix.initMixingParameter.w0, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &mix.initMixingParameter.w0, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
     MPI_Unpack(buf, s, &pos, &mix.initMixingParameter.max_broyden, 1,
                MPI_UNSIGNED, comm.comm);
     MPI_Unpack(buf, s, &pos, &mix.initMixingParameter.iter_reset, 1,
                MPI_UNSIGNED, comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &mix.initSpdMixingParameter.alpha, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &mix.initSpdMixingParameter.alpha, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
-    MPI_Unpack(buf, s, &pos, &mix.initSpdMixingParameter.w0, 1, MPI_DOUBLE,
+    MPI_Unpack(buf, s, &pos, &mix.initSpdMixingParameter.w0, 1, TypeTraits<Real>::mpiType(),
                comm.comm);
     MPI_Unpack(buf, s, &pos, &mix.initSpdMixingParameter.max_broyden, 1,
                MPI_UNSIGNED, comm.comm);
@@ -388,9 +388,9 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
                            CrystalParameters &crystal, MixingParameters &mix,
                            AlloyMixingDesc &alloyDesc)
 {
-  const int s = sizeof(LSMSSystemParameters) + 9*sizeof(Real) + sizeof(int)
-      + 10 + sizeof(MixingParameters) + 5*sizeof(int)
-      + sizeof(int); // <-- +1 for no. alloy classes
+  const int s = sizeof(LSMSSystemParameters) + 9*sizeof(double) + sizeof(int)
+              + mix.numQuantities * (2 * sizeof(int) + sizeof(Real))
+              + sizeof(int); // <-- +1 for no. alloy classes
   char buf[s];
   int nalloy_classes;
 
@@ -419,27 +419,28 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
     MPI_Pack(&lsms.n_spin_cant,1,MPI_INT,buf,s,&pos,comm.comm);
     MPI_Pack(&lsms.n_spin_pola,1,MPI_INT,buf,s,&pos,comm.comm);
     MPI_Pack(&lsms.mtasa,1,MPI_INT,buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.use_voronoi,1,MPI_INT,buf,s,&pos,comm.comm);
     MPI_Pack(&lsms.xcFunctional[0],numFunctionalIndices,MPI_INT,buf,s,&pos,comm.comm);
     MPI_Pack(&lsms.fixRMT,1,MPI_INT,buf,s,&pos,comm.comm);
     MPI_Pack(&lsms.nscf,1,MPI_INT,buf,s,&pos,comm.comm);
     MPI_Pack(&lsms.writeSteps,1,MPI_INT,buf,s,&pos,comm.comm);
-    MPI_Pack(&lsms.temperature,1,MPI_DOUBLE,buf,s,&pos,comm.comm);
-    MPI_Pack(&lsms.clight,1,MPI_DOUBLE,buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.temperature,1,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.clight,1,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
 
     MPI_Pack(&lsms.energyContour.grid,1,MPI_INT,buf,s,&pos,comm.comm);
     MPI_Pack(&lsms.energyContour.npts,1,MPI_INT,buf,s,&pos,comm.comm);
-    MPI_Pack(&lsms.energyContour.ebot,1,MPI_DOUBLE,buf,s,&pos,comm.comm);
-    MPI_Pack(&lsms.energyContour.etop,1,MPI_DOUBLE,buf,s,&pos,comm.comm);
-    MPI_Pack(&lsms.energyContour.eibot,1,MPI_DOUBLE,buf,s,&pos,comm.comm);
-    MPI_Pack(&lsms.energyContour.eitop,1,MPI_DOUBLE,buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.energyContour.ebot,1,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.energyContour.etop,1,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.energyContour.eibot,1,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.energyContour.eitop,1,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
     MPI_Pack(&lsms.energyContour.maxGroupSize,1,MPI_INT,buf,s,&pos,comm.comm);
 
-    MPI_Pack(&lsms.adjustContourBottom,1,MPI_DOUBLE,buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.adjustContourBottom,1,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
 
     MPI_Pack(&lsms.mixing,1,MPI_INT,buf,s,&pos,comm.comm);
-    MPI_Pack(&lsms.alphaDV,1,MPI_DOUBLE,buf,s,&pos,comm.comm);
-    MPI_Pack(&lsms.rmsTolerance,1,MPI_DOUBLE,buf,s,&pos,comm.comm);
-    MPI_Pack(&lsms.energyTolerance,1,MPI_DOUBLE,buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.alphaDV,1,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.rmsTolerance,1,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
+    MPI_Pack(&lsms.energyTolerance,1,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
     MPI_Pack(&lsms.zblockLUSize,1,MPI_INT,buf,s,&pos,comm.comm);
 
     MPI_Pack(&lsms.global.iprpts,1,MPI_INT,buf,s,&pos,comm.comm);
@@ -469,7 +470,7 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
         tmpQuantity[i] = 0;
     MPI_Pack(&tmpQuantity[0],mix.numQuantities,MPI_INT,buf,s,&pos,comm.comm);
     MPI_Pack(&mix.algorithm[0],mix.numQuantities,MPI_INT,buf,s,&pos,comm.comm);
-    MPI_Pack(&mix.mixingParameter[0],mix.numQuantities,MPI_DOUBLE,buf,s,&pos,comm.comm);
+    MPI_Pack(&mix.mixingParameter[0],mix.numQuantities,TypeTraits<Real>::mpiType(),buf,s,&pos,comm.comm);
   }
   MPI_Bcast(buf,s,MPI_PACKED,0,comm.comm);
   if(comm.rank!=0)
@@ -498,27 +499,28 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
     MPI_Unpack(buf,s,&pos,&lsms.n_spin_cant,1,MPI_INT,comm.comm);
     MPI_Unpack(buf,s,&pos,&lsms.n_spin_pola,1,MPI_INT,comm.comm);
     MPI_Unpack(buf,s,&pos,&lsms.mtasa,1,MPI_INT,comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.use_voronoi,1,MPI_INT,comm.comm);
     MPI_Unpack(buf,s,&pos,&lsms.xcFunctional[0],numFunctionalIndices,MPI_INT,comm.comm);
     MPI_Unpack(buf,s,&pos,&lsms.fixRMT,1,MPI_INT,comm.comm);
     MPI_Unpack(buf,s,&pos,&lsms.nscf,1,MPI_INT,comm.comm);
     MPI_Unpack(buf,s,&pos,&lsms.writeSteps,1,MPI_INT,comm.comm);
-    MPI_Unpack(buf,s,&pos,&lsms.temperature,1,MPI_DOUBLE,comm.comm);
-    MPI_Unpack(buf,s,&pos,&lsms.clight,1,MPI_DOUBLE,comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.temperature,1,TypeTraits<Real>::mpiType(),comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.clight,1,TypeTraits<Real>::mpiType(),comm.comm);
 
     MPI_Unpack(buf,s,&pos,&lsms.energyContour.grid,1,MPI_INT,comm.comm);
     MPI_Unpack(buf,s,&pos,&lsms.energyContour.npts,1,MPI_INT,comm.comm);
-    MPI_Unpack(buf,s,&pos,&lsms.energyContour.ebot,1,MPI_DOUBLE,comm.comm);
-    MPI_Unpack(buf,s,&pos,&lsms.energyContour.etop,1,MPI_DOUBLE,comm.comm);
-    MPI_Unpack(buf,s,&pos,&lsms.energyContour.eibot,1,MPI_DOUBLE,comm.comm);
-    MPI_Unpack(buf,s,&pos,&lsms.energyContour.eitop,1,MPI_DOUBLE,comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.energyContour.ebot,1,TypeTraits<Real>::mpiType(),comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.energyContour.etop,1,TypeTraits<Real>::mpiType(),comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.energyContour.eibot,1,TypeTraits<Real>::mpiType(),comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.energyContour.eitop,1,TypeTraits<Real>::mpiType(),comm.comm);
     MPI_Unpack(buf,s,&pos,&lsms.energyContour.maxGroupSize,1,MPI_INT,comm.comm);
 
-    MPI_Unpack(buf,s,&pos,&lsms.adjustContourBottom,1,MPI_DOUBLE,comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.adjustContourBottom,1,TypeTraits<Real>::mpiType(),comm.comm);
 
     MPI_Unpack(buf,s,&pos,&lsms.mixing,1,MPI_INT,comm.comm);
-    MPI_Unpack(buf,s,&pos,&lsms.alphaDV,1,MPI_DOUBLE,comm.comm);
-    MPI_Unpack(buf,s,&pos,&lsms.rmsTolerance,1,MPI_DOUBLE,comm.comm);
-    MPI_Unpack(buf,s,&pos,&lsms.energyTolerance,1,MPI_DOUBLE,comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.alphaDV,1,TypeTraits<Real>::mpiType(),comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.rmsTolerance,1,TypeTraits<Real>::mpiType(),comm.comm);
+    MPI_Unpack(buf,s,&pos,&lsms.energyTolerance,1,TypeTraits<Real>::mpiType(),comm.comm);
     MPI_Unpack(buf,s,&pos,&lsms.zblockLUSize,1,MPI_INT,comm.comm);
 
     MPI_Unpack(buf,s,&pos,&lsms.global.iprpts,1,MPI_INT,comm.comm);
@@ -550,7 +552,7 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
       else
         mix.quantity[i] = false;
     MPI_Unpack(buf,s,&pos,&mix.algorithm[0],mix.numQuantities,MPI_INT,comm.comm);
-    MPI_Unpack(buf,s,&pos,&mix.mixingParameter[0],mix.numQuantities,MPI_DOUBLE,comm.comm);
+    MPI_Unpack(buf,s,&pos,&mix.mixingParameter[0],mix.numQuantities,TypeTraits<Real>::mpiType(),comm.comm);
   }
   lsms.rank = comm.rank;
   MPI_Bcast(&crystal.position(0,0),3*crystal.num_atoms,MPI_DOUBLE,0,comm.comm);
@@ -610,58 +612,58 @@ void communicateSingleAtomData(LSMSCommunication &comm, int from, int to,
     MPI_Pack(&local_id, 1, MPI_INT, buf, s, &pos, comm.comm);
     MPI_Pack(&atom.jmt, 1, MPI_INT, buf, s, &pos, comm.comm);
     MPI_Pack(&atom.jws, 1, MPI_INT, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.xstart, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.rmt, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.rInscribed, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.xstart, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.rmt, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.rInscribed, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
     MPI_Pack(&atom.rCircumscribed, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
     MPI_Pack(atom.header, 80, MPI_CHAR, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.alat, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.efermi, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.vdif, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.mag_mom, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.ztotss, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.zcorss, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.zsemss, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.zvalss, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.qtotws, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.mtotws, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.alat, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.efermi, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.vdif, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.mag_mom, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.ztotss, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.zcorss, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.zsemss, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.zvalss, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.qtotws, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.mtotws, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
 
-    MPI_Pack(&atom.mtotmt, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.mvalmt, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.mvalws, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.mtotmt, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.mvalmt, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.mvalws, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
 
-    MPI_Pack(atom.evec, 3, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(atom.evecNew, 3, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(atom.evecOut, 3, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(atom.xvalws, 2, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.localEnergy, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.localMadelungEnergy, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.localMadelungPotential, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(atom.evec, 3, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(atom.evecNew, 3, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(atom.evecOut, 3, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(atom.xvalws, 2, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.localEnergy, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.localMadelungEnergy, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.localMadelungPotential, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
     MPI_Pack(&atom.alloy_class, 1, MPI_INT, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.omegaMT, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.omegaWS, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.rws, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.omegaMT, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.omegaWS, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.rws, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
     MPI_Pack(&atom.lmax, 1, MPI_INT, buf, s, &pos, comm.comm);
     MPI_Pack(&atom.nspin, 1, MPI_INT, buf, s, &pos, comm.comm);
     MPI_Pack(&atom.forceZeroMoment, 1, MPI_INT, buf, s, &pos, comm.comm);
     MPI_Pack(&atom.numc, 1, MPI_INT, buf, s, &pos, comm.comm);
     t = atom.vr.n_row();
     MPI_Pack(&t, 1, MPI_INT, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.vr(0, 0), t, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.vr(0, 1), t, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.vr(0, 0), t, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.vr(0, 1), t, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
 
-    MPI_Pack(&atom.rhotot(0, 0), t, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.rhotot(0, 1), t, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.rhotot(0, 0), t, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.rhotot(0, 1), t, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
 
-    MPI_Pack(&atom.corden(0, 0), t, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.corden(0, 1), t, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.corden(0, 0), t, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.corden(0, 1), t, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
 
-    MPI_Pack(&atom.b_con[0], 3, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.b_basis[0], 9, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.b_con[0], 3, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.b_basis[0], 9, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
     t = atom.ec.n_row();
     MPI_Pack(&t, 1, MPI_INT, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.ec(0, 0), t, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&atom.ec(0, 1), t, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.ec(0, 0), t, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&atom.ec(0, 1), t, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
 
     MPI_Pack(&atom.nc(0, 0), t, MPI_INT, buf, s, &pos, comm.comm);
     MPI_Pack(&atom.nc(0, 1), t, MPI_INT, buf, s, &pos, comm.comm);
@@ -682,37 +684,37 @@ void communicateSingleAtomData(LSMSCommunication &comm, int from, int to,
     MPI_Unpack(buf, s, &pos, &local_id, 1, MPI_INT, comm.comm);
     MPI_Unpack(buf, s, &pos, &atom.jmt, 1, MPI_INT, comm.comm);
     MPI_Unpack(buf, s, &pos, &atom.jws, 1, MPI_INT, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.xstart, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.rmt, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.rInscribed, 1, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.xstart, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.rmt, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.rInscribed, 1, TypeTraits<Real>::mpiType(), comm.comm);
     MPI_Unpack(buf, s, &pos, &atom.rCircumscribed, 1, MPI_DOUBLE, comm.comm);
     MPI_Unpack(buf, s, &pos, atom.header, 80, MPI_CHAR, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.alat, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.efermi, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.vdif, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.mag_mom, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.ztotss, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.zcorss, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.zsemss, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.zvalss, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.qtotws, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.mtotws, 1, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.alat, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.efermi, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.vdif, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.mag_mom, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.ztotss, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.zcorss, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.zsemss, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.zvalss, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.qtotws, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.mtotws, 1, TypeTraits<Real>::mpiType(), comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &atom.mtotmt, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.mvalmt, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.mvalws, 1, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.mtotmt, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.mvalmt, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.mvalws, 1, TypeTraits<Real>::mpiType(), comm.comm);
 
-    MPI_Unpack(buf, s, &pos, atom.evec, 3, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, atom.evecNew, 3, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, atom.evecOut, 3, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, atom.xvalws, 2, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.localEnergy, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.localMadelungEnergy, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.localMadelungPotential, 1, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, atom.evec, 3, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, atom.evecNew, 3, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, atom.evecOut, 3, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, atom.xvalws, 2, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.localEnergy, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.localMadelungEnergy, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.localMadelungPotential, 1, TypeTraits<Real>::mpiType(), comm.comm);
     MPI_Unpack(buf, s, &pos, &atom.alloy_class, 1, MPI_INT, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.omegaMT, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.omegaWS, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.rws, 1, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.omegaMT, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.omegaWS, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.rws, 1, TypeTraits<Real>::mpiType(), comm.comm);
     MPI_Unpack(buf, s, &pos, &atom.lmax, 1, MPI_INT, comm.comm);
     atom.kkrsz = (atom.lmax + 1) * (atom.lmax + 1);
     MPI_Unpack(buf, s, &pos, &atom.nspin, 1, MPI_INT, comm.comm);
@@ -721,22 +723,22 @@ void communicateSingleAtomData(LSMSCommunication &comm, int from, int to,
 
     MPI_Unpack(buf, s, &pos, &t, 1, MPI_INT, comm.comm);
     if (t != atom.vr.n_row()) atom.resizePotential(t);
-    MPI_Unpack(buf, s, &pos, &atom.vr(0, 0), t, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.vr(0, 1), t, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.vr(0, 0), t, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.vr(0, 1), t, TypeTraits<Real>::mpiType(), comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &atom.rhotot(0, 0), t, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.rhotot(0, 1), t, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.rhotot(0, 0), t, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.rhotot(0, 1), t, TypeTraits<Real>::mpiType(), comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &atom.corden(0, 0), t, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.corden(0, 1), t, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.corden(0, 0), t, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.corden(0, 1), t, TypeTraits<Real>::mpiType(), comm.comm);
 
-    MPI_Unpack(buf, s, &pos, &atom.b_con[0], 3, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.b_basis[0], 9, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.b_con[0], 3, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.b_basis[0], 9, TypeTraits<Real>::mpiType(), comm.comm);
 
     MPI_Unpack(buf, s, &pos, &t, 1, MPI_INT, comm.comm);
     if (t != atom.nc.n_row()) atom.resizeCore(t);
-    MPI_Unpack(buf, s, &pos, &atom.ec(0, 0), t, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &atom.ec(0, 1), t, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.ec(0, 0), t, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &atom.ec(0, 1), t, TypeTraits<Real>::mpiType(), comm.comm);
 
     MPI_Unpack(buf, s, &pos, &atom.nc(0, 0), t, MPI_INT, comm.comm);
     MPI_Unpack(buf, s, &pos, &atom.nc(0, 1), t, MPI_INT, comm.comm);
@@ -751,8 +753,8 @@ void communicateSingleAtomData(LSMSCommunication &comm, int from, int to,
 
 void communicatePotentialShiftParameters(LSMSCommunication &comm,
                                          PotentialShifter &ps) {
-  // const int s = sizeof(bool) + sizeof(double) * 2;
-  const int s = sizeof(int) + sizeof(double) * 2;
+  // const int s = sizeof(bool) + sizeof(Real) * 2;
+  const int s = sizeof(int) + sizeof(Real) * 2;
   char buf[s];
 
   if (comm.rank == 0) {
@@ -764,8 +766,8 @@ void communicatePotentialShiftParameters(LSMSCommunication &comm,
     if (ps.vSpinShiftFlag) tmpFlag = 1;
 
     MPI_Pack(&tmpFlag, 1, MPI_INT, buf, s, &pos, comm.comm);
-    MPI_Pack(&ps.minShift, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
-    MPI_Pack(&ps.maxShift, 1, MPI_DOUBLE, buf, s, &pos, comm.comm);
+    MPI_Pack(&ps.minShift, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
+    MPI_Pack(&ps.maxShift, 1, TypeTraits<Real>::mpiType(), buf, s, &pos, comm.comm);
   }
 
   MPI_Bcast(buf, s, MPI_PACKED, 0, comm.comm);
@@ -783,8 +785,8 @@ void communicatePotentialShiftParameters(LSMSCommunication &comm,
     else
       ps.vSpinShiftFlag = false;
 
-    MPI_Unpack(buf, s, &pos, &ps.minShift, 1, MPI_DOUBLE, comm.comm);
-    MPI_Unpack(buf, s, &pos, &ps.maxShift, 1, MPI_DOUBLE, comm.comm);
+    MPI_Unpack(buf, s, &pos, &ps.minShift, 1, TypeTraits<Real>::mpiType(), comm.comm);
+    MPI_Unpack(buf, s, &pos, &ps.maxShift, 1, TypeTraits<Real>::mpiType(), comm.comm);
   }
 }
 
@@ -798,7 +800,7 @@ void expectTmatCommunication(LSMSCommunication &comm, LocalTypeInfo &local) {
       // printf("Node %d: expect tmat %d from
       // %d\n",comm.rank,comm.tmatFrom[i].globalIdx[j],from);
       MPI_Irecv(&local.tmatStore(0, comm.tmatFrom[i].tmatStoreIdx[j]),
-                2 * local.lDimTmatStore, MPI_DOUBLE, from,
+                2 * local.lDimTmatStore, TypeTraits<Real>::mpiType(), from,
                 comm.tmatFrom[i].globalIdx[j], comm.comm,
                 &comm.tmatFrom[i].communicationRequest[j]);
     }
@@ -815,7 +817,7 @@ void expectJxCommunication(LSMSCommunication &comm, LocalTypeInfo &local)
     {
  //     printf("Node %d: expect Jx %d from %d\n",comm.rank,comm.tmatFrom[i].globalIdx[j],from);
       MPI_Irecv(&local.JxStore(0,comm.tmatFrom[i].tmatStoreIdx[j]),2*local.lDimTmatStore,
-                MPI_DOUBLE,from,comm.tmatFrom[i].globalIdx[j],comm.comm,
+                TypeTraits<Real>::mpiType(),from,comm.tmatFrom[i].globalIdx[j],comm.comm,
                 &comm.JFrom[i].JxcommunicationRequest[j]);
     }
   }
@@ -831,7 +833,7 @@ void expectJyCommunication(LSMSCommunication &comm, LocalTypeInfo &local)
     {
       // printf("Node %d: expect tmat %d from %d\n",comm.rank,comm.tmatFrom[i].globalIdx[j],from);
       MPI_Irecv(&local.JyStore(0,comm.tmatFrom[i].tmatStoreIdx[j]),2*local.lDimTmatStore,
-                MPI_DOUBLE,from,comm.tmatFrom[i].globalIdx[j],comm.comm,
+                TypeTraits<Real>::mpiType(),from,comm.tmatFrom[i].globalIdx[j],comm.comm,
                 &comm.JFrom[i].JycommunicationRequest[j]);
     }
   }
@@ -847,7 +849,7 @@ void expectJzCommunication(LSMSCommunication &comm, LocalTypeInfo &local)
     {
       // printf("Node %d: expect tmat %d from %d\n",comm.rank,comm.tmatFrom[i].globalIdx[j],from);
       MPI_Irecv(&local.JzStore(0,comm.tmatFrom[i].tmatStoreIdx[j]),2*local.lDimTmatStore,
-                MPI_DOUBLE,from,comm.tmatFrom[i].globalIdx[j],comm.comm,
+                TypeTraits<Real>::mpiType(),from,comm.tmatFrom[i].globalIdx[j],comm.comm,
                 &comm.JFrom[i].JzcommunicationRequest[j]);
     }
   }
@@ -863,12 +865,12 @@ void sendTmats(LSMSCommunication &comm, LocalTypeInfo &local) {
       // %d\n",comm.rank,comm.tmatTo[i].globalIdx[j],to);
 #ifdef USE_ISEND
       MPI_Isend(&local.tmatStore(0, comm.tmatTo[i].tmatStoreIdx[j]),
-                2 * local.lDimTmatStore, MPI_DOUBLE, to,
+                2 * local.lDimTmatStore, TypeTraits<Real>::mpiType(), to,
                 comm.tmatTo[i].globalIdx[j], comm.comm,
                 &comm.tmatTo[i].communicationRequest[j]);
 #else
       MPI_Send(&local.tmatStore(0, comm.tmatTo[i].tmatStoreIdx[j]),
-               2 * local.lDimTmatStore, MPI_DOUBLE, to,
+               2 * local.lDimTmatStore, TypeTraits<Real>::mpiType(), to,
                comm.tmatTo[i].globalIdx[j], comm.comm);
 #endif
     }
@@ -885,12 +887,12 @@ void sendJx(LSMSCommunication &comm, LocalTypeInfo &local)
   //    printf("Node %d: send Jx %d to %d\n",comm.rank,comm.tmatTo[i].globalIdx[j],to);
 #ifdef USE_ISEND
       MPI_Isend(&local.JxStore(0,comm.tmatTo[i].tmatStoreIdx[j]),2*local.lDimTmatStore,
-                MPI_DOUBLE,to,comm.tmatTo[i].globalIdx[j],comm.comm,
+                TypeTraits<Real>::mpiType(),to,comm.tmatTo[i].globalIdx[j],comm.comm,
                 &comm.JTo[i].JxcommunicationRequest[j]);
 #else
   //    std::cout << "Blocking send" << std::endl;
       MPI_Send(&local.JxStore(0,comm.tmatTo[i].tmatStoreIdx[j]),2*local.lDimTmatStore,
-               MPI_DOUBLE,to,comm.tmatTo[i].globalIdx[j],comm.comm);
+               TypeTraits<Real>::mpiType(),to,comm.tmatTo[i].globalIdx[j],comm.comm);
 #endif
     }
   }
@@ -906,11 +908,11 @@ void sendJy(LSMSCommunication &comm, LocalTypeInfo &local)
       // printf("Node %d: send tmat %d to %d\n",comm.rank,comm.tmatTo[i].globalIdx[j],to);
 #ifdef USE_ISEND
       MPI_Isend(&local.JyStore(0,comm.tmatTo[i].tmatStoreIdx[j]),2*local.lDimTmatStore,
-                MPI_DOUBLE,to,comm.tmatTo[i].globalIdx[j],comm.comm,
+                TypeTraits<Real>::mpiType(),to,comm.tmatTo[i].globalIdx[j],comm.comm,
                 &comm.JTo[i].JycommunicationRequest[j]);
 #else
       MPI_Send(&local.JyStore(0,comm.tmatTo[i].tmatStoreIdx[j]),2*local.lDimTmatStore,
-               MPI_DOUBLE,to,comm.tmatTo[i].globalIdx[j],comm.comm);
+               TypeTraits<Real>::mpiType(),to,comm.tmatTo[i].globalIdx[j],comm.comm);
 #endif
     }
   }
@@ -926,11 +928,11 @@ void sendJz(LSMSCommunication &comm, LocalTypeInfo &local)
       // printf("Node %d: send tmat %d to %d\n",comm.rank,comm.tmatTo[i].globalIdx[j],to);
 #ifdef USE_ISEND
       MPI_Isend(&local.JzStore(0,comm.tmatTo[i].tmatStoreIdx[j]),2*local.lDimTmatStore,
-                MPI_DOUBLE,to,comm.tmatTo[i].globalIdx[j],comm.comm,
+                TypeTraits<Real>::mpiType(),to,comm.tmatTo[i].globalIdx[j],comm.comm,
                 &comm.JTo[i].JzcommunicationRequest[j]);
 #else
       MPI_Send(&local.JzStore(0,comm.tmatTo[i].tmatStoreIdx[j]),2*local.lDimTmatStore,
-               MPI_DOUBLE,to,comm.tmatTo[i].globalIdx[j],comm.comm);
+               TypeTraits<Real>::mpiType(),to,comm.tmatTo[i].globalIdx[j],comm.comm);
 #endif
     }
   }
@@ -1067,18 +1069,18 @@ void globalAnd(LSMSCommunication &comm, bool &a) {
   if (r == 0) a = false;
 }
 
-double calculateFomScaleDouble(LSMSCommunication &comm, LocalTypeInfo &local) {
+Real calculateFomScaleDouble(LSMSCommunication &comm, LocalTypeInfo &local) {
   // fomScale = \sum_#atoms (LIZ * (lmax+1)^2)^3
-  double fomLocal = 0.0;
-  double fom = 0.0;
+  Real fomLocal = 0.0;
+  Real fom = 0.0;
 
   for (int i = 0; i < local.num_local; i++) {
     // printf("nrmat = %d\n",local.atom[i].nrmat);
-    double nrmatD = (double)local.atom[i].nrmat;
+    Real nrmatD = (Real)local.atom[i].nrmat;
     fomLocal += nrmatD * nrmatD * nrmatD;
   }
   // printf("fomLocal = %ld\n",fomLocal);
-  MPI_Allreduce(&fomLocal, &fom, 1, MPI_DOUBLE, MPI_SUM, comm.comm);
+  MPI_Allreduce(&fomLocal, &fom, 1, TypeTraits<Real>::mpiType(), MPI_SUM, comm.comm);
   // printf("fom = %ld\n",fom);
   return fom;
 }

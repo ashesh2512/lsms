@@ -167,7 +167,7 @@ c     calculate p(l,m)'s...............................................
       costheta=rij(3)/rmag
 c     -----------------------------------------------------------------
 ! meis: changed to normalized associated Legendre functions
-      call plm_normalized(lend,costheta,plm)
+      call plm_normalized_dp(lend,costheta,plm)
 c     -----------------------------------------------------------------
 c     =================================================================
 c     multiply be the normalization constant...........................

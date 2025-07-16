@@ -105,12 +105,21 @@ void BroydenMixer::invert(Matrix<Real> &A, int nn) {
   int LWORK = LDIM * LDIM;
   int INFO;
 
+#if SP
+  // computes an LU factorization
+  LAPACK::sgetrf_(&nn, &nn, &A(0, 0), &LDIM, ipiv.data(), &INFO);
+
+  // computes the inverse of a matrix using the computed LU factorization
+  LAPACK::sgetri_(&nn, &A(0, 0), &LDIM, ipiv.data(), WORK.data(), &LWORK,
+                  &INFO);
+#else
   // computes an LU factorization
   LAPACK::dgetrf_(&nn, &nn, &A(0, 0), &LDIM, ipiv.data(), &INFO);
 
   // computes the inverse of a matrix using the computed LU factorization
   LAPACK::dgetri_(&nn, &A(0, 0), &LDIM, ipiv.data(), WORK.data(), &LWORK,
                   &INFO);
+#endif
 }
 
 void BroydenMixer::mix(LSMSCommunication &comm, RealMixingVector &mix) {

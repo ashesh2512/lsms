@@ -58,7 +58,7 @@ void getCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
   int ndeep = 0;
   int nnorm;
 
-  Real c = cphot * std::pow(10.0, lsms.nrelc);
+  Real c = cphot * pow_t(toReal(10.0), lsms.nrelc);
 
   // if(lsms.mtasa != 0)
   //   last2 = atom.jws;
@@ -85,16 +85,23 @@ void getCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
       int nitmax = 50;
       int ipdeq = 5;
       int iter;
-      Real tol = 1.0e-10;
+      Real tol = lsms::TOL;
       Real fac1 = (3 - lsms.n_spin_pola) * std::abs(atom.kc(ic, is));
       ndeep += (3 - lsms.n_spin_pola) * std::abs(atom.kc(ic, is));
 
       nnorm = last;
 
+#if SP
+      deepst_sp_(&atom.nc(ic, is), &atom.lc(ic, is), &atom.kc(ic, is),
+                 &atom.ec(ic, is), &atom.vr(0, is), &atom.r_mesh[0], &f[1],
+                 &atom.h, &atom.ztotss, &c, &nitmax, &tol, &atom.jws, &last, &iter,
+                 &local_iprpts, &ipdeq);
+#else
       deepst_(&atom.nc(ic, is), &atom.lc(ic, is), &atom.kc(ic, is),
               &atom.ec(ic, is), &atom.vr(0, is), &atom.r_mesh[0], &f[1],
               &atom.h, &atom.ztotss, &c, &nitmax, &tol, &atom.jws, &last, &iter,
               &local_iprpts, &ipdeq);
+#endif
 
       if (ndeep <= numDeepStates) {
         nnorm = last;
@@ -103,10 +110,17 @@ void getCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
           atom.coreStateType(ic, is) = 'V';
       } else {
         nnorm = last2;
+#if SP
+        semcst_sp_(&atom.nc(ic, is), &atom.lc(ic, is), &atom.kc(ic, is),
+                   &atom.ec(ic, is), &atom.vr(0, is), &atom.r_mesh[0], &f[1],
+                   &atom.h, &atom.ztotss, &c, &nitmax, &tol, &jmt, &atom.jws,
+                   &last2, &iter, &local_iprpts, &ipdeq);
+#else
         semcst_(&atom.nc(ic, is), &atom.lc(ic, is), &atom.kc(ic, is),
                 &atom.ec(ic, is), &atom.vr(0, is), &atom.r_mesh[0], &f[1],
                 &atom.h, &atom.ztotss, &c, &nitmax, &tol, &jmt, &atom.jws,
                 &last2, &iter, &local_iprpts, &ipdeq);
+#endif
 
         // std::printf("S: [%3d %3d] :%3d %3d %3d %20.10f\n", ic, is,
         // atom.nc(ic, is), atom.lc(ic, is), atom.kc(ic, is), atom.ec(ic, is));
@@ -127,8 +141,14 @@ void getCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
       // call newint(nnorm+1,rtmp,f,qmp,3)
       int nnp1 = nnorm + 1;
       int three = 3;
+
+#if SP
+      newint_sp_(&nnp1, &rtmp[0], &f[0], &qmp[0], &three);
+#else
       newint_(&nnp1, &rtmp[0], &f[0], &qmp[0], &three);
-      Real gnrm = 1.0 / (2.0 * qmp[nnorm - 1]);
+#endif
+
+      Real gnrm = toReal(1.0) / (2 * qmp[nnorm - 1]);
       for (int j = 1; j < local_iprpts + 1; j++)
         f[j] = f[j] * gnrm * atom.r_mesh[j - 1];
 
@@ -200,11 +220,11 @@ c     ----------------------------------------------------------------
 
       for (int ic = 0; ic < atom.numc; ic++) {
         printf("            %2d   %2d  %3d   %20.13f    %c\n", atom.nc(ic, is),
-               atom.lc(ic, is), atom.kc(ic, is), atom.ec(ic, is),
+               atom.lc(ic, is), atom.kc(ic, is), (double)atom.ec(ic, is),
                atom.coreStateType(ic, is));
       }
-      printf("          Energy     core: %16.8f\n", atom.ecorv[is]);
-      printf("          Energy semicore: %16.8f\n", atom.esemv[is]);
+      printf("          Energy     core: %16.8f\n", (double)atom.ecorv[is]);
+      printf("          Energy semicore: %16.8f\n", (double)atom.esemv[is]);
     }
     printf("\n");
   }
@@ -225,21 +245,33 @@ c     ----------------------------------------------------------------
       }
       int last2p1 = last2 + 1;
       int three = 3;
+
+#if SP
+      newint_sp_(&last2p1, &rtmp[0], &wrk2[0], &wrk1[0], &three);
+#else
       newint_(&last2p1, &rtmp[0], &wrk2[0], &wrk1[0], &three);
-      qsemmt += 2.0 * wrk1[jmt];
-      qsemws += 2.0 * wrk1[last2 - 1];
-      atom.mcpsc_mt += 2.0 * (1 - 2 * is) * wrk1[jmt];
-      atom.mcpsc_ws += 2.0 * (1 - 2 * is) * wrk1[last2 - 1];
+#endif
+
+      qsemmt += toReal(2.0) * wrk1[jmt];
+      qsemws += toReal(2.0) * wrk1[last2 - 1];
+      atom.mcpsc_mt += toReal(2.0) * (1 - 2 * is) * wrk1[jmt];
+      atom.mcpsc_ws += toReal(2.0) * (1 - 2 * is) * wrk1[last2 - 1];
 
       wrk2[0] = 0.0;
       for (int j = 1; j <= last2; j++) {
         wrk2[j] = atom.corden(j - 1, is) / atom.r_mesh[j - 1];
       }
+
+#if SP
+      newint_sp_(&last2p1, &rtmp[0], &wrk2[0], &wrk1[0], &three);
+#else
       newint_(&last2p1, &rtmp[0], &wrk2[0], &wrk1[0], &three);
-      qcormt += 2.0 * wrk1[jmt];
-      qcorws += 2.0 * wrk1[last2 - 1];
-      atom.mcpsc_mt += 2.0 * (1 - 2 * is) * wrk1[jmt];
-      atom.mcpsc_ws += 2.0 * (1 - 2 * is) * wrk1[last2 - 1];
+#endif
+
+      qcormt += toReal(2.0) * wrk1[jmt];
+      qcorws += toReal(2.0) * wrk1[last2 - 1];
+      atom.mcpsc_mt += toReal(2.0) * (1 - 2 * is) * wrk1[jmt];
+      atom.mcpsc_ws += toReal(2.0) * (1 - 2 * is) * wrk1[last2 - 1];
     }
   }
 
@@ -248,13 +280,13 @@ c     ----------------------------------------------------------------
   atom.qcpsc_ws = qcorws + qsemws;
 
   if (lsms.global.iprint >= 0) {
-    printf("getCoreStates: Muffin-tin core charge        = %16.11f\n", qcormt);
-    printf("               Muffin-tin semicore charge    = %16.11f\n", qsemmt);
+    printf("getCoreStates: Muffin-tin core charge        = %16.11f\n", (double)qcormt);
+    printf("               Muffin-tin semicore charge    = %16.11f\n", (double)qsemmt);
     printf("               Muffin-tin core+semi moment   = %16.11f\n",
-           atom.mcpsc_mt);
+           (double)atom.mcpsc_mt);
     printf("               Wigner-Seitz core+semi moment = %16.11f\n",
-           atom.mcpsc_ws);
-    printf("               Interstitial charge core      = %16.11f\n", qcorout);
+           (double)atom.mcpsc_ws);
+    printf("               Interstitial charge core      = %16.11f\n", (double)qcorout);
   }
 }
 
@@ -281,7 +313,7 @@ void lsms::getNewCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
 
   int nMesh = atom.vr.l_dim();
 
-  Real c = cphot * std::pow(10.0, lsms.nrelc);
+  Real c = cphot * pow_t(toReal(10.0), lsms.nrelc);
 
   std::vector<Real> dens(nMesh);
 
@@ -290,7 +322,7 @@ void lsms::getNewCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
   if (lsms.n_spin_pola == 1) {
     totDeepStates = (int) atom.zcorss;
   } else if (lsms.n_spin_pola == 2) {
-    totDeepStates = std::ceil(atom.zcorss / 2.0);
+    totDeepStates = std::ceil(atom.zcorss / toReal(2.0));
   }
 
   // Bounding sphere radius
@@ -310,15 +342,34 @@ void lsms::getNewCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
 
       if (nDeepStates <= totDeepStates) {
         // Deep core state
-        deepst_(&atom.nc(ic, is), &atom.lc(ic, is), &atom.kc(ic, is),
-                &atom.ec(ic, is), &atom.vr(0, is), atom.r_mesh.data(),
-                dens.data(), &atom.h, &atom.ztotss, &c, &nitmax, &tol,
-                &atom.jws, &nMesh, &iter, &nMesh, &ipdeq);
+#if SP
+      deepst_sp_(&atom.nc(ic, is), &atom.lc(ic, is), &atom.kc(ic, is),
+                 &atom.ec(ic, is), &atom.vr(0, is), atom.r_mesh.data(),
+                 dens.data(), &atom.h, &atom.ztotss, &c, &nitmax, &tol,
+                 &atom.jws, &nMesh, &iter, &nMesh, &ipdeq);
+#else
+      deepst_(&atom.nc(ic, is), &atom.lc(ic, is), &atom.kc(ic, is),
+              &atom.ec(ic, is), &atom.vr(0, is), atom.r_mesh.data(),
+              dens.data(), &atom.h, &atom.ztotss, &c, &nitmax, &tol,
+              &atom.jws, &nMesh, &iter, &nMesh, &ipdeq);
+#endif
 
         atom.coreStateType(ic, is) = 'C';  // deep core state
 
       } else {
         // First deep core value
+#if SP
+        deepst_sp_(&atom.nc(ic, is), &atom.lc(ic, is), &atom.kc(ic, is),
+                   &atom.ec(ic, is), &atom.vr(0, is), atom.r_mesh.data(),
+                   dens.data(), &atom.h, &atom.ztotss, &c, &nitmax, &tol,
+                   &atom.jws, &nMesh, &iter, &nMesh, &ipdeq);
+
+        // Semi-core state
+        semcst_sp_(&atom.nc(ic, is), &atom.lc(ic, is), &atom.kc(ic, is),
+                   &atom.ec(ic, is), &atom.vr(0, is), atom.r_mesh.data(),
+                   dens.data(), &atom.h, &atom.ztotss, &c, &nitmax, &tol,
+                   &atom.jmt, &atom.jws, &nMesh, &iter, &nMesh, &ipdeq);
+#else
         deepst_(&atom.nc(ic, is), &atom.lc(ic, is), &atom.kc(ic, is),
                 &atom.ec(ic, is), &atom.vr(0, is), atom.r_mesh.data(),
                 dens.data(), &atom.h, &atom.ztotss, &c, &nitmax, &tol,
@@ -329,6 +380,7 @@ void lsms::getNewCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
                 &atom.ec(ic, is), &atom.vr(0, is), atom.r_mesh.data(),
                 dens.data(), &atom.h, &atom.ztotss, &c, &nitmax, &tol,
                 &atom.jmt, &atom.jws, &nMesh, &iter, &nMesh, &ipdeq);
+#endif
 
         atom.coreStateType(ic, is) = 'S';  // semi core state
       }
@@ -393,11 +445,11 @@ void lsms::getNewCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
 
       for (int ic = 0; ic < atom.numc; ic++) {
         printf("            %2d   %2d  %3d   %20.13f    %c\n", atom.nc(ic, is),
-               atom.lc(ic, is), atom.kc(ic, is), atom.ec(ic, is),
+               atom.lc(ic, is), atom.kc(ic, is), (double)atom.ec(ic, is),
                atom.coreStateType(ic, is));
       }
-      printf("          Energy     core: %16.8f\n", atom.ecorv[is]);
-      printf("          Energy semicore: %16.8f\n", atom.esemv[is]);
+      printf("          Energy     core: %16.8f\n", (double)atom.ecorv[is]);
+      printf("          Energy semicore: %16.8f\n", (double)atom.esemv[is]);
     }
     printf("\n");
   }
@@ -424,10 +476,10 @@ void lsms::getNewCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
         fmt::print("  Qcore  [{}]: {:12.8f}\n", is+1, mtNorm);
       }
 
-      qsemmt += 2.0 * mtNorm;
-      qsemws += 2.0 * wsNorm;
-      atom.mcpsc_mt += 2.0 * (1 - 2 * is) * mtNorm;
-      atom.mcpsc_ws += 2.0 * (1 - 2 * is) * wsNorm;
+      qsemmt += toReal(2.0) * mtNorm;
+      qsemws += toReal(2.0) * wsNorm;
+      atom.mcpsc_mt += toReal(2.0) * (1 - 2 * is) * mtNorm;
+      atom.mcpsc_ws += toReal(2.0) * (1 - 2 * is) * wsNorm;
     }
   }
 
@@ -436,12 +488,12 @@ void lsms::getNewCoreStates(LSMSSystemParameters &lsms, AtomData &atom) {
   atom.qcpsc_ws = qcorws + qsemws;
 
   if (lsms.global.iprint >= 0) {
-    printf("getCoreStates: Muffin-tin core charge        = %16.11f\n", qcormt);
-    printf("               Muffin-tin semicore charge    = %16.11f\n", qsemmt);
+    printf("getCoreStates: Muffin-tin core charge        = %16.11f\n", (double)qcormt);
+    printf("               Muffin-tin semicore charge    = %16.11f\n", (double)qsemmt);
     printf("               Muffin-tin core+semi moment   = %16.11f\n",
-           atom.mcpsc_mt);
+           (double)atom.mcpsc_mt);
     printf("               Wigner-Seitz core+semi moment = %16.11f\n",
-           atom.mcpsc_ws);
-    printf("               Interstitial charge core      = %16.11f\n", qcorout);
+           (double)atom.mcpsc_ws);
+    printf("               Interstitial charge core      = %16.11f\n", (double)qcorout);
   }
 }

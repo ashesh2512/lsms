@@ -80,7 +80,7 @@ c     ================================================================
 c     set nume equal to number of points on grid i.e. ngauss..........
       nume=ngauss
 c     ----------------------------------------------------------------
-      call gauss_legendre_points(-one,one,xgs,wgs,ngauss)
+      call gauss_legendre_points_dp(-one,one,xgs,wgs,ngauss)
 c     ----------------------------------------------------------------
 c
 c     ================================================================
@@ -110,7 +110,7 @@ c     write out grid and return.......................................
      >             t40,''='',i5)') nume
       endif
       if(iprint.ge.2) then
-         write(6,'(12x,''n='',i5,'' e='',2e12.4,'' de='',2d12.4)')
+         write(6,'(12x,''n='',i5,'' e='',2e12.4,'' de='',2e12.4)')
      >   (ie,egrd(ie),dele1(ie),ie=1,nume)
       endif
 c

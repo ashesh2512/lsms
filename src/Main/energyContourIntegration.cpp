@@ -44,14 +44,21 @@ void rotateToGlobal(AtomData &atom, Matrix<Complex> &dos,
 
 extern "C" {
 //     cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-void constraint_(int *jmt, Real *rmt, int *n_spin_pola, Real *vr, Real *r_mesh,
-                 Real *pi4, Real *evec, Real *evec_r, Real *b_con,
-                 Real *b_basis, int *i_vdif, Real *h_app_para_mag,
-                 Real *h_app_perp_mag, int *iprpts, int *iprint, char *istop,
+void constraint_(int *jmt, double *rmt, int *n_spin_pola, double *vr, double *r_mesh,
+                 double *pi4, double *evec, double *evec_r, double *b_con,
+                 double *b_basis, int *i_vdif, double *h_app_para_mag,
+                 double *h_app_perp_mag, int *iprpts, int *iprint, char *istop,
                  int len_sitop);
+void constraint_sp_(int *jmt, float *rmt, int *n_spin_pola, float *vr, float *r_mesh,
+                   float *pi4, float *evec, float *evec_r, float *b_con,
+                   float *b_basis, int *i_vdif, float *h_app_para_mag,
+                   float *h_app_perp_mag, int *iprpts, int *iprint, char *istop,
+                   int len_sitop);
 //     cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-void u_sigma_u_(Complex *ubr, Complex *ubrd, Complex *wx, Complex *wy,
-                Complex *wz);
+void u_sigma_u_(DComplex *ubr, DComplex *ubrd, DComplex *wx, DComplex *wy,
+                DComplex *wz);
+void u_sigma_u_sp_(FComplex *ubr, FComplex *ubrd, FComplex *wx, FComplex *wy,
+                   FComplex *wz);
 //     cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 void green_function_(int *mtasa, int *n_spin_pola, int *n_spin_cant, int *lmax,
                      int *kkrsz, Complex *wx, Complex *wy, Complex *wz,
@@ -76,10 +83,18 @@ void green_function_rel_(int *mtasa, int *lmax, int *kkrsz, Complex *wx,
                          char *istop, int len_istop);
 //     ================================================================
 void clebsch_(void);
+void clebsch_sp_(void);
+
 void gfill_(int *iplmax);
+void gfill_sp_(int *iplmax);
+
 void gafill_(int *iplmax);
-void matrot1_(Real *rGlobal, Real *evec_r, int *lmax, Complex *dmat,
-              Complex *dmatp);
+void gafill_sp_(int *iplmax);
+
+void matrot1_(double *rGlobal, double *evec_r, int *lmax, DComplex *dmat,
+              DComplex *dmatp);
+void matrot1_sp_(float *rGlobal, float *evec_r, int *lmax, FComplex *dmat,
+                 FComplex *dmatp);
 }
 
 void buildEnergyContour(int igrid, Real ebot, Real etop, Real eibot, Real eitop,
@@ -107,8 +122,13 @@ void buildEnergyContour(int igrid, Real ebot, Real etop, Real eibot, Real eitop,
       egrd.resize(npts + 2);
       dele1.resize(npts + 2);
       ipepts = egrd.size();
+#if SP
+      congauss_sp_(&ebot, &etop, &eibot, &egrd[0], &dele1[0], &npts, &nume, &pi,
+                   &ipepts, &iprint, istop, 32);
+#else
       congauss_(&ebot, &etop, &eibot, &egrd[0], &dele1[0], &npts, &nume, &pi,
                 &ipepts, &iprint, istop, 32);
+#endif
       break;
     case 3:  // DOS calculation: Points parallel to the real axis
       egrd.resize(npts);
@@ -139,15 +159,21 @@ void buildEnergyContour(int igrid, Real ebot, Real etop, Real eibot, Real eitop,
 void energyContourIntegration(LSMSCommunication &comm,
                               LSMSSystemParameters &lsms,
                               LocalTypeInfo &local) {
-  double timeEnergyContourIntegration_1 = MPI_Wtime();
+  Real timeEnergyContourIntegration_1 = MPI_Wtime();
 
   if (lsms.global.iprint >= 0) printf("** Energy Contour Integration **\n");
 
   // calculate coefficients and matrices for spherical relativistic calculations
   if (lsms.relativity == full) {
+#if SP
+    clebsch_sp_();
+    gfill_sp_(&lsms.maxlmax);
+    gafill_sp_(&lsms.maxlmax);
+#else
     clebsch_();
     gfill_(&lsms.maxlmax);
     gafill_(&lsms.maxlmax);
+#endif
   }
 
   // energy grid info
@@ -184,8 +210,13 @@ void energyContourIntegration(LSMSCommunication &comm,
     if (std::abs(evec_norm - 1.0) > 1.0e-5)
       printf("|atom[%d].evec|=%lf\n", i, evec_norm);
     //
+#if SP
+    spin_trafo_sp_(&local.atom[i].evec[0], &local.atom[i].ubr[0],
+                   &local.atom[i].ubrd[0]);
+#else
     spin_trafo_(&local.atom[i].evec[0], &local.atom[i].ubr[0],
                 &local.atom[i].ubrd[0]);
+#endif
     //     ================================================================
     //     set up Constraint ..............................................
     //     copy vr into vr_con which contains the B-field constraint.......
@@ -204,19 +235,37 @@ void energyContourIntegration(LSMSCommunication &comm,
       // here I leave out the i_vdif<0 case!
       if (lsms.constraint == 0) {
         // Apply constrain to rotate potential
+#if SP
+        constraint_sp_(&jmt, &rmt, &lsms.n_spin_pola, &(vr_con[i])(0, 0),
+                       &local.atom[i].r_mesh[0], &pi4, &local.atom[i].evec[0],
+                       &evec_r(0, i), local.atom[i].b_con, local.atom[i].b_basis,
+                       &i_vdif, &h_app_para_mag, &h_app_perp_mag, &iprpts,
+                       &lsms.global.iprint, lsms.global.istop, 32);
+#else
         constraint_(&jmt, &rmt, &lsms.n_spin_pola, &(vr_con[i])(0, 0),
                     &local.atom[i].r_mesh[0], &pi4, &local.atom[i].evec[0],
                     &evec_r(0, i), local.atom[i].b_con, local.atom[i].b_basis,
                     &i_vdif, &h_app_para_mag, &h_app_perp_mag, &iprpts,
                     &lsms.global.iprint, lsms.global.istop, 32);
+#endif
       }
       if (lsms.relativity != full) {
         if (lsms.constraint == 0) {
+#if SP
+          spin_trafo_sp_(&evec_r(0, i), &local.atom[i].ubr[0],
+                         &local.atom[i].ubrd[0]);
+#else
           spin_trafo_(&evec_r(0, i), &local.atom[i].ubr[0],
                       &local.atom[i].ubrd[0]);
+#endif
         } else {
+#if SP
+          spin_trafo_sp_(&local.atom[i].evec[0], &local.atom[i].ubr[0],
+                         &local.atom[i].ubrd[0]);
+#else
           spin_trafo_(&local.atom[i].evec[0], &local.atom[i].ubr[0],
                       &local.atom[i].ubrd[0]);
+#endif
         }
       } else {  //. relativistic
         int matrot_size =
@@ -229,20 +278,36 @@ void energyContourIntegration(LSMSCommunication &comm,
         rGlobal[2] = 1.0;
 
         if (lsms.constraint == 0) {
+#if SP
+          matrot1_sp_(rGlobal, &evec_r(0, i), &local.atom[i].lmax,
+                      &local.atom[i].dmat(0, 0), &local.atom[i].dmatp(0, 0));
+#else
           matrot1_(rGlobal, &evec_r(0, i), &local.atom[i].lmax,
                    &local.atom[i].dmat(0, 0), &local.atom[i].dmatp(0, 0));
+#endif
         } else {
+#if SP
+          matrot1_sp_(rGlobal, &local.atom[i].evec[0], &local.atom[i].lmax,
+                      &local.atom[i].dmat(0, 0), &local.atom[i].dmatp(0, 0));
+#else
           matrot1_(rGlobal, &local.atom[i].evec[0], &local.atom[i].lmax,
                    &local.atom[i].dmat(0, 0), &local.atom[i].dmatp(0, 0));
+#endif
         }
       }
     } else {  // n_spin_cant != 2 i.e. non spin polarized
               // call zcopy(4,u,1,ubr,1)
               // call zcopy(4,ud,1,ubrd,1)
     }
+#if SP
+    u_sigma_u_sp_(&local.atom[i].ubr[0], &local.atom[i].ubrd[0],
+                  &local.atom[i].wx[0], &local.atom[i].wy[0],
+                  &local.atom[i].wz[0]);
+#else
     u_sigma_u_(&local.atom[i].ubr[0], &local.atom[i].ubrd[0],
                &local.atom[i].wx[0], &local.atom[i].wy[0],
                &local.atom[i].wz[0]);
+#endif
   }
 
   /*
@@ -391,8 +456,8 @@ void energyContourIntegration(LSMSCommunication &comm,
 
   timeEnergyContourIntegration_1 = MPI_Wtime() - timeEnergyContourIntegration_1;
 
-  double timeEnergyContourIntegration_2 = MPI_Wtime();
-  double timeCalculateAllTauMatrices = 0.0;
+  Real timeEnergyContourIntegration_2 = MPI_Wtime();
+  Real timeCalculateAllTauMatrices = 0.0;
 
   // energy groups:
   int eGroupRemainder = nume % lsms.energyContour.groupSize();
@@ -416,9 +481,12 @@ void energyContourIntegration(LSMSCommunication &comm,
     nvtxRangePushEx(&eventAttrib);
 #endif
 
-    double timeSingleScatterers = MPI_Wtime();
+    Real timeSingleScatterers = MPI_Wtime();
     local.tmatStore = 0.0;
     expectTmatCommunication(comm, local);
+
+  printf("\nStopping at line 488 in energyCounterIntegration.cpp\n");
+  fflush(stdout); exit(0);
 
     if (lsms.global.iprint >= 1)
       printf("calculate single scatterer solutions.\n");
@@ -481,7 +549,7 @@ void energyContourIntegration(LSMSCommunication &comm,
       if (lsms.global.iprint >= 0)
         printf("Energy #%d (%lf,%lf)\n", ie, real(energy), imag(energy));
 
-      double timeCATM = MPI_Wtime();
+      Real timeCATM = MPI_Wtime();
       calculateAllTauMatrices(comm, lsms, local, vr_con, energy, iie, tau00_l);
 
       timeCalculateAllTauMatrices += MPI_Wtime() - timeCATM;
@@ -497,7 +565,7 @@ void energyContourIntegration(LSMSCommunication &comm,
         eventAttrib.message.ascii = "calculateDensities";
         nvtxRangePushEx(&eventAttrib);
 #endif
-        double timeCalcDensities = MPI_Wtime();
+        Real timeCalcDensities = MPI_Wtime();
         if (lsms.relativity != full) {
 // openMP here
 #pragma omp parallel for                                  \
@@ -589,7 +657,7 @@ void energyContourIntegration(LSMSCommunication &comm,
                 for (int ir = 0; ir < green.l_dim1(); ir++) {
                   // green(ir,0,i) is the spin up charge density and
                   // green(ir,1,i) is spin down part
-                  green(ir, 0, i) = 0.5 * (green(ir, 0, i) + green(ir, 1, i));
+                  green(ir, 0, i) = toReal(0.5) * (green(ir, 0, i) + green(ir, 1, i));
                   green(ir, 1, i) = green(ir, 0, i);
                 }
               }

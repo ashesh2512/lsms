@@ -19,7 +19,7 @@ lsms::XCLibxc::XCLibxc(int nSpin, std::vector<int> xcFunctional)
   setup(nSpin, std::begin(xcFunctional), std::end(xcFunctional));
 }
 
-void lsms::XCLibxc::evaluate(const std::vector<Real> &rMesh, double h,
+void lsms::XCLibxc::evaluate(const std::vector<Real> &rMesh, Real h,
                              const Matrix<Real> &rhoIn, int jmt,
                              Matrix<Real> &xcEnergyOut,
                              Matrix<Real> &xcPotOut) {
@@ -37,19 +37,19 @@ void lsms::XCLibxc::evaluate(const std::vector<Real> &rMesh, double h,
 
   Matrix<double> g_xc(jmt, _nSpin);
 
-  std::vector<Real> rho(_nSpin *jmt);
+  std::vector<double> rho(_nSpin *jmt);
 
-  std::vector<Real> rho_up(jmt);
+  std::vector<double> rho_up(jmt);
   std::vector<Real> rho_down(jmt);
 
-  std::vector<Real> drho_up(jmt);
+  std::vector<double> drho_up(jmt);
   std::vector<Real> drho_down(jmt);
 
-  std::vector<Real> xcEnergy(jmt);
+  std::vector<double> xcEnergy(jmt);
 
-  std::vector<Real> sigma(nSigma * jmt);
-  std::vector<Real> xcPot(nSigma * jmt);
-  std::vector<Real> vSigma(nSigma * jmt);
+  std::vector<double> sigma(nSigma * jmt);
+  std::vector<double> xcPot(nSigma * jmt);
+  std::vector<double> vSigma(nSigma * jmt);
 
   xcEnergyOut = 0.0;
   xcPotOut = 0.0;
@@ -83,7 +83,7 @@ void lsms::XCLibxc::evaluate(const std::vector<Real> &rMesh, double h,
 
     } else {
       drho_up = lsms::derivative<double>(rho_up.data(), jmt);
-      drho_down = lsms::derivative<double>(rho_down.data(), jmt);
+      drho_down = lsms::derivative<Real>(rho_down.data(), jmt);
 
       for (int ir = 0; ir < jmt; ir++) {
         sigma[ir * 3] =
@@ -219,10 +219,12 @@ void lsms::XCLibxc::evaluate(const Real rhoIn[2], Real &xcEnergyOut,
     nSigma = 3;
   }
 
-  Real xcEnergy;
-  std::vector<Real> sigma(nSigma, 0.0);
-  std::vector<Real> vSigma(nSigma);
-  std::vector<Real> xcPot(_nSpin);
+  double xcEnergy;
+  std::vector<double> sigma(nSigma, 0.0);
+  std::vector<double> vSigma(nSigma);
+  std::vector<double> xcPot(_nSpin);
+
+  double* rho = reinterpret_cast<double*>(const_cast<Real*>(rhoIn));
 
   xcEnergyOut = 0.0;
 
@@ -240,11 +242,11 @@ void lsms::XCLibxc::evaluate(const Real rhoIn[2], Real &xcEnergyOut,
   for (int i = 0; i < numFunctionals; i++) {
     switch (functionals[i].get_functional().info->family) {
       case XC_FAMILY_LDA:
-        xc_lda_exc_vxc(&functionals[i].get_functional(), 1, rhoIn, &xcEnergy,
+        xc_lda_exc_vxc(&functionals[i].get_functional(), 1, rho, &xcEnergy,
                        xcPot.data());
         break;
       case XC_FAMILY_GGA:
-        xc_gga_exc_vxc(&functionals[i].get_functional(), 1, rhoIn, sigma.data(),
+        xc_gga_exc_vxc(&functionals[i].get_functional(), 1, rho, sigma.data(),
                        &xcEnergy, xcPot.data(), vSigma.data());
         break;
     }

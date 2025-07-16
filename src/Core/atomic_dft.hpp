@@ -15,7 +15,7 @@ namespace lsms {
 
 constexpr int BROYDEN_MAX_STEP = 6;
 constexpr int BROYDEN_ITER_RESET = 25;
-constexpr double BROYDEN_W0 = 0.01;
+constexpr Real BROYDEN_W0 = 0.01;
 
 class AtomicDFT {
 
@@ -23,10 +23,10 @@ class AtomicDFT {
 
   int max_iter;
   int max_eig_iter;
-  double e_eig_tol;
-  double e_tol;
+  Real e_eig_tol;
+  Real e_tol;
   int iprint;
-  double alpha;
+  Real alpha;
 
   std::unique_ptr<lsms::XCBase> xc;
 
@@ -36,50 +36,50 @@ class AtomicDFT {
       std::vector<int> functional = {0, 0, 0},
       int max_iter = 100,
       int max_eig_iter = 100,
-      double e_tol = 1.0e-10,
-      double e_eig_tol = 1.0e-12, int iprint = 0, double alpha = 0.05
+      Real e_tol = 1.0e-10,
+      Real e_eig_tol = 1.0e-12, int iprint = 0, Real alpha = 0.05
   );
 
-  std::tuple<std::vector<double>, double> solve(int Z,
-               const std::vector<double> &r_mesh,
-               double h,
+  std::tuple<std::vector<Real>, Real> solve(int Z,
+               const std::vector<Real> &r_mesh,
+               Real h,
                int N,
-               Matrix<double> &density,
-               std::vector<double> &tot_potential
+               Matrix<Real> &density,
+               std::vector<Real> &tot_potential
   );
 
 };
 
-void generate_starting_potential(std::vector<double> &potential,
-                                 const std::vector<double> &r_mesh,
+void generate_starting_potential(std::vector<Real> &potential,
+                                 const std::vector<Real> &r_mesh,
                                  int core_charge,
                                  std::size_t end
 );
 
-double generate_density(
-    const std::vector<double> &r_mesh,
-    double h,
+Real generate_density(
+    const std::vector<Real> &r_mesh,
+    Real h,
     std::size_t end,
-    const std::vector<double> &potential,
+    const std::vector<Real> &potential,
     int core_charge,
     const std::vector<int> &n,
     const std::vector<int> &l,
     const std::vector<int> &spin,
     const std::vector<int> &kappa,
-    const std::vector<double> &occupation,
-    std::vector<double> &e_eig,
+    const std::vector<Real> &occupation,
+    std::vector<Real> &e_eig,
     Matrix<Real> &density,
     int max_eig_iter,
-    double eig_tol
+    Real eig_tol
 );
 
-double total_energy(const std::vector<double> &r_mesh,
+Real total_energy(const std::vector<Real> &r_mesh,
                     Matrix<Real> &rho,
-                    std::vector<double> &v_hartree,
+                    std::vector<Real> &v_hartree,
                     Matrix<Real> &e_xc,
-                    std::vector<double> &v_pot,
-                    double E_band,
-                    double Z,
+                    std::vector<Real> &v_pot,
+                    Real E_band,
+                    Real Z,
                     int N
 );
 

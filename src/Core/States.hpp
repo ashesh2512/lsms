@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#include "Real.hpp"
+
 namespace lsms {
 
 class States {
@@ -15,12 +17,12 @@ class States {
                                          std::vector<int> &l,
                                          std::vector<int> &spin,
                                          std::vector<int> &kappa,
-                                         std::vector<double> &occupation);
+                                         std::vector<Real> &occupation);
 
   static void nonrelativistic_atomic_states(int core_charge,
                                             std::vector<int> &n,
                                             std::vector<int> &l,
-                                            std::vector<double> &occupation);
+                                            std::vector<Real> &occupation);
 };
 
 }  // namespace lsms

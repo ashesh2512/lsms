@@ -12,7 +12,7 @@ void calculateMadelungMatrices(LSMSSystemParameters &lsms,
                                LocalTypeInfo &local);
 
 extern "C" {
-void cal_madelung_matrix_(int *mynod, int *num_atoms, Real *bravais_lattice_in,
+void cal_madelung_matrix_(int *mynod, int *num_atoms, double *bravais_lattice_in,
                           Real *atom_posi_x_in, Real *atom_posi_y_in,
                           Real *atom_posi_z_in, Real *madmat, int *iprint,
                           char *istop, int istop_len);

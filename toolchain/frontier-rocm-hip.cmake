@@ -1,5 +1,5 @@
 # Toolchain for building LSMS with HIP on OLCF Frontier with amd compiler
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Cmake build type")
 set(BUILD_TESTING OFF)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
@@ -14,6 +14,8 @@ set(USE_ACCELERATOR_HIP ON)
 
 set(AMDGPU_TARGETS "gfx90a")
 set(GPU_TARGETS "gfx90a")
+
+set(CMAKE_SP OFF CACHE BOOL "Precision Setting")
 
 set(MST_LINEAR_SOLVER_DEFAULT 0x0020)
 #set(MST_LINEAR_SOLVER_DEFAULT 0x0005)

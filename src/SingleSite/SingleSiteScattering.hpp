@@ -186,32 +186,60 @@ class FullPotentialRelativisticSingleScattererSolution
 
 extern "C" {
 void single_site_tmat_(int *nrel_rel, int *n_spin_cant, int *is,
-                       int *n_spin_pola, int *mtasa, Real *rws, int *nrelv,
-                       Real *clight, int *lmax, int *kkrsz, Complex *energy,
-                       Complex *prel, Complex *pnrel, Real *vr, Real *h,
-                       int *jmt, int *jws, Real *r_mesh, Complex *tmat_l,
-                       Complex *tmat_g, Complex *matom, Complex *zlr,
-                       Complex *jlr, Complex *gz, Complex *fz, Complex *gj,
-                       Complex *fj, int *nuz, int *indz, Complex *ubr,
-                       Complex *ubrd, Complex *dmat, Complex *dmatp,
-                       Real *r_sph, int *iprint, const char *istop);
+                       int *n_spin_pola, int *mtasa, double *rws, int *nrelv,
+                       double *clight, int *lmax, int *kkrsz, DComplex *energy,
+                       DComplex *prel, DComplex *pnrel, double *vr, double *h,
+                       int *jmt, int *jws, double *r_mesh, DComplex *tmat_l,
+                       DComplex *tmat_g, DComplex *matom, DComplex *zlr,
+                       DComplex *jlr, DComplex *gz, DComplex *fz, DComplex *gj,
+                       DComplex *fj, int *nuz, int *indz, DComplex *ubr,
+                       DComplex *ubrd, DComplex *dmat, DComplex *dmatp,
+                       double *r_sph, int *iprint, const char *istop);
+
+void single_site_tmat_sp_(int *nrel_rel, int *n_spin_cant, int *is,
+                       int *n_spin_pola, int *mtasa, float *rws, int *nrelv,
+                       float *clight, int *lmax, int *kkrsz, FComplex *energy,
+                       FComplex *prel, FComplex *pnrel, float *vr, float *h,
+                       int *jmt, int *jws, float *r_mesh, FComplex *tmat_l,
+                       FComplex *tmat_g, FComplex *matom, FComplex *zlr,
+                       FComplex *jlr, FComplex *gz, FComplex *fz, FComplex *gj,
+                       FComplex *fj, int *nuz, int *indz, FComplex *ubr,
+                       FComplex *ubrd, FComplex *dmat, FComplex *dmatp,
+                       float *r_sph, int *iprint, const char *istop);
 
 void single_scatterer_nonrel_(int *nrelv, double *clight, int *lmax, int *kkrsz,
-                              Complex *energy, Complex *prel, Complex *pnrel,
+                              DComplex *energy, DComplex *prel, DComplex *pnrel,
                               double *vr, double *r_mesh, double *h, int *jmt,
-                              int *jws, Complex *tmat_l, Complex *matom,
-                              Complex *zlr, Complex *jlr, double *r_sph,
+                              int *jws, DComplex *tmat_l, DComplex *matom,
+                              DComplex *zlr, DComplex *jlr, double *r_sph,
+                              int *iprpts, int *iprint, char *istop,
+                              int istop_len);
+
+void single_scatterer_nonrel_sp_(int *nrelv, float *clight, int *lmax, int *kkrsz,
+                              FComplex *energy, FComplex *prel, FComplex *pnrel,
+                              float *vr, float *r_mesh, float *h, int *jmt,
+                              int *jws, FComplex *tmat_l, FComplex *matom,
+                              FComplex *zlr, FComplex *jlr, float *r_sph,
                               int *iprpts, int *iprint, char *istop,
                               int istop_len);
 
 void single_scatterer_rel_(
-    Complex *ce, Complex *psq, int *lmax, int *kmymax,
+    DComplex *ce, DComplex *psq, int *lmax, int *kmymax,
     int *idpot,  // idpot=identifies vauum empty sphere: idpot=0 -> Vacuum else
                  // an atomic site (can be set to Z!)
     double *v0, double *vr, double *br, double *bopr, double *dx, int *ns,
-    double *rs, Complex *tminv, Complex *gz, Complex *fz, Complex *gj,
-    Complex *fj, int *nuz, int *indz, int *iflag, double *socsc, int *iprpts,
+    double *rs, DComplex *tminv, DComplex *gz, DComplex *fz, DComplex *gj,
+    DComplex *fj, int *nuz, int *indz, int *iflag, double *socsc, int *iprpts,
     int *iprint, const char *istop, int istop_len);
+
+void single_scatterer_rel_sp_(
+    FComplex *ce, FComplex *psq, int *lmax, int *kmymax,
+    int *idpot,  // idpot=identifies vauum empty sphere: idpot=0 -> Vacuum else
+                 // an atomic site (can be set to Z!)
+    float *v0, float *vr, float *br, float *bopr, float *dx, int *ns,
+    float *rs, FComplex *tminv, FComplex *gz, FComplex *fz, FComplex *gj,
+    FComplex *fj, int *nuz, int *indz, int *iflag, float *socsc, int *iprpts,
+    int *iprint, const char *istop, int istop_len);    
 }
 
 void calculateSingleScattererSolution(

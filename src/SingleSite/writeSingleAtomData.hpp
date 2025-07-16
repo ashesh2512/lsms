@@ -19,5 +19,14 @@ void f_writesingleatomdata_bigcell_(const char *fname_c,int *fname_l,
                                    double *vr,double *rhotot,double *corden,int *v_dim,
                                    char *atname, double *zsemss, double *zvalss,
                                    double *ec,int *nc,int *lc,int *kc,int *c_dim,int);
+
+void f_writesingleatomdata_bigcell_sp_(const char *fname_c,int *fname_l,
+                                    char *header_c, int *header_l,int *jmt,int *jws, float *xstart,
+                                   float *rmt,float *alat,float *efermi,
+                                   float *vdif,float *ztotss,float *zcorss,
+                                   int *nspin,int *numc,float *xvalws,
+                                   float *vr,float *rhotot,float *corden,int *v_dim,
+                                   char *atname, float *zsemss, float *zvalss,
+                                   float *ec,int *nc,int *lc,int *kc,int *c_dim,int);
 };
 #endif

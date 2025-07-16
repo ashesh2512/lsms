@@ -10,7 +10,7 @@
 
 #include "utils.hpp"
 
-double lsms::omega(lsms::matrix<double> &bravais) {
+Real lsms::omega(lsms::matrix<Real> &bravais) {
   return std::abs(
       (bravais(1, 0) * bravais(2, 1) - bravais(2, 0) * bravais(1, 1)) *
           bravais(0, 2) +
@@ -20,9 +20,9 @@ double lsms::omega(lsms::matrix<double> &bravais) {
           bravais(2, 2));
 }
 
-void lsms::insert_ordered(lsms::matrix<double> &latt_vec,
-                          std::vector<double> &latt_vec_sq, int len,
-                          std::vector<double> &vec, double &v_sq) {
+void lsms::insert_ordered(lsms::matrix<Real> &latt_vec,
+                          std::vector<Real> &latt_vec_sq, int len,
+                          std::vector<Real> &vec, Real &v_sq) {
   for (int i = 0; i < len; i++) {
     if (latt_vec_sq[i] >= v_sq) {
       for (int j = len - 1; j >= i; j--) {
@@ -48,18 +48,18 @@ void lsms::insert_ordered(lsms::matrix<double> &latt_vec,
   latt_vec(2, len) = vec[2];
 }
 
-__attribute__((unused)) lsms::matrix<double> lsms::create_lattice(
-    const lsms::matrix<double> &brav, double cutoff, const std::vector<int> &nm,
+__attribute__((unused)) lsms::matrix<Real> lsms::create_lattice(
+    const lsms::matrix<Real> &brav, Real cutoff, const std::vector<int> &nm,
     int size) {
-  lsms::matrix<double> latt_vec(3, size);
-  std::vector<double> latt_vec_sq(size);
+  lsms::matrix<Real> latt_vec(3, size);
+  std::vector<Real> latt_vec_sq(size);
 
   int number = 0;
 
   // To also include vectors on the boarder
-  double vcut2 = cutoff * cutoff + 1e-6;
+  Real vcut2 = cutoff * cutoff + 1e-6;
 
-  std::vector<double> vn(3, 0.0);
+  std::vector<Real> vn(3, 0.0);
 
   for (int x = -nm[0]; x <= nm[0]; x++) {
     for (int y = -nm[1]; y <= nm[1]; y++) {
@@ -81,18 +81,18 @@ __attribute__((unused)) lsms::matrix<double> lsms::create_lattice(
   return latt_vec;
 }
 
-std::tuple<lsms::matrix<double>, std::vector<double>>
-lsms::create_lattice_and_sq(lsms::matrix<double> &brav, double cutoff,
+std::tuple<lsms::matrix<Real>, std::vector<Real>>
+lsms::create_lattice_and_sq(lsms::matrix<Real> &brav, Real cutoff,
                             const std::vector<int> &nm, int size) {
-  lsms::matrix<double> latt_vec(3, size);
-  std::vector<double> latt_vec_sq(size);
+  lsms::matrix<Real> latt_vec(3, size);
+  std::vector<Real> latt_vec_sq(size);
 
   int number = 0;
 
   // To also include vectors on the boarder
-  double vcut2 = cutoff * cutoff + 1e-6;
+  Real vcut2 = cutoff * cutoff + 1e-6;
 
-  std::vector<double> vn(3, 0.0);
+  std::vector<Real> vn(3, 0.0);
 
   for (int x = -nm[0]; x <= nm[0]; x++) {
     for (int y = -nm[1]; y <= nm[1]; y++) {
@@ -114,9 +114,9 @@ lsms::create_lattice_and_sq(lsms::matrix<double> &brav, double cutoff,
   return std::make_tuple(latt_vec, latt_vec_sq);
 }
 
-void lsms::reciprocal_lattice(lsms::matrix<double> &bravais,
-                              lsms::matrix<double> &reciprocal_bravais,
-                              double &scale) {
+void lsms::reciprocal_lattice(lsms::matrix<Real> &bravais,
+                              lsms::matrix<Real> &reciprocal_bravais,
+                              Real &scale) {
   auto vol = (bravais(1, 0) * bravais(2, 1) - bravais(2, 0) * bravais(1, 1)) *
                  bravais(0, 2) +
              (bravais(2, 0) * bravais(0, 1) - bravais(0, 0) * bravais(2, 1)) *

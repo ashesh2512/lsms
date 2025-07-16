@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <vector>
 
+#include"Real.hpp"
 #include "Main/SystemParameters.hpp"
 #include "Mixer/MixingParameter.hpp"
 #include "Potential/PotentialShifter.hpp"
@@ -112,7 +113,7 @@ void globalSum(LSMSCommunication &comm, T *a, int n) {
   std::copy(r.begin(), r.end(), a);
 }
 
-double calculateFomScaleDouble(LSMSCommunication &comm, LocalTypeInfo &local);
+Real calculateFomScaleDouble(LSMSCommunication &comm, LocalTypeInfo &local);
 
 long long calculateFomScale(LSMSCommunication &comm, LocalTypeInfo &local);
 

@@ -38,11 +38,11 @@ c
 !     set up things for the gaunt coeff:s
 !      call getclm(2*iplmax,clm)
 ! meis: changed to normalized associated Legendre functions
-      call ylm_coefficients(2*iplmax,clm)
-      call gauss_legendre_points(-1.d0,1.d0,tg,wg,2*(2*iplmax+1))
+      call ylm_coefficients_dp(2*iplmax,clm)
+      call gauss_legendre_points_dp(-1.d0,1.d0,tg,wg,2*(2*iplmax+1))
       do i=1,2*iplmax+1
 ! meis: changed to normalized associated Legendre functions
-        call plm_normalized(2*iplmax,tg(i),plmg(1,i))
+        call plm_normalized_dp(2*iplmax,tg(i),plmg(1,i))
       end do
 
 

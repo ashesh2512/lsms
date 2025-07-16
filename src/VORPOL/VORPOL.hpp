@@ -24,39 +24,39 @@ class VoronoiPolyhedra {
    common /common_step/ wylm,gwwylm,grwylm,ncrit
   */
   int ncrit;
-  Real rInscribedSphere;  // inscribed sphere
-  Real omegaInt;          // interstitial volume
-  Complex dipint[6];
+  double rInscribedSphere;  // inscribed sphere
+  double omegaInt;          // interstitial volume
+  DComplex dipint[6];
   Array3d<Complex> wylm;
   Matrix<Real> gwwylm, grwylm;
 };
 
 extern "C" {
-void setup_vorpol_(int *my_atom, int *num_atoms, Real *atom_position_1,
-                   Real *atom_position_2, Real *atom_position_3,
-                   Real *system_bravais, int *lmax, Real *clm, int *ngaussq,
-                   int *ngaussr, Real *rmt, Real *omegint, Complex *dipint,
-                   Real *rad, int *ipvp, int *ipnode, int *ipcorn, int *ipedge,
-                   int *iprcrit, Real *gwwylm, Real *grwylm, int *ncrit,
-                   Complex *wylm, Real *rcirc, int *iprint, char *istop,
-                   int istopl_len);
+void setup_vorpol_(int *my_atom, int *num_atoms, double *atom_position_1,
+                   double *atom_position_2, double *atom_position_3,
+                   double *system_bravais, int *lmax, double *clm, int *ngaussq,
+                   int *ngaussr, double *rmt, double *omegint, DComplex *dipint,
+                   double *rad, int *ipvp, int *ipnode, int *ipcorn, int *ipedge,
+                   int *iprcrit, double *gwwylm, double *grwylm, int *ncrit,
+                   DComplex *wylm, double *rcirc, int *iprint, char *istop,
+                   int istopl_len);    
 
-void setup_vorpol_vplane_(Real *vp, int *nvplane, int *lmax, Real *clm,
-                          int *ngaussq, int *ngaussr, Real *rmt, Real *omegint,
-                          Complex *dipint, int *ipvp, int *ipnode, int *ipcorn,
-                          int *ipedge, int *iprcrit, Real *gwwylm, Real *grwylm,
-                          int *ncrit, Complex *wylm, Real *rcirc, int *iprint,
+void setup_vorpol_vplane_(double *vp, int *nvplane, int *lmax, double *clm,
+                          int *ngaussq, int *ngaussr, double *rmt, double *omegint,
+                          DComplex *dipint, int *ipvp, int *ipnode, int *ipcorn,
+                          int *ipedge, int *iprcrit, double *gwwylm, double *grwylm,
+                          int *ncrit, DComplex *wylm, double *rcirc, int *iprint,
                           char *istop, int istopl_len);
 
-void setup_boundary_(int *my_atom, int *num_atoms, Real *atom_position_1,
-                     Real *atom_position_2, Real *atom_position_3,
-                     Real *bravais_1, Real *bravais_2, Real *bravais_3,
-                     Real *vplanes, int *ipvp, int *nvplanes, Real *rad);
+void setup_boundary_(int *my_atom, int *num_atoms, double *atom_position_1,
+                     double *atom_position_2, double *atom_position_3,
+                     double *bravais_1, double *bravais_2, double *bravais_3,
+                     double *vplanes, int *ipvp, int *nvplanes, double *rad);
 
-void setup_boundary_cluster_(int *i_seed, int *num_seeds, Real *atom_position_1,
-                             Real *atom_position_2, Real *atom_position_3,
-                             Real *vplanes, int *ipvp, int *nvplanes,
-                             Real *rad);
+void setup_boundary_cluster_(int *i_seed, int *num_seeds, double *atom_position_1,
+                             double *atom_position_2, double *atom_position_3,
+                             double *vplanes, int *ipvp, int *nvplanes,
+                             double *rad);                        
 }
 
 #endif

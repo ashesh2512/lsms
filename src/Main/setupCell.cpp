@@ -18,9 +18,9 @@ void lsms::setupCell(LSMSSystemParameters &lsms, CrystalParameters &crystal,
                             crystal.bravais(1, 0) * crystal.bravais(0, 1)) *
                                crystal.bravais(2, 2));
 
-  double ws_radius =
+  Real ws_radius =
       std::cbrt(crystal.omega * 3.0 / (4.0 * M_PI * crystal.num_atoms));
-  double ws_volumes = crystal.omega / crystal.num_atoms;
+  Real ws_volumes = crystal.omega / crystal.num_atoms;
 
   for (int i = 0; i < local.num_local; i++) {
     local.atom[i].rInscribed = ws_radius;
@@ -40,7 +40,7 @@ void lsms::setupCell(LSMSSystemParameters &lsms, CrystalParameters &crystal,
 
 void lsms::printCell(LSMSSystemParameters &lsms, CrystalParameters &crystal,
                      LocalTypeInfo &local, LSMSCommunication &comm) {
-  double total_volume = 0.0;
+  Real total_volume = 0.0;
   for (int i = 0; i < local.num_local; i++) {
     total_volume += local.atom[i].omegaMT;
   }

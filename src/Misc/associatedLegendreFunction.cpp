@@ -15,11 +15,18 @@
 #include <cmath>
 
 extern "C" {
-void plm_normalized_(int *lmax, double *x, double *plm) {
+void plm_normalized_dp_(int *lmax, double *x, double *plm) {
   associatedLegendreFunctionNormalized<double>(*x, *lmax, plm);
 }
+void plm_normalized_sp_(int *lmax, float *x, float *plm) {
+  associatedLegendreFunctionNormalized<float>(*x, *lmax, plm);
+}
 
-void ylm_coefficients_(int *lmax, double *clm) {
+void ylm_coefficients_dp_(int *lmax, double *clm) {
+  for (int i = 0; i < ((*lmax) + 1) * ((*lmax) + 2) / 2; i++)
+    clm[i] = std::sqrt(0.5);
+}
+void ylm_coefficients_sp_(int *lmax, float *clm) {
   for (int i = 0; i < ((*lmax) + 1) * ((*lmax) + 2) / 2; i++)
     clm[i] = std::sqrt(0.5);
 }

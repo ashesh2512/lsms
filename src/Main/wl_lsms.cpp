@@ -440,8 +440,8 @@ int main(int argc, char *argv[]) {
 
     if (my_group >= 0) {
       double energy;
-      double band_energy;
-      double *evec, *r_values;
+      Real band_energy;
+      Real *evec, *r_values;
       double *recv_buffer;
       int *occ;
       int i_values[10];
@@ -451,8 +451,8 @@ int main(int argc, char *argv[]) {
       recv_buffer = (double *)malloc(sizeof(double) * 4 * size_lsms);
 
       occ = (int *)malloc(sizeof(int) * size_lsms);
-      evec = (double *)malloc(sizeof(double) * 4 * size_lsms);
-      r_values = (double *)malloc(sizeof(double) *
+      evec = (Real *)malloc(sizeof(Real) * 4 * size_lsms);
+      r_values = (Real *)malloc(sizeof(Real) *
                                   (R_VALUE_OFFSET + 3 * (size_lsms + 1)));
       MPI_Comm_rank(local_comm, &rank);
       snprintf(prefix, 38, "%d_", my_group);

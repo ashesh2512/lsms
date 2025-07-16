@@ -8,6 +8,7 @@
 #include <complex>
 #include <vector>
 
+#include "Real.hpp"
 #include "Main/SystemParameters.hpp"
 #include "Misc/Coeficients.hpp"
 #include "common.hpp"
@@ -22,9 +23,9 @@ class MultipoleMadelung {
   /// Local number of atoms
   int local_num_atoms;
 
-  double scaling_factor;
-  double rscut;
-  double kncut;
+  Real scaling_factor;
+  Real rscut;
+  Real kncut;
 
   std::vector<int> r_nm;
   int nrslat;
@@ -40,11 +41,11 @@ class MultipoleMadelung {
   MultipoleMadelung(LSMSSystemParameters &lsms, CrystalParameters &crystal,
                     LocalTypeInfo &local, int lmax = 0);
 
-  double getScalingFactor() const;
+  Real getScalingFactor() const;
 
-  double getRsCut() const;
+  Real getRsCut() const;
 
-  double getKnCut() const;
+  Real getKnCut() const;
 
   std::vector<int> getRsSize() const;
 

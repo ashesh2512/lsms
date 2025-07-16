@@ -7,7 +7,7 @@ void CurrentMatrix::init(LSMSSystemParameters &lsms, LocalTypeInfo &local,
     local_index = lindex;
     energy = en;
     prel = sqrt(en);
-    pnrel = sqrt(en*(1.0 + en*c2inv));
+    pnrel = sqrt(en*(toReal(1.0) + en*c2inv));
     atom = &a;
     kkrsz = a.kkrsz;
     nrmat = a.nrmat;
@@ -47,7 +47,7 @@ Complex CurrentMatrix::calPrefactor(int L, int Lp, int dir, int choice){
         coeffsum = coeffsum + cgcoeff*ClebschGordan::kdelta(l,lp+1)*
                                       ClebschGordan::kdelta(m,mp-k)*ClebschGordan::evec(k+1,dir-1);
       }
-      coeffsum = coeffsum*sqrt((lp + 1.0)/(2*lp + 1.0));
+      coeffsum = coeffsum*sqrt((lp + toReal(1.0))/(2*lp + toReal(1.0)));
     }
     else if (choice == 1) {
        for(int k=-1;k<=1;k++){
@@ -69,7 +69,7 @@ Complex CurrentMatrix::calPrefactor(int L, int Lp, int dir, int choice){
          coeffsum = coeffsum + cgcoeff*ClebschGordan::kdelta(l,lp-1)*
                                        ClebschGordan::kdelta(m,mp-k)*ClebschGordan::evec(k+1,dir-1);
        }
-       coeffsum = coeffsum*sqrt((lp*1.0)/(2*lp + 1.0));
+       coeffsum = coeffsum*sqrt((lp*toReal(1.0))/(2*lp + toReal(1.0)));
     }
     return coeffsum;
 }
@@ -105,15 +105,15 @@ Complex CurrentMatrix::calRadialIntegral(AtomData &a, int L, int Lp, int dir, in
     if (choice == 0){
       Complex coeff = calPrefactor(L, Lp, dir, 0);
       for(int j=0;j<a.r_mesh.size();j++){
-         integrand[j] = coeff*pow(a.r_mesh[j], 2)*solutionNonRel.zlr(j, l, is)*(zlrd(j, lp, is) 
-                   - ((1.0*lp)/a.r_mesh[j])*solutionNonRel.zlr(j, lp, is));
+         integrand[j] = coeff*pow(a.r_mesh[j], toReal(2))*solutionNonRel.zlr(j, l, is)*(zlrd(j, lp, is) 
+                   - ((toReal(1.0)*lp)/a.r_mesh[j])*solutionNonRel.zlr(j, lp, is));
       }
     }
     else if (choice == 1) {
       Complex coeff = calPrefactor(L, Lp, dir, 1);
       for(int j=0;j<a.r_mesh.size();j++){
-         integrand[j] = coeff*pow(a.r_mesh[j], 2)*solutionNonRel.zlr(j, l, is)*(zlrd(j, lp, is) 
-                   + ((lp + 1.0)/a.r_mesh[j])*solutionNonRel.zlr(j, lp, is));
+         integrand[j] = coeff*pow(a.r_mesh[j], toReal(2))*solutionNonRel.zlr(j, l, is)*(zlrd(j, lp, is) 
+                   + ((lp + toReal(1.0))/a.r_mesh[j])*solutionNonRel.zlr(j, lp, is));
       }
     }
     else {
@@ -129,13 +129,13 @@ Complex CurrentMatrix::calRadialIntegral(AtomData &a, int L, int Lp, int dir, in
     integrateOneDim(a.r_mesh, integrand_imag, integral_imag);
     integrated = Complex(integral_real[a.jmt-1],integral_imag[a.jmt-1]);
     integrated = integrated -
-      0.5*pow(a.r_mesh[a.jmt-1],2)*coeff*solutionNonRel.zlr(a.jmt-1,l,is)*solutionNonRel.zlr(a.jmt-1,lp,is);
+      toReal(0.5)*pow(a.r_mesh[a.jmt-1],toReal(2))*coeff*solutionNonRel.zlr(a.jmt-1,l,is)*solutionNonRel.zlr(a.jmt-1,lp,is);
     return integrated;
 }
 
 void CurrentMatrix::assembleJxFromRadialIntegral(AtomData &a){
     int L1,L2;
-    Complex pref(0.0, -2.0*sqrt(2.0));
+    Complex pref(0.0, toReal(-2.0)*sqrt(toReal(2.0)));
     for(int L1=0;L1<kkrsz;L1++){
        for(int L2=0;L2<kkrsz;L2++){
           Jx(L1,L2) = pref*(-calRadialIntegral(a,L1,L2,1,0)
@@ -166,12 +166,19 @@ void CurrentMatrix::calJyzFromJx(){
           mp = ClebschGordan::a.mofk[Lp];
           lpp = ClebschGordan::a.lofk[Lpp];
           mpp = ClebschGordan::a.mofk[Lpp];
-          Jz(L,Lp) = Jz(L,Lp) + Complex(0.0,-0.5)*(sqrt(lpp*(lpp+1) - mpp*(mpp+1))*
-            Complex(1.0*ClebschGordan::kdelta(m,mpp+1),0.0) + sqrt(lpp*(lpp+1) - mpp*(mpp-1))*
-            Complex(1.0*ClebschGordan::kdelta(m,mpp-1),0.0))*Complex(1.0*ClebschGordan::kdelta(l,lpp),0.0)*Jy(Lpp,Lp)
-            - Complex(0.0,-0.5)*(sqrt(lp*(lp+1) - mp*(mp+1))*Complex(1.0*ClebschGordan::kdelta(mpp,mp+1),0.0)
-            + sqrt(lp*(lp+1) - mp*(mp-1))*Complex(1.0*ClebschGordan::kdelta(mpp,mp-1),0.0))*
-              Complex(1.0*ClebschGordan::kdelta(lpp,lp),0.0)*Jy(L,Lpp);
+          Jz(L,Lp) = Jz(L,Lp) 
+                   + Complex(toReal(0.0),toReal(-0.5))
+                   * (sqrt(toReal(lpp)*toReal(lpp+1) - toReal(mpp)*toReal(mpp+1))
+                     * Complex(1.0*ClebschGordan::kdelta(m,mpp+1),0.0)
+                     + sqrt(toReal(lpp)*toReal(lpp+1) - toReal(mpp)*toReal(mpp-1))
+                     * Complex(1.0*ClebschGordan::kdelta(m,mpp-1),0.0))
+                  * Complex(1.0*ClebschGordan::kdelta(l,lpp),0.0)*Jy(Lpp,Lp)
+                  - Complex(toReal(0.0),toReal(-0.5))
+                  * (sqrt(toReal(lp)*toReal(lp+1) - toReal(mp)*toReal(mp+1))
+                    * Complex(1.0*ClebschGordan::kdelta(mpp,mp+1),0.0)
+                    + sqrt(toReal(lp)*toReal(lp+1) - toReal(mp)*toReal(mp-1))
+                    * Complex(1.0*ClebschGordan::kdelta(mpp,mp-1),0.0))
+                  * Complex(1.0*ClebschGordan::kdelta(lpp,lp),0.0)*Jy(L,Lpp);
         }
       }
     }

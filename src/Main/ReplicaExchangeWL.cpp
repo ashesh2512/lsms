@@ -16,7 +16,7 @@ REWL::REWL(MPI_Comm comm, int numberOfWindows, int numberOfWalkersPerWindow,
   numWalkersPerWindow = numberOfWalkersPerWindow;
 
   myID = REWLcomm.rank;
-  myWindow = int(floor(double(myID) / double(numWalkersPerWindow)));
+  myWindow = int(floor(Real(myID) / Real(numWalkersPerWindow)));
 
   // printf("YingWai's check: Inside REWL constructor. world_rank = %5d,
   // myWindow = %5d, myID = %5d\n", global_rank, myWindow, myID);
@@ -80,21 +80,21 @@ void REWL::assignSwapPartner() {
   }
 }
 
-void REWL::swapEnergy(double &energyForSwap) {
+void REWL::swapEnergy(Real &energyForSwap) {
   if (partnerID != -1)  // Swap energy with partner
     REWLcomm.swapScalar(energyForSwap, partnerID);
 }
 
-bool REWL::determineAcceptance(double myDOSRatio) {
-  double partnerDOSRatio{0.0};
+bool REWL::determineAcceptance(Real myDOSRatio) {
+  Real partnerDOSRatio{0.0};
   int change{0};
 
   if (myWindow % 2 == 1) {  // Receiver and calculator
     REWLcomm.recvScalar(partnerDOSRatio, partnerID);
 
-    double acceptProb = myDOSRatio * partnerDOSRatio;
+    Real acceptProb = myDOSRatio * partnerDOSRatio;
 
-    double rand = rnd(rng);
+    Real rand = rnd(rng);
     if (rand < acceptProb) change = 1;
 
     REWLcomm.sendScalar(change, partnerID);
@@ -109,12 +109,12 @@ bool REWL::determineAcceptance(double myDOSRatio) {
     return false;
 }
 
-void REWL::swapConfig(double evecsForSwap[], int numElements) {
+void REWL::swapConfig(Real evecsForSwap[], int numElements) {
   if (partnerID != -1)
     REWLcomm.swapVector(evecsForSwap, numElements, partnerID);
 }
 
-void REWL::swapPotentialShifts(double potentialShiftsForSwap[],
+void REWL::swapPotentialShifts(Real potentialShiftsForSwap[],
                                int numElements) {
   if (partnerID != -1)
     REWLcomm.swapVector(potentialShiftsForSwap, numElements, partnerID);

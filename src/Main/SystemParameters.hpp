@@ -198,10 +198,10 @@ class CrystalParameters {
 
   void resizeTypes(size_t n) { types.resize(n); }
 
-  Matrix<Real> bravais;
-  Real omega;  // bravais lattice volume
+  Matrix<double> bravais;
+  double omega;  // bravais lattice volume
   int num_atoms, num_types;
-  Matrix<Real> position, evecs;
+  Matrix<double> position, evecs;
   std::vector<int> type;
   std::vector<AtomType> types;
 };

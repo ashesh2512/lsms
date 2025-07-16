@@ -10,8 +10,8 @@
 class PotentialShifter {
  public:
   bool vSpinShiftFlag{false};
-  double minShift{0.0};
-  double maxShift{0.0};
+  Real minShift{0.0};
+  Real maxShift{0.0};
 
   void resetPotentials(LocalTypeInfo &local);
 

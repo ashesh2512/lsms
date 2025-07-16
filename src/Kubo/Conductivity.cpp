@@ -13,7 +13,7 @@ Conductivity::Conductivity(LSMSSystemParameters &lsms, LSMSCommunication &comm, 
     rho.resize(3, 3, pola);
     spin_summed_rho.resize(3, 3);
 
-    double timeSingleScatterers=MPI_Wtime();
+    Real timeSingleScatterers=MPI_Wtime();
     local.tmatStore=0.0;
     local.JxStore=0.0;
     local.JyStore=0.0;
@@ -70,7 +70,7 @@ Conductivity::Conductivity(LSMSSystemParameters &lsms, LSMSCommunication &comm, 
     std::cout << std::endl;
     }
     */
-   double timeTauMatrix=MPI_Wtime();
+   Real timeTauMatrix=MPI_Wtime();
    for (int i=0;i<local.atom.size();i++){
       for (int is=0;is<pola;is++){
         cm(i,is).calTauFull(lsms,local,local.atom[i]);
@@ -81,7 +81,7 @@ Conductivity::Conductivity(LSMSSystemParameters &lsms, LSMSCommunication &comm, 
    if(lsms.global.iprint>=0) printf("timeTauMatrix = %lf sec\n",timeTauMatrix);
    fflush(stdout);
 
-   double timeConductivity=MPI_Wtime();
+   Real timeConductivity=MPI_Wtime();
    calSigma(comm,local);
    timeConductivity=MPI_Wtime()-timeConductivity;
    if (comm.rank == 0) {
@@ -123,21 +123,21 @@ void Conductivity::processCurrentMatrix(LocalTypeInfo &local, int index, int dir
       if (dir == 1){
         for(int i=0;i<kkrsz;i++){
           for(int j=0;j<kkrsz;j++){
-            Jout1(i,j) = pow(-1.0, ClebschGordan::a.lofk[i])*local.JxStore(i+j*kkrsz,index);
+            Jout1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[i])*local.JxStore(i+j*kkrsz,index);
           }
         }
       }
       else if (dir == 2){
         for(int i=0;i<kkrsz;i++){
           for(int j=0;j<kkrsz;j++){
-            Jout1(i,j) = pow(-1.0, ClebschGordan::a.lofk[i])*local.JyStore(i+j*kkrsz,index);
+            Jout1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[i])*local.JyStore(i+j*kkrsz,index);
           }
         }
       }
       else if (dir == 3){
         for(int i=0;i<kkrsz;i++){
           for(int j=0;j<kkrsz;j++){
-            Jout1(i,j) = pow(-1.0, ClebschGordan::a.lofk[i])*local.JzStore(i+j*kkrsz,index);
+            Jout1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[i])*local.JzStore(i+j*kkrsz,index);
           }
         }
       }
@@ -146,21 +146,21 @@ void Conductivity::processCurrentMatrix(LocalTypeInfo &local, int index, int dir
       if (dir == 1) {
         for(int i=0;i<kkrsz;i++){
           for(int j=0;j<kkrsz;j++){
-            Jout1(i,j) = pow(-1.0, ClebschGordan::a.lofk[j])*local.JxStore(i+j*kkrsz,index);
+            Jout1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[j])*local.JxStore(i+j*kkrsz,index);
           }
         }
       }
       else if (dir == 2){
         for(int i=0;i<kkrsz;i++){
           for(int j=0;j<kkrsz;j++){
-            Jout1(i,j) = pow(-1.0, ClebschGordan::a.lofk[j])*local.JyStore(i+j*kkrsz,index);
+            Jout1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[j])*local.JyStore(i+j*kkrsz,index);
           }
         }
       }
       else if (dir == 3){
         for(int i=0;i<kkrsz;i++){
           for(int j=0;j<kkrsz;j++){
-            Jout1(i,j) = pow(-1.0, ClebschGordan::a.lofk[j])*local.JzStore(i+j*kkrsz,index);
+            Jout1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[j])*local.JzStore(i+j*kkrsz,index);
           }
         }
       }
@@ -169,21 +169,21 @@ void Conductivity::processCurrentMatrix(LocalTypeInfo &local, int index, int dir
       if (dir == 1){
         for(int i=0;i<kkrsz;i++){
           for(int j=0;j<kkrsz;j++){
-            Jout1(i,j) = pow(-1.0, ClebschGordan::a.lofk[i]+ClebschGordan::a.lofk[j])*local.JxStore(i+j*kkrsz,index);
+            Jout1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[i]+ClebschGordan::a.lofk[j])*local.JxStore(i+j*kkrsz,index);
           }
         }
       }
       else if (dir == 2) {
         for(int i=0;i<kkrsz;i++){
           for(int j=0;j<kkrsz;j++){
-            Jout1(i,j) = pow(-1.0, ClebschGordan::a.lofk[i]+ClebschGordan::a.lofk[j])*local.JyStore(i+j*kkrsz,index);
+            Jout1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[i]+ClebschGordan::a.lofk[j])*local.JyStore(i+j*kkrsz,index);
           }
         }
       }
       else if (dir == 3) {
         for(int i=0;i<kkrsz;i++){
           for(int j=0;j<kkrsz;j++){
-            Jout1(i,j) = pow(-1.0, ClebschGordan::a.lofk[i]+ClebschGordan::a.lofk[j])*local.JzStore(i+j*kkrsz,index);
+            Jout1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[i]+ClebschGordan::a.lofk[j])*local.JzStore(i+j*kkrsz,index);
           }
         }
       }
@@ -203,7 +203,7 @@ void Conductivity::processTauMatrix(Matrix <Complex> &tau1, Matrix <Complex> &ta
       for (int i=0;i<kkrsz;i++){
         for (int j=0;j<kkrsz;j++){
           tau1(i,j) = cm(m,is).tau1(i,n*kkrsz+j);
-          tau2(i,j) = pow(-1.0, ClebschGordan::a.lofk[i] - ClebschGordan::a.lofk[j])*
+          tau2(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[i] - ClebschGordan::a.lofk[j])*
                       conj(cm(m,is).tau1(j,n*kkrsz+i));
         }
       }
@@ -211,7 +211,7 @@ void Conductivity::processTauMatrix(Matrix <Complex> &tau1, Matrix <Complex> &ta
     else if (etype == 3) {
        for (int i=0;i<kkrsz;i++){
          for (int j=0;j<kkrsz;j++){
-            tau1(i,j) = pow(-1.0, ClebschGordan::a.lofk[i] - ClebschGordan::a.lofk[j])*
+            tau1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[i] - ClebschGordan::a.lofk[j])*
                         conj(cm(m,is).tau1(n*kkrsz+j,i));
             tau2(i,j) = cm(m,is).tau1(n*kkrsz+i,j);
          }
@@ -220,9 +220,9 @@ void Conductivity::processTauMatrix(Matrix <Complex> &tau1, Matrix <Complex> &ta
     else if (etype == 4) {
        for (int i=0;i<kkrsz;i++){
          for (int j=0;j<kkrsz;j++){
-            tau1(i,j) = pow(-1.0, ClebschGordan::a.lofk[i] - ClebschGordan::a.lofk[j])*
+            tau1(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[i] - ClebschGordan::a.lofk[j])*
                         conj(cm(m,is).tau1(n*kkrsz+j,i));
-            tau2(i,j) = pow(-1.0, ClebschGordan::a.lofk[i] - ClebschGordan::a.lofk[j])*
+            tau2(i,j) = pow_t(toReal(-1.0), ClebschGordan::a.lofk[i] - ClebschGordan::a.lofk[j])*
                         conj(cm(m,is).tau1(j,n*kkrsz+i));
          }
        }
@@ -257,7 +257,7 @@ Complex Conductivity::calSigmaTilde(LocalTypeInfo &local, int dir1, int dir2, in
           }
        }
     }
-    return -sigmatilde/(M_PI*omega);
+    return -sigmatilde/(toReal(M_PI)*omega);
 }
 
 void Conductivity::calSigma(LSMSCommunication &comm, LocalTypeInfo &local){   
@@ -275,8 +275,8 @@ void Conductivity::calSigma(LSMSCommunication &comm, LocalTypeInfo &local){
          sigmatilde2(dir1-1,dir2-1,is) = calSigmaTilde(local,dir1,dir2,is,2);
          sigmatilde3(dir1-1,dir2-1,is) = calSigmaTilde(local,dir1,dir2,is,3);
          sigmatilde4(dir1-1,dir2-1,is) = calSigmaTilde(local,dir1,dir2,is,4);
-         temp = 0.25*(sigmatilde1(dir1-1,dir2-1,is) - sigmatilde2(dir1-1,dir2-1,is)
-                  - sigmatilde3(dir1-1,dir2-1,is) + sigmatilde4(dir1-1,dir2-1,is));
+         temp = toReal(0.25)*(sigmatilde1(dir1-1,dir2-1,is) - sigmatilde2(dir1-1,dir2-1,is)
+                            - sigmatilde3(dir1-1,dir2-1,is) + sigmatilde4(dir1-1,dir2-1,is));
          sigma(dir1-1,dir2-1,is) = 0.0230384174*temp.real();
        }
      }
@@ -302,8 +302,14 @@ void Conductivity::calSigma(LSMSCommunication &comm, LocalTypeInfo &local){
    }
 
  // Inverting spin-summed conductivity
-   LAPACK::dgetrf_(&dirs, &dirs, &spin_summed_sigma(0, 0), &dirs, &ipiv[0], &info);
-   LAPACK::dgetri_(&dirs, &spin_summed_sigma(0,0), &dirs, &ipiv[0], &work(0,0), &dirs, &info);
+#if SP
+    LAPACK::sgetrf_(&dirs, &dirs, &spin_summed_sigma(0, 0), &dirs, &ipiv[0], &info);
+    LAPACK::sgetri_(&dirs, &spin_summed_sigma(0,0), &dirs, &ipiv[0], &work(0,0), &dirs, &info);
+#else
+    LAPACK::dgetrf_(&dirs, &dirs, &spin_summed_sigma(0, 0), &dirs, &ipiv[0], &info);
+    LAPACK::dgetri_(&dirs, &spin_summed_sigma(0,0), &dirs, &ipiv[0], &work(0,0), &dirs, &info);
+#endif
+
    for(int i=0;i<dirs;i++){
      for(int j=0;j<dirs;j++){
        spin_summed_rho(i,j) = spin_summed_sigma(i,j);
@@ -322,8 +328,15 @@ void Conductivity::invertConductivityMatrix(int is){
        tmpinvert(i,j) = sigma(i,j,is);
      }
    }
-   LAPACK::dgetrf_(&dirs, &dirs, &tmpinvert(0, 0), &dirs, &ipiv[0], &info);
-   LAPACK::dgetri_(&dirs, &tmpinvert(0,0), &dirs, &ipiv[0], &work(0,0), &dirs, &info);
+   
+#if SP
+    LAPACK::sgetrf_(&dirs, &dirs, &tmpinvert(0, 0), &dirs, &ipiv[0], &info);
+    LAPACK::sgetri_(&dirs, &tmpinvert(0,0), &dirs, &ipiv[0], &work(0,0), &dirs, &info);
+#else
+    LAPACK::dgetrf_(&dirs, &dirs, &tmpinvert(0, 0), &dirs, &ipiv[0], &info);
+    LAPACK::dgetri_(&dirs, &tmpinvert(0,0), &dirs, &ipiv[0], &work(0,0), &dirs, &info);    
+#endif
+
    for (int i=0;i<dirs;i++){
      for (int j=0;j<dirs;j++){
        rho(i,j,is) = tmpinvert(i,j);

@@ -17,14 +17,14 @@ void ClebschGordan::init(int lmax){
 //  e0 = z
 //  Matrix evec : evec(0,:) = em1, evec(1:,) = e0, evec(2:,) = ep1
     evec.resize(3, 3);
-    evec(0,0) = 1.0/sqrt(2);
-    evec(0,1) = -sqrtm1/sqrt(2);
+    evec(0,0) = toReal(1.0/sqrt(2));
+    evec(0,1) = -sqrtm1/toReal(sqrt(2));
     evec(0,2) = 0.0;
     evec(1,0) = 0.0;
     evec(1,1) = 0.0;
     evec(1,2) = 1.0;  
-    evec(2,0) = -1.0/sqrt(2);
-    evec(2,1) = -sqrtm1/sqrt(2);
+    evec(2,0) = toReal(-1.0/sqrt(2));
+    evec(2,1) = -sqrtm1/toReal(sqrt(2));
     evec(2,2) = 0.0;
 
 //  Allocating memory for Clebsch-Gordan storage clb

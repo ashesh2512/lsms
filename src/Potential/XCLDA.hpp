@@ -22,7 +22,7 @@ class XCLDA : public XCBase {
 
   XCLDA(int n_spin, std::vector<int> xc_functional);
 
-  void evaluate(const std::vector<Real> &r_mesh, double h,
+  void evaluate(const std::vector<Real> &r_mesh, Real h,
                 const Matrix<Real> &rho_in, int jmt,
                 Matrix<Real> &xc_energy_out, Matrix<Real> &xc_pot_out) override;
 

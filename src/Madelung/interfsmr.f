@@ -62,7 +62,7 @@ c    -------------------------------------------------------------------
       call zeroout(dqintl(0),lmax+1)
       xi0 = sqrt(eta)*half
 !      call gauleg(zero,xi0,xg,wg,ngaussr_mad)
-      call gauss_legendre_points(zero,xi0,xg,wg,ngaussr_mad)
+      call gauss_legendre_points_dp(zero,xi0,xg,wg,ngaussr_mad)
 c         loop over cos(theta)
       do iz=1,ngauss_mad
         z=xgs(iz)
@@ -87,7 +87,7 @@ c to (0,xi0) thus missing a factor of r.
 	    sum=wgs(iz)*sum*twopi
 c     get legendre polynomials on z=cos(theta) grid
 ! meis: changed to normalized associated Legendre functions
-        call plm_normalized(lmax,z,plmofz)
+        call plm_normalized_dp(lmax,z,plmofz)
 c    -------------------------------------------------------------------
 c     loop over L
         do j=1,ndlm

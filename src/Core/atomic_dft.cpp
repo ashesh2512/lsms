@@ -35,7 +35,7 @@ void lsms::generate_starting_potential(std::vector<Real> &potential,
   std::vector<Real> x(end);
 
   for (int i = 0; i < end; i++) {
-    x[i] = r_mesh[i] * std::pow((128 * Z / (9 * M_PI * M_PI)), 1.0 / 3.0);
+    x[i] = r_mesh[i] * toReal(std::pow((128 * Z / (9 * M_PI * M_PI)), 1.0 / 3.0));
   }
 
   Real alpha = 0.7280642371;
@@ -44,9 +44,9 @@ void lsms::generate_starting_potential(std::vector<Real> &potential,
 
   for (int i = 0; i < end; i++) {
     Z_eff[i] = Z *
-        (1 + alpha * std::sqrt(x[i]) + beta * x[i] * exp(-gamma * std::sqrt(x[i]))) *
-        (1 + alpha * std::sqrt(x[i]) + beta * x[i] * exp(-gamma * std::sqrt(x[i]))) *
-        exp(-2 * alpha * std::sqrt(x[i]));
+        (1 + alpha * sqrt_t(x[i]) + beta * x[i] * exp_t(-gamma * sqrt_t(x[i]))) *
+        (1 + alpha * sqrt_t(x[i]) + beta * x[i] * exp_t(-gamma * sqrt_t(x[i]))) *
+        exp_t(-2 * alpha * sqrt_t(x[i]));
 
     if (Z_eff[i] < 1) {
       Z_eff[i] = 1;
@@ -88,7 +88,7 @@ Real lsms::generate_density(
 
     Real e_init = e_eig[i_orbs];
 
-    if (e_init == 0.0) {
+    if (e_init == toReal(0.0)) {
       e_init = rel_energy_start(n[i_orbs], kappa[i_orbs], core_charge);
     }
 
@@ -146,7 +146,7 @@ Real lsms::total_energy(const std::vector<Real> &r_mesh,
   Real T_s = E_band - lsms::radialIntegral(integrand, r_mesh, N);
 
   for (int ir = 0; ir < N; ir++) {
-    integrand[ir] = -0.5 * v_hartree[ir] * rho(ir, 0);
+    integrand[ir] = toReal(-0.5) * v_hartree[ir] * rho(ir, 0);
   }
 
   Real E_ee = -lsms::radialIntegral(integrand, r_mesh, N);
@@ -164,14 +164,14 @@ Real lsms::total_energy(const std::vector<Real> &r_mesh,
 
   Real EE_xc = lsms::radialIntegral(integrand, r_mesh, N);
 
-  return 2.0 * T_s + 2.0 * E_c + EE_xc;
+  return toReal(2.0) * T_s + toReal(2.0) * E_c + EE_xc;
 }
 
-std::tuple<std::vector<double>, double> lsms::AtomicDFT::solve(int Z,
+std::tuple<std::vector<Real>, Real> lsms::AtomicDFT::solve(int Z,
                                                                const std::vector<Real> &r_mesh,
                                                                Real h,
                                                                int N,
-                                                               Matrix<double> &density,
+                                                               Matrix<Real> &density,
                                                                std::vector<Real> &tot_potential
 ) {
 
@@ -280,7 +280,7 @@ std::tuple<std::vector<double>, double> lsms::AtomicDFT::solve(int Z,
 
     // Mix density
     for (auto ir = 0; ir < N; ir++) {
-      mixVector.vec_new[ir] = xc_potential[ir] * 0.5 + vhartree_potential[ir];
+      mixVector.vec_new[ir] = xc_potential[ir] * toReal(0.5) + vhartree_potential[ir];
     }
 
     Real vrms = 0.0;

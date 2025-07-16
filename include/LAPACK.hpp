@@ -32,12 +32,20 @@ namespace LAPACK {
 
   //MSS
   extern "C" int  dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO);
+  extern "C" int  sgetrf_(int* M, int* N, float* A, int* LDA, int* IPIV, int* INFO);
+
   extern "C" int  zgetrf_(int* M, int* N, std::complex<double>* A, int* LDA, int* IPIV, int* INFO);
+  extern "C" int  cgetrf_(int* M, int* N, std::complex<float>* A, int* LDA, int* IPIV, int* INFO);
 
   extern "C" int  zgetrs_(const char * trans, int* n, int* nrhs, std::complex<double>* A, int* LDA, int* IPIV, std::complex<double>* B, int *LDB, int* INFO);
+  extern "C" int  cgetrs_(const char * trans, int* n, int* nrhs, std::complex<float>* A, int* LDA, int* IPIV, std::complex<float>* B, int *LDB, int* INFO);
 
   extern "C" int  dgetri_(int* N, double* A, int* LDA, int* IPIV,  double* WORK, int* LWORK, int* INFO);
+  extern "C" int  sgetri_(int* N, float* A, int* LDA, int* IPIV,  float* WORK, int* LWORK, int* INFO);
+
   extern "C" void zgetri_(int *n, Complex *a, int *lda,int *ipvt, Complex *w, int *lw,
+               int *info);
+  extern "C" void cgetri_(int *n, Complex *a, int *lda,int *ipvt, Complex *w, int *lw,
                int *info);
 
 // ============================================================================

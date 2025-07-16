@@ -9,9 +9,11 @@
 #include <complex>
 #include <vector>
 
+#include "Real.hpp"
+
 namespace lsms {
 
-constexpr static double TOL = 0.5 * 1.0e-12;
+constexpr static Real TOL = 0.5 * 1.0e-12;
 
 inline int pvt(int l, int m);
 
@@ -22,15 +24,15 @@ class SphericalHarmonics {
   explicit SphericalHarmonics(int lmax);
 
   /* Compute an entire set of Y_{l,m}(\theta,\phi) and store in array Y */
-  void computeYlm(int lmax, std::vector<double> vec,
-                  std::vector<std::complex<double>> &Ylm);
+  void computeYlm(int lmax, std::vector<Real> vec,
+                  std::vector<std::complex<Real>> &Ylm);
 
  private:
   int _lmax;
 
-  std::vector<double> A;
-  std::vector<double> B;
-  std::vector<double> P;
+  std::vector<Real> A;
+  std::vector<Real> B;
+  std::vector<Real> P;
 
   /**
    * Compute an entire set of P_l^m(x) and store in the array P
@@ -38,7 +40,7 @@ class SphericalHarmonics {
    * @param lmax
    * @param X
    */
-  void computeP(int lmax, double X);
+  void computeP(int lmax, Real X);
 };
 
 }  // namespace lsms

@@ -279,8 +279,13 @@ void solveTau00zgetrf_rocsolver(LSMSSystemParameters &lsms,
 
   // printf("LSMS solveTau00zgetrf_rocsolver: before zgetrf\n");
   // fflush(stdout);
-  rocsolver_zgetrf(rocblasHandle, nrmat_ns, nrmat_ns,
-                   (rocblas_double_complex *)devM, nrmat_ns, devIpiv, devInfo);
+#if SP
+    rocsolver_cgetrf(rocblasHandle, nrmat_ns, nrmat_ns,
+                    (rocblas_float_complex *)devM, nrmat_ns, devIpiv, devInfo);
+#else
+    rocsolver_zgetrf(rocblasHandle, nrmat_ns, nrmat_ns,
+                    (rocblas_double_complex *)devM, nrmat_ns, devIpiv, devInfo);   
+#endif
 
 #ifdef INCLUDE_ADDITIONAL_SYNCHRONIZE
   ret = hipDeviceSynchronize();
@@ -292,9 +297,15 @@ void solveTau00zgetrf_rocsolver(LSMSSystemParameters &lsms,
 
   //  printf("LSMS solveTau00zgetrf_rocsolver: before zgetrs\n");
   // fflush(stdout);
-  rocsolver_zgetrs(rocblasHandle, rocblas_operation_none, nrmat_ns, kkrsz_ns,
-                   (rocblas_double_complex *)devM, nrmat_ns, devIpiv,
-                   (rocblas_double_complex *)devTau, nrmat_ns);
+#if SP
+    rocsolver_cgetrs(rocblasHandle, rocblas_operation_none, nrmat_ns, kkrsz_ns,
+                    (rocblas_float_complex *)devM, nrmat_ns, devIpiv,
+                    (rocblas_float_complex *)devTau, nrmat_ns);
+#else
+    rocsolver_zgetrs(rocblasHandle, rocblas_operation_none, nrmat_ns, kkrsz_ns,
+                    (rocblas_double_complex *)devM, nrmat_ns, devIpiv,
+                    (rocblas_double_complex *)devTau, nrmat_ns);  
+#endif
 
 #ifdef INCLUDE_ADDITIONAL_SYNCHRONIZE
   ret = hipDeviceSynchronize();
@@ -343,8 +354,13 @@ void solveTauFullzgetrf_rocsolver(LSMSSystemParameters &lsms, LocalTypeInfo &loc
   ret = hipDeviceSynchronize();
 #endif
 
-  rocsolver_zgetrf(rocblashandle, nrmat_ns, nrmat_ns,
-                                      (rocblas_double_complex *)devM, nrmat_ns, devIpiv, devInfo);
+#if SP
+    rocsolver_cgetrf(rocblashandle, nrmat_ns, nrmat_ns,
+                    (rocblas_float_complex *)devM, nrmat_ns, devIpiv, devInfo);
+#else
+     rocsolver_zgetrf(rocblashandle, nrmat_ns, nrmat_ns,
+                    (rocblas_double_complex *)devM, nrmat_ns, devIpiv, devInfo);   
+#endif
 
 #ifdef INCLUDE_ADDITIONAL_SYNCHRONIZE
   ret = hipDeviceSynchronize();
@@ -352,8 +368,13 @@ void solveTauFullzgetrf_rocsolver(LSMSSystemParameters &lsms, LocalTypeInfo &loc
 
   //std::cout << nrmat_ns << "  " << std::endl;
   //printf(" %p %p %p %p\n", devM, devTauFull, devIpiv, devInfo);
-  rocsolver_zgetrs(rocblashandle, rocblas_operation_none, nrmat_ns, nrmat_ns,
-                                      (rocblas_double_complex *)devM, nrmat_ns, devIpiv, (rocblas_double_complex *)devTauFull, nrmat_ns);
+#if SP
+    rocsolver_cgetrs(rocblashandle, rocblas_operation_none, nrmat_ns, nrmat_ns,
+                    (rocblas_float_complex *)devM, nrmat_ns, devIpiv, (rocblas_float_complex *)devTauFull, nrmat_ns);
+#else
+    rocsolver_zgetrs(rocblashandle, rocblas_operation_none, nrmat_ns, nrmat_ns,
+                  (rocblas_double_complex *)devM, nrmat_ns, devIpiv, (rocblas_double_complex *)devTauFull, nrmat_ns);   
+#endif
 
 #ifdef INCLUDE_ADDITIONAL_SYNCHRONIZE
   ret = hipDeviceSynchronize();

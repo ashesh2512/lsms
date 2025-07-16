@@ -45,9 +45,9 @@ inline void calculateHankel(Complex prel, Real r, int lend, Complex *hfn) {
   const Complex sqrtm1(0.0, 1.0);
   Complex z = prel * r;
   hfn[0] = -sqrtm1;
-  hfn[1] = -1.0 - sqrtm1 / z;
+  hfn[1] = toReal(-1.0) - sqrtm1 / z;
   for (int l = 1; l < lend; l++) {
-    hfn[l + 1] = (2.0 * l + 1.0) * hfn[l] / z - hfn[l - 1];
+    hfn[l + 1] = toReal(2.0 * l + 1.0) * hfn[l] / z - hfn[l - 1];
   }
   /*
 c             l+1
@@ -409,6 +409,16 @@ void buildKKRMatrixLMaxIdenticalCPU(LSMSSystemParameters &lsms,
         if (lsms.n_spin_pola ==
             lsms.n_spin_cant)  // non polarized or spin canted
         {
+#if SP
+          BLAS::cgemm_("n", "n", &kkr1_ns, &kkr2_ns, &kkr1_ns, &cmone,
+                       &local.tmatStore(iie * local.blkSizeTmatStore,
+                                        atom.LIZStoreIdx[ir1]),
+                       &kkr1_ns,
+                       // &tmat_n(0, 0), &kkr1_ns,
+                       &bgij(iOffset, jOffset), &nrmat_ns, &czero,
+                       // &bgijSmall(0, 0), &kkrsz_ns, &czero,
+                       &m(iOffset, jOffset), &nrmat_ns);
+#else
           BLAS::zgemm_("n", "n", &kkr1_ns, &kkr2_ns, &kkr1_ns, &cmone,
                        &local.tmatStore(iie * local.blkSizeTmatStore,
                                         atom.LIZStoreIdx[ir1]),
@@ -417,10 +427,22 @@ void buildKKRMatrixLMaxIdenticalCPU(LSMSSystemParameters &lsms,
                        &bgij(iOffset, jOffset), &nrmat_ns, &czero,
                        // &bgijSmall(0, 0), &kkrsz_ns, &czero,
                        &m(iOffset, jOffset), &nrmat_ns);
+#endif
         } else {  // spin polarized, collinear
           int lmax = lsms.maxlmax;
           int kkrsz = (lmax + 1) * (lmax + 1);
           int spinOffset = kkrsz * kkrsz * ispin;
+#if SP
+          BLAS::cgemm_(
+              "n", "n", &kkr1_ns, &kkr2_ns, &kkr1_ns, &cmone,
+              &local.tmatStore(iie * local.blkSizeTmatStore + spinOffset,
+                               atom.LIZStoreIdx[ir1]),
+              &kkr1_ns,
+              // &tmat_n(0, 0), &kkr1_ns,
+              &bgij(iOffset, jOffset), &nrmat_ns, &czero,
+              // &bgijSmall(0, 0), &kkrsz_ns, &czero,
+              &m(iOffset, jOffset), &nrmat_ns);
+#else
           BLAS::zgemm_(
               "n", "n", &kkr1_ns, &kkr2_ns, &kkr1_ns, &cmone,
               &local.tmatStore(iie * local.blkSizeTmatStore + spinOffset,
@@ -430,6 +452,7 @@ void buildKKRMatrixLMaxIdenticalCPU(LSMSSystemParameters &lsms,
               &bgij(iOffset, jOffset), &nrmat_ns, &czero,
               // &bgijSmall(0, 0), &kkrsz_ns, &czero,
               &m(iOffset, jOffset), &nrmat_ns);
+#endif
         }
         /*
         for(int i=0; i<kkr1_ns; i++)
@@ -601,21 +624,38 @@ void buildKKRMatrixLMaxDifferentCPU(LSMSSystemParameters &lsms,
         if (lsms.n_spin_pola ==
             lsms.n_spin_cant)  // non polarized or spin canted
         {
+#if SP
+          BLAS::cgemm_("n", "n", &kkr1_ns, &kkr2_ns, &kkr1_ns, &cmone,
+                       &local.tmatStore(iie * local.blkSizeTmatStore,
+                                        atom.LIZStoreIdx[ir1]),
+                       &kkrsz_ns, &bgij(iOffset, jOffset), &nrmat_ns, &czero,
+                       &m(iOffset, jOffset), &nrmat_ns);
+#else
           BLAS::zgemm_("n", "n", &kkr1_ns, &kkr2_ns, &kkr1_ns, &cmone,
                        &local.tmatStore(iie * local.blkSizeTmatStore,
                                         atom.LIZStoreIdx[ir1]),
                        &kkrsz_ns, &bgij(iOffset, jOffset), &nrmat_ns, &czero,
                        &m(iOffset, jOffset), &nrmat_ns);
+#endif
         } else {  // spin polarized, collinear
           int lmax = lsms.maxlmax;
           int kkrsz = (lmax + 1) * (lmax + 1);
           int spinOffset = kkrsz * kkrsz * ispin;
+#if SP
+          BLAS::cgemm_(
+              "n", "n", &kkr1_ns, &kkr2_ns, &kkr1_ns, &cmone,
+              &local.tmatStore(iie * local.blkSizeTmatStore + spinOffset,
+                               atom.LIZStoreIdx[ir1]),
+              &kkrsz_ns, &bgij(iOffset, jOffset), &nrmat_ns, &czero,
+              &m(iOffset, jOffset), &nrmat_ns);
+#else
           BLAS::zgemm_(
               "n", "n", &kkr1_ns, &kkr2_ns, &kkr1_ns, &cmone,
               &local.tmatStore(iie * local.blkSizeTmatStore + spinOffset,
                                atom.LIZStoreIdx[ir1]),
               &kkrsz_ns, &bgij(iOffset, jOffset), &nrmat_ns, &czero,
               &m(iOffset, jOffset), &nrmat_ns);
+#endif
         }
       }
     }

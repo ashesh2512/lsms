@@ -185,9 +185,15 @@ void calculateChargeDensity(LSMSSystemParameters &lsms, AtomData &atom, Real edo
     for(int ir=0; ir<atom.jws; ir++)
       rhotmp[ir+1] = 2.0*rhonew(ir,is) / (atom.r_mesh[ir]*atom.r_mesh[ir]);
 
+#if SP
+    interp_sp_(&rtmp[1],&rhotmp[1],&four,&dzero,&rhotmp[0],&dummy,&f);
+    newint_sp_(&ir_sph_p1,rtmp,rhotmp,w1,&five);
+    interp_sp_(&rtmp[0],w1,&ir_sph_p1,&sqrt_r_sph,&w1_r_sph,&dummy,&f);
+#else
     interp_(&rtmp[1],&rhotmp[1],&four,&dzero,&rhotmp[0],&dummy,&f);
     newint_(&ir_sph_p1,rtmp,rhotmp,w1,&five);
     interp_(&rtmp[0],w1,&ir_sph_p1,&sqrt_r_sph,&w1_r_sph,&dummy,&f);
+#endif
 
     qvalmt+=w1_r_sph;
   }
@@ -292,7 +298,11 @@ void calculateLocalQrms(LSMSSystemParameters &lsms, LocalTypeInfo &local)
         // printf("%4d  %f %f %f\n",ir,rhonew(ir,is),atom.rhotot(ir,is),w2[ir+1]);
       }
       // interp_(&atom.r_mesh[0],&w2[1],&four,&dzero,&w2[0],&dummy,&f);
+#if SP
+      newint_sp_(&ir_sph_p1,&rtmp[0],&w2[0],w1,&seven);
+#else
       newint_(&ir_sph_p1,&rtmp[0],&w2[0],w1,&seven);
+#endif
       // interp_(&rtmp[0],&w1[0],&ir_sph_p1,&sqrt_r_sph,&qrms[is],&dummy,&f);
       local.atom[i].qrms[is] = w1[ir_sph];
       local.atom[i].qrms[is] = std::sqrt(local.atom[i].qrms[is] / (4.0*M_PI*local.atom[i].omegaMT));

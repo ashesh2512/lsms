@@ -8,6 +8,9 @@
 #include <functional>
 #include <vector>
 
+#include "Real.hpp"
+#include "Complex.hpp"
+
 template <typename Rx, typename Ry>
 void modifiedMidpoint(Rx x0, Rx x1, Ry *y0, Ry *y1, int n,
                       std::function<void(Rx x, Ry *y, Ry *dy)> rhs, int steps) {

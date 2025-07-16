@@ -6,6 +6,7 @@ local_src := $(addprefix $(local_dir)/,\
         buildKKRMatrix_CPU.cpp \
         linearSolvers_CPU.cpp \
         makegij_c.f \
+				makegij_c_sp.f \
         setgij.f \
         block_inverse_fortran.f \
         zblock_lu.F \
@@ -27,8 +28,11 @@ local_src := $(addprefix $(local_dir)/,\
         green_function_rel.f \
         write_kkrmat.f \
         relmtrx.f \
+				relmtrx_sp.f \
         gfill.f \
+				gfill_sp.f \
         gafill.f \
+				gafill_sp.f \
         magnet.f \
         magnetic_dens.f \
         new_dens.f \

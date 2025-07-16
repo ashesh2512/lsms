@@ -28,8 +28,11 @@ void calculateLocalQrms(LSMSSystemParameters &lsms, LocalTypeInfo &local);
 
 extern "C"
 {
-  void interp_(Real *r, Real *f, int *nr, Real *rs, Real *ps, Real *dps, int *deriv);
-  void newint_(int *nr, Real *r, Real *f, Real *g, int *ip0);
+  void interp_(double *r, double *f, int *nr, double *rs, double *ps, double *dps, int *deriv);
+  void interp_sp_(float *r, float *f, int *nr, float *rs, float *ps, float *dps, int *deriv);
+
+  void newint_(int *nr, double *r, double *f, double *g, int *ip0);
+  void newint_sp_(int *nr, float *r, float *f, float *g, int *ip0);
 }
 
 #endif

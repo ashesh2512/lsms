@@ -13,7 +13,7 @@ void calculateChargesPotential(LSMSCommunication &comm, LSMSSystemParameters &ls
 
   Array3d<Real> rhoTemp;
 
-  std::vector<double> qsub(crystal.num_types);
+  std::vector<Real> qsub(crystal.num_types);
 
   for (int i = 0; i < crystal.num_types; i++) qsub[i] = 0.0;
 
@@ -239,7 +239,7 @@ void calculateLocalCharges(LSMSSystemParameters &lsms, LocalTypeInfo &local, int
 
 void
 calculateCharges(LSMSCommunication &comm, LSMSSystemParameters &lsms, LocalTypeInfo &local, CrystalParameters &crystal,
-                 std::vector<double>& qsub, Array3d<Real> &rhoTemp, int chargeSwitch) {
+                 std::vector<Real>& qsub, Array3d<Real> &rhoTemp, int chargeSwitch) {
 
   // Compute integrated densities of states and store in xval**
   // (from mufind_c.f)

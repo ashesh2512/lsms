@@ -29,7 +29,7 @@ void calculateGaussLegendrePoints(R *x, R *w, int n, R xLeft = -1.0,
     x[i] = std::cos(pi * (R(i + 1) - 0.25) / (R(n) + 0.5));
     dX[i] = 1000.0;
 
-    while (x[i] + dX[i] / 4.0 != x[i]) {
+    while (x[i] + dX[i] / toReal(4.0) != x[i]) {
       Pk[i] = 0.0;       // P_{-1}(x_i) = 0
       PkPlus1[i] = 1.0;  // P_0(x_i) = 1
       // iterate using the recurence relation for Legendre polynomials:

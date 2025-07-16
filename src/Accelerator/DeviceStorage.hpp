@@ -171,9 +171,9 @@ class DeviceConstants {
 //  ~DeviceConstants() { }
   static int *lofk;
   static int *mofk;
-  static deviceDoubleComplex *ilp1;
+  static deviceComplex *ilp1;
   // DeviceMatrix<Complex> illp(ndlj, ndlj);
-  static deviceDoubleComplex* illp;
+  static deviceComplex* illp;
   static int ndlj_illp;
   // DeviceArray3d<Real> cgnt(lmax+1,ndlj,ndlj);
   static Real* cgnt;

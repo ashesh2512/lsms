@@ -62,7 +62,7 @@ c     ================================================================
 c     generate Gaussian-Quadrature points for theta integration.......
 c     ----------------------------------------------------------------
 !     call gauleg(-one,one,xgq,wgq,ngaussq)
-      call gauss_legendre_points(-one,one,xgq,wgq,ngaussq)
+      call gauss_legendre_points_dp(-one,one,xgq,wgq,ngaussq)
 c     ----------------------------------------------------------------
 c     if(iprint.ge.1) then
 c        write(6,'(''           No. Gaussian pts. [cos(theta)]: '',
@@ -76,7 +76,7 @@ c     generate gaussian pointsi and weights for "r" integration.......
 c     use the last column of grwylm and gwwylm to store xgr and wgr
 c     ----------------------------------------------------------------
 !     call gauleg(-one,one,grwylm(1,ncrit-1),gwwylm(1,ncrit-1),ngaussr)
-      call gauss_legendre_points
+      call gauss_legendre_points_dp
      &          (-one,one,grwylm(1,ncrit-1),gwwylm(1,ncrit-1),ngaussr)
 c     ----------------------------------------------------------------
 c     if(iprint.ge.1) then

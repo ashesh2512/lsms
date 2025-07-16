@@ -70,7 +70,7 @@ c             it doesn't matter if we use ylm or cylm because m=0
 c             we could save time with a legengre polynomial routine for m=0
 c     get legendre polynomials on z=cos(theta) grid
 ! meis: changed to normalized associated Legendre functions
-        call plm_normalized(lmax,z,plmofz)
+        call plm_normalized_dp(lmax,z,plmofz)
 c     loop over L
         do j=1,ndlm
           m=mofj(j)

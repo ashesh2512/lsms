@@ -9,19 +9,19 @@ extern "C" {
 void get_rho_(Real *rho_in, Real *rho_out, int *stride, Real *r_mesh, int *jmt);
 }
 
-double alpha2_VWN(double rs, double dz, int ispin, double *xcEnergy) {
-  const double a[3] = {-0.0337740, 0.06218140, 0.03109070};
-  const double b[3] = {1.131070, 3.727440, 7.060420};
-  const double c[3] = {13.00450, 12.93520, 18.05780};
-  const double x0[3] = {-0.00475840, -0.104980, -0.32500};
-  const double cst = 1.923661050;
-  const double aip = 0.916330590;
-  const double fnot = 1.709920950;
-  const double bip = 0.259921050;
-  const double for3 = 4.0 / 3.0;
-  const double thrd = 1.0 / 3.0;
+Real alpha2_VWN(Real rs, Real dz, int ispin, Real *xcEnergy) {
+  const Real a[3] = {-0.0337740, 0.06218140, 0.03109070};
+  const Real b[3] = {1.131070, 3.727440, 7.060420};
+  const Real c[3] = {13.00450, 12.93520, 18.05780};
+  const Real x0[3] = {-0.00475840, -0.104980, -0.32500};
+  const Real cst = 1.923661050;
+  const Real aip = 0.916330590;
+  const Real fnot = 1.709920950;
+  const Real bip = 0.259921050;
+  const Real for3 = 4.0 / 3.0;
+  const Real thrd = 1.0 / 3.0;
 
-  double cx[3], q[3], bxx[3], tbq[3], tbxq[3], bb[3];
+  Real cx[3], q[3], bxx[3], tbq[3], tbxq[3], bb[3];
 
   for (int i = 0; i < 3; i++) {
     cx[i] = x0[i] * x0[i] + b[i] * x0[i] + c[i];
@@ -32,20 +32,20 @@ double alpha2_VWN(double rs, double dz, int ispin, double *xcEnergy) {
     bb[i] = 4.0 * b[i] * (1.0 - x0[i] * (b[i] + 2.0 * x0[i]) / cx[i]);
   }
 
-  double zp1 = 1.0 + dz;
-  double zm1 = 1.0 - dz;
-  double xr = std::sqrt(rs);
-  double pex = -aip / rs;
-  double xrsq = rs;
+  Real zp1 = 1.0 + dz;
+  Real zm1 = 1.0 - dz;
+  Real xr = std::sqrt(rs);
+  Real pex = -aip / rs;
+  Real xrsq = rs;
 
-  double g[3], dg[3];
+  Real g[3], dg[3];
 
   for (int i = 0; i < 3; i++) {
-    double qi = q[i];
-    double txb = 2.0 * xr + b[i];
-    double fx = xrsq + xr * b[i] + c[i];
-    double arct = std::atan2(qi, txb);
-    double dxs = (xr - x0[i]) * (xr - x0[i]) / fx;
+    Real qi = q[i];
+    Real txb = 2.0 * xr + b[i];
+    Real fx = xrsq + xr * b[i] + c[i];
+    Real arct = std::atan2(qi, txb);
+    Real dxs = (xr - x0[i]) * (xr - x0[i]) / fx;
     g[i] = a[i] * (std::log(xrsq / fx) + tbq[i] * arct -
                    bxx[i] * (std::log(dxs) + tbxq[i] * arct));
     dg[i] =
@@ -53,33 +53,33 @@ double alpha2_VWN(double rs, double dz, int ispin, double *xcEnergy) {
                 bb[i] / (qi * qi + txb * txb));
   }
 
-  double ecp = g[1];
-  double zp3 = std::cbrt(zp1);
-  double zm3 = std::cbrt(zm1);
-  double zp3m3 = zp3 - zm3;
+  Real ecp = g[1];
+  Real zp3 = std::cbrt(zp1);
+  Real zm3 = std::cbrt(zm1);
+  Real zp3m3 = zp3 - zm3;
   //     part of last term in vx   eq(13)
-  double fx1 = 0.5 * for3 * pex * zp3m3;
-  double z4 = dz * dz * dz * dz;
-  double fz = cst * (std::pow(zp1, for3) + std::pow(zm1, for3) - 2.0);
-  double beta = fnot * (g[2] - g[1]) / g[0] - 1.0;
-  double ec = ecp + fz * g[0] * (1.0 + z4 * beta) / fnot;
-  double ex = pex * (1.0 + fz * bip);
-  double f3ex = for3 * ex;
+  Real fx1 = 0.5 * for3 * pex * zp3m3;
+  Real z4 = dz * dz * dz * dz;
+  Real fz = cst * (std::pow(zp1, for3) + std::pow(zm1, for3) - 2.0);
+  Real beta = fnot * (g[2] - g[1]) / g[0] - 1.0;
+  Real ec = ecp + fz * g[0] * (1.0 + z4 * beta) / fnot;
+  Real ex = pex * (1.0 + fz * bip);
+  Real f3ex = for3 * ex;
 
   //     echange-correlation energy
   *xcEnergy = ec + ex;
 
   //     exchange potential
-  double vxx[2];
+  Real vxx[2];
   vxx[0] = f3ex + fx1 * zm1;
   vxx[1] = f3ex - fx1 * zp1;
   //     correlation potential
-  double vcc = ec - xr *
+  Real vcc = ec - xr *
                         ((1.0 - z4 * fz) * dg[1] + z4 * fz * dg[2] +
                          (1.0 - z4) * fz * dg[0] / fnot) /
                         6.0;
 
-  double facc =
+  Real facc =
       4.0 * g[0] *
       (dz * dz * dz * fz * beta + (1.0 + beta * z4) * zp3m3 / (6.0 * bip)) /
       fnot;
@@ -92,7 +92,7 @@ double alpha2_VWN(double rs, double dz, int ispin, double *xcEnergy) {
   return vcc - zp1 * facc + vxx[1];
 }
 
-double rsFromRho(double rho) { return std::cbrt(3.0 / (4.0 * M_PI * rho)); }
+Real rsFromRho(Real rho) { return std::cbrt(3.0 / (4.0 * M_PI * rho)); }
 
 int NewFunctionalInterface::init(int nSpin, int *xcFunctional) {
   needGradients = needLaplacian = needKineticEnergyDensity = needExactExchange =

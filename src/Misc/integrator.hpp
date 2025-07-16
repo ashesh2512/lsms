@@ -37,42 +37,42 @@ T simpson_nonuniform(const std::vector<T> &x, II f, U length) {
   auto N = length - 1;
   auto h = diff(x, length);
 
-  auto result = 0.0;
+  Real result = 0.0;
 
   for (U i = 1; i < N; i += 2) {
     auto hph = h[i] + h[i - 1];
 
     result += f[i] *
         (lsms::pow(h[i], 3) + lsms::pow(h[i - 1], 3) +
-            3.0 * h[i] * h[i - 1] * hph) /
+            toReal(3.0) * h[i] * h[i - 1] * hph) /
         (6 * h[i] * h[i - 1]);
 
     result += f[i - 1] *
-        (2.0 * lsms::pow(h[i - 1], 3) - lsms::pow(h[i], 3) +
-            3.0 * h[i] * lsms::pow(h[i - 1], 2)) /
+        (toReal(2.0) * lsms::pow(h[i - 1], 3) - lsms::pow(h[i], 3) +
+            toReal(3.0) * h[i] * lsms::pow(h[i - 1], 2)) /
         (6 * h[i - 1] * hph);
 
     result += f[i + 1] *
-        (2.0 * lsms::pow(h[i], 3) - lsms::pow(h[i - 1], 3) +
-            3.0 * h[i - 1] * lsms::pow(h[i], 2)) /
+        (toReal(2.0) * lsms::pow(h[i], 3) - lsms::pow(h[i - 1], 3) +
+            toReal(3.0) * h[i - 1] * lsms::pow(h[i], 2)) /
         (6 * h[i] * hph);
   }
 
   if ((N + 1) % 2 == 0) {
     if (N > 1) {
       result += f[N] *
-          (2 * lsms::pow(h[N - 1], 2) + 3.0 * h[N - 2] * h[N - 1]) /
+          (2 * lsms::pow(h[N - 1], 2) + toReal(3.0) * h[N - 2] * h[N - 1]) /
           (6 * (h[N - 2] + h[N - 1]));
 
       result += f[N - 1] *
-          (lsms::pow(h[N - 1], 2) + 3.0 * h[N - 1] * h[N - 2]) /
+          (lsms::pow(h[N - 1], 2) + toReal(3.0) * h[N - 1] * h[N - 2]) /
           (6 * h[N - 2]);
 
       result -= f[N - 2] * lsms::pow(h[N - 1], 3) /
           (6 * h[N - 2] * (h[N - 2] + h[N - 1]));
 
     } else {
-      result += 0.5 * (f[N] + f[N - 1]) * h[N - 1];
+      result += toReal(0.5) * (f[N] + f[N - 1]) * h[N - 1];
     }
   }
 

@@ -949,7 +949,7 @@ Real LSMS::scfEnergy(Real *eb) {
     if (lsms.n_spin_pola > 1) {
       for (int i = 0; i < local.num_local; i++)
         rms = std::max(rms,
-                       0.5 * (local.atom[i].qrms[0] + local.atom[i].qrms[1]));
+                       toReal(0.5) * (local.atom[i].qrms[0] + local.atom[i].qrms[1]));
     } else {
       for (int i = 0; i < local.num_local; i++)
         rms = std::max(rms, local.atom[i].qrms[0]);

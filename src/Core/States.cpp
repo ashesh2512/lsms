@@ -8,7 +8,7 @@ void lsms::States::relativistic_atomic_states(int core_charge,
                                               std::vector<int> &l,
                                               std::vector<int> &spin,
                                               std::vector<int> &kappa,
-                                              std::vector<double> &occupation) {
+                                              std::vector<Real> &occupation) {
   /*
    * Here the atomic states are calculated in oder to obtain the Dirac
    * Finestructure
@@ -20,7 +20,7 @@ void lsms::States::relativistic_atomic_states(int core_charge,
 
   std::vector<int> n_nonrel;
   std::vector<int> l_nonrel;
-  std::vector<double> occupation_nonrel;
+  std::vector<Real> occupation_nonrel;
 
   /**
    * First calculate the non relativistic quantum numbers
@@ -35,7 +35,7 @@ void lsms::States::relativistic_atomic_states(int core_charge,
   nonrelativistic_atomic_states(core_charge, n_nonrel, l_nonrel,
                                 occupation_nonrel);
 
-  double occ_number;
+  Real occ_number;
 
   int number_of_states = n_nonrel.size();
 
@@ -87,7 +87,7 @@ void lsms::States::relativistic_atomic_states(int core_charge,
 
 void lsms::States::nonrelativistic_atomic_states(
     int core_charge, std::vector<int> &n, std::vector<int> &l,
-    std::vector<double> &occupation) {
+    std::vector<Real> &occupation) {
   switch (core_charge) {
     case (1):
       n = {1};

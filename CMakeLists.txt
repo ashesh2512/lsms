@@ -219,6 +219,13 @@ if (DEFINED MST_BUILD_KKR_MATRIX_DEFAULT)
     target_compile_definitions(lsmscore PUBLIC "MST_BUILD_KKR_MATRIX_DEFAULT=${MST_BUILD_KKR_MATRIX_DEFAULT}")
 endif ()
 
+if(CMAKE_SP)
+    message(STATUS "Precision: Single")
+    target_compile_definitions(lsmscore PUBLIC CMAKE_SP=1)  # Define CMAKE_SP as 1
+else()
+    message(STATUS "Precision: Double")
+    target_compile_definitions(lsmscore PUBLIC CMAKE_SP=0)  # Define CMAKE_SP as 0
+endif()
 
 option(ARCH_IBM "Is IBM architecture" OFF)
 

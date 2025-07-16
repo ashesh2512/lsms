@@ -109,9 +109,9 @@ void localTotalEnergy(LSMSSystemParameters &lsms, AtomData &atom, Real &energy,
   /**
    * Calculation of Coulomb contribution (5a)
    */
-  std::vector<double> vhartreederiv(atom.r_mesh.size(), 0.0);
-  std::vector<double> vhartree(atom.r_mesh.size(), 0.0);
-  std::vector<double> density(atom.r_mesh.size(), 0.0);
+  std::vector<Real> vhartreederiv(atom.r_mesh.size(), 0.0);
+  std::vector<Real> vhartree(atom.r_mesh.size(), 0.0);
+  std::vector<Real> density(atom.r_mesh.size(), 0.0);
 
   if (lsms.n_spin_pola == 1) {
     for (auto i = 0; i < atom.r_mesh.size(); i++) {
@@ -292,9 +292,9 @@ void localTotalEnergy(LSMSSystemParameters &lsms, AtomData &atom,
    *
    */
 
-  std::vector<double> vhartreederiv(atom.r_mesh.size(), 0.0);
-  std::vector<double> vhartree(atom.r_mesh.size(), 0.0);
-  std::vector<double> density(atom.r_mesh.size(), 0.0);
+  std::vector<Real> vhartreederiv(atom.r_mesh.size(), 0.0);
+  std::vector<Real> vhartree(atom.r_mesh.size(), 0.0);
+  std::vector<Real> density(atom.r_mesh.size(), 0.0);
 
   if (lsms.n_spin_pola == 1) {
     for (auto i = 0; i < atom.r_mesh.size(); i++) {

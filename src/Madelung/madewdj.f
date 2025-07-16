@@ -164,7 +164,7 @@ c     get weights for integration over cos(theta). used for removing
 c     contribution of gaussian charges inside rcut which are included in 
 c     k space sum.
 !     call gauleg(-one,one,xgs,wgs,ngauss_mad)
-      call gauss_legendre_points(-one,one,xgs,wgs,ngauss_mad)
+      call gauss_legendre_points_dp(-one,one,xgs,wgs,ngauss_mad)
 c
 c     facl apears in expresion for plane wave in terms of bessel functions
       do l=0,lmax
@@ -193,7 +193,7 @@ c       ----------------------------------------------------------
         yk=knlat_y(i)*xknabsi
 c       ----------------------------------------------------------
 ! meis: changed to normalized associated Legendre functions
-        call plm_normalized(lmax,zk,plmk(1,i))
+        call plm_normalized_dp(lmax,zk,plmk(1,i))
 c       ----------------------------------------------------------
 C       if(yk.eq.zero.and.xk.eq.zero)then
 C         phi=zero
@@ -301,7 +301,7 @@ C           endif
 c           get legendre polynomial for cos(theta)
 c       ----------------------------------------------------------
 ! meis: changed to normalized associated Legendre functions
-            call plm_normalized(lmax,z,plm)
+            call plm_normalized_dp(lmax,z,plm)
 c       ----------------------------------------------------------
 c           rotate dqintl by theta,phi using trans; which is particularly
 c           simple because dqintl has only m=0 parts. trans is a spherical

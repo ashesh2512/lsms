@@ -163,10 +163,17 @@ void buildKKRMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
           for (int is = 0; is < lsms.n_spin_cant; is++) {
             int jm = jsm + kkrsz_ns * j + kkrsz * is;
             int one = 1;
+#if SP
+            BLAS::ccopy_(&kkr1,
+                         &local.tmatStore(iie * local.blkSizeTmatStore + jm,
+                                          atom.LIZStoreIdx[ir1]),
+                         &one, &tmat_n[im], &one);
+#else
             BLAS::zcopy_(&kkr1,
                          &local.tmatStore(iie * local.blkSizeTmatStore + jm,
                                           atom.LIZStoreIdx[ir1]),
                          &one, &tmat_n[im], &one);
+#endif
             im += kkr1;
           }
         }
@@ -176,10 +183,17 @@ void buildKKRMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
       for (int j = 0; j < kkr1; j++) {
         int jm = jsm + kkrsz_ns * j;
         int one = 1;
+#if SP
+        BLAS::ccopy_(&kkr1,
+                     &local.tmatStore(iie * local.blkSizeTmatStore + jm,
+                                      atom.LIZStoreIdx[ir1]),
+                     &one, &tmat_n[im], &one);
+#else
         BLAS::zcopy_(&kkr1,
                      &local.tmatStore(iie * local.blkSizeTmatStore + jm,
                                       atom.LIZStoreIdx[ir1]),
                      &one, &tmat_n[im], &one);
+#endif
         im += kkr1;
       }
     }
@@ -209,6 +223,17 @@ void buildKKRMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
         rij[1] = atom.LIZPos(1, ir1) - atom.LIZPos(1, ir2);
         rij[2] = atom.LIZPos(2, ir1) - atom.LIZPos(2, ir2);
 
+#if SP
+        makegij_sp_(&atom.LIZlmax[ir1], &kkr1, &atom.LIZlmax[ir2], &kkr2,
+                 &lsms.maxlmax, &kkrsz, &AngularMomentumIndices::ndlj,
+                 &AngularMomentumIndices::ndlm, &prel, &rij[0], sinmp, cosmp,
+                 &SphericalHarmonicsCoeficients::clm[0], plm,
+                 &GauntCoeficients::cgnt(0, 0, 0), &GauntCoeficients::lmax,
+                 &AngularMomentumIndices::lofk[0],
+                 &AngularMomentumIndices::mofk[0], &IFactors::ilp1[0],
+                 &IFactors::illp(0, 0), hfn, dlm, gij, &pi4,
+                 &lsms.global.iprint, lsms.global.istop, 32);
+#else
         makegij_(&atom.LIZlmax[ir1], &kkr1, &atom.LIZlmax[ir2], &kkr2,
                  &lsms.maxlmax, &kkrsz, &AngularMomentumIndices::ndlj,
                  &AngularMomentumIndices::ndlm, &prel, &rij[0], sinmp, cosmp,
@@ -218,6 +243,8 @@ void buildKKRMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
                  &AngularMomentumIndices::mofk[0], &IFactors::ilp1[0],
                  &IFactors::illp(0, 0), hfn, dlm, gij, &pi4,
                  &lsms.global.iprint, lsms.global.istop, 32);
+#endif
+
         Complex psq = prel * prel;
         int nrel_rel = 0;
         if (lsms.relativity == full) nrel_rel = 1;
@@ -239,9 +266,16 @@ void buildKKRMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
           for (int jj = ncst; jj < ncst + kkr2_ns; jj++)
             Gij_full(ii, jj) = bgij[ii - nrst + (jj - ncst) * kkr2_ns];
 #endif
+
+#if SP
+        BLAS::cgemm_("n", "n", &kkr1_ns, &kkr2_ns, &kkr1_ns, &cmone, tmat_n,
+                     &kkr1_ns, bgij, &kkr1_ns, &czero, &m(nrst, ncst),
+                     &nrmat_ns);
+#else
         BLAS::zgemm_("n", "n", &kkr1_ns, &kkr2_ns, &kkr1_ns, &cmone, tmat_n,
                      &kkr1_ns, bgij, &kkr1_ns, &czero, &m(nrst, ncst),
                      &nrmat_ns);
+#endif
       }
       ncst += kkr2_ns;
     }
@@ -287,17 +321,17 @@ void buildKKRMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
         fclose(f1); fclose(f2);
       }
   // calculate matrix norm and condition number
-      double work[2*nrmat_ns];
+      Real work[2*nrmat_ns];
       int ipiv[nrmat_ns];
       int info;
-      double norm=zlange_("1",&nrmat_ns,&nrmat_ns,&m(0,0),&nrmat_ns,work);
+      Real norm=zlange_("1",&nrmat_ns,&nrmat_ns,&m(0,0),&nrmat_ns,work);
       printf("Matrix 1-norm of the kkr matrix=%lf\n",norm);
       zgetrf_(&nrmat_ns, &nrmat_ns, &m(0,0),&nrmat_ns,ipiv,&info);
       printf("ZGETRF on kkr-matrix returned info=%d\n",info);
       if(info==0)
       {
         zgetri_(&nrmat_ns,&m(0,0),&nrmat_ns,ipiv,(Complex
-  *)work,&nrmat_ns,&info); printf("ZGETRI returned info=%d\n",info); double
+  *)work,&nrmat_ns,&info); printf("ZGETRI returned info=%d\n",info); Real
   norm_i=zlange_("1",&nrmat_ns,&nrmat_ns,&m(0,0),&nrmat_ns,work); printf("Matrix
   1-norm of the kkr matrix inverse=%lf\n",norm_i); printf("1-norm condition
   number of the kkr-matrix=%lf\n",norm*norm_i);
@@ -353,7 +387,7 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
   // =======================================
   m.resize(nrmat_ns, nrmat_ns);
 
-  double timeBuildKKRMatrix = MPI_Wtime();
+  Real timeBuildKKRMatrix = MPI_Wtime();
 
 #ifdef USE_NVTX
   nvtxRangePushA("buildKKRMatrix");
@@ -666,7 +700,7 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
         solveTau00zgetrf(lsms, local, atom, iie, m, tau00, ispin);
         break;
 #ifndef ARCH_IBM
-      case MST_LINEAR_SOLVER_ZCGESV:
+      case MST_LINEAR_SOLVER_ZCGESV:      
         solveTau00zcgesv(lsms, local, atom, iie, m, tau00, ispin);
         break;
 #endif
@@ -720,7 +754,7 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
         exit(1);
     }
 
-    double timePostproc = MPI_Wtime();
+    Real timePostproc = MPI_Wtime();
     if (lsms.relativity != full) {
       calculateTau00MinusT(lsms, local, atom, iie, tau00, tau00, ispin);
       rotateTau00ToLocalFrameNonRelativistic(lsms, atom, tau00, tau00_l);
@@ -806,7 +840,7 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
       Matrix<Complex> delta(kkrsz_ns, kkrsz_ns);
       // Complex *delta = new Complex[kkrsz_ns*kkrsz_ns];
       int *iwork = new int[kkrsz_ns * atom.numLIZ];
-      Real *rwork = new Real[kkrsz_ns * atom.numLIZ];
+      double *rwork = new double[kkrsz_ns * atom.numLIZ];
       Complex *work1 = new Complex[kkrsz_ns * atom.numLIZ];
       int alg = 2;
       if (alg > 2)
@@ -829,7 +863,7 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
 
       if (alg > 2) free(vecs);
 
-      double timePostproc = MPI_Wtime();
+      Real timePostproc = MPI_Wtime();
       Matrix<Complex> tau00(kkrsz_ns, kkrsz_ns);
       if (lsms.relativity != full) {
         if (lsms.n_spin_pola ==
@@ -878,7 +912,7 @@ void calculateAllTauMatrices(
     std::vector<Matrix<Real> > &vr, Complex energy, int iie,
     // std::vector<NonRelativisticSingleScattererSolution> &solution,
     Matrix<Complex> &tau00_l) {
-  Complex prel = std::sqrt(energy * (1.0 + energy * c2inv));
+  Complex prel = std::sqrt(energy * (toReal(1.0) + energy * c2inv));
   Complex pnrel = std::sqrt(energy);
 
   int max_nrmat_ns = 0;
@@ -922,7 +956,7 @@ void calculateAllTauMatrices(
 #else
   m_dat = NULL;
 #endif
-  double timeCalcTauMatTotal = MPI_Wtime();
+  Real timeCalcTauMatTotal = MPI_Wtime();
 #if defined(ACCELERATOR_LIBSCI) || defined(ACCELERATOR_CUDA_C) || \
     defined(ACCELERATOR_HIP)
 #pragma omp parallel for default(none) shared(                              \
@@ -943,7 +977,7 @@ void calculateAllTauMatrices(
 #else
     Matrix<Complex> m(max_nrmat_ns, max_nrmat_ns);
 #endif
-    double timeCalcTauMat = MPI_Wtime();
+    Real timeCalcTauMat = MPI_Wtime();
     calculateTauMatrix(lsms, local, local.atom[i], i, 0, energy, prel,
                        &tau00_l(0, i), m, iie);
     if (lsms.n_spin_pola != lsms.n_spin_cant)  // spin polarized second spin

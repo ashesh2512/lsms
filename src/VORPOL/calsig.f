@@ -136,7 +136,7 @@ c           l = lmax for each cos(theta) value.
 c           ==========================================================
 c           ----------------------------------------------------------
 ! meis: changed to normalized associated Legendre functions
-            call plm_normalized(lmax,cosrth,plm)
+            call plm_normalized_dp(lmax,cosrth,plm)
 c           ----------------------------------------------------------
             call intphi(lmax,cosrth,r,xp,nbnd,sumfi(0,3))
 c           ----------------------------------------------------------
@@ -159,7 +159,7 @@ c
 	    wt=two*sqrt(d)*wgq(n)*u*u
 c           ----------------------------------------------------------
 ! meis: changed to normalized associated Legendre functions
-            call plm_normalized(lmax,u*u+tnode(i),plm)
+            call plm_normalized_dp(lmax,u*u+tnode(i),plm)
 c           ----------------------------------------------------------
 	    do m=0,lmax
 	      af1=wt*sumfi(m,1)
@@ -171,7 +171,7 @@ c           ----------------------------------------------------------
             enddo
 c           ----------------------------------------------------------
 ! meis: changed to normalized associated Legendre functions
-            call plm_normalized(lmax,tnode(i+1)-u*u,plm)
+            call plm_normalized_dp(lmax,tnode(i+1)-u*u,plm)
 c           ----------------------------------------------------------
 	    do m=0,lmax
 	      af1=wt*sumfi(m,2)

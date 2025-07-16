@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <vector>
 
+#include "Real.hpp"
 #include "Matrix.hpp"
 
 namespace lsms {

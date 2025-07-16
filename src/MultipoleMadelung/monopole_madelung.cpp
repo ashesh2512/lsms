@@ -9,33 +9,34 @@
 #include <algorithm>
 #include <cmath>
 
+#include "Real.hpp"
 #include "common.hpp"
 #include "lattice_utils.hpp"
 #include "madelung_term.hpp"
 #include "utils.hpp"
 
-double lsms::scaling_factor(const lsms::matrix<double> &bravais, int lmax,
-                            int max_iter, double fstep) {
+Real lsms::scaling_factor(const lsms::matrix<Real> &bravais, int lmax,
+                            int max_iter, Real fstep) {
   // Scaled bravais lattice
-  lsms::matrix<double> r_brav(3, 3);
+  lsms::matrix<Real> r_brav(3, 3);
   // Scaled reciprocal lattice
-  lsms::matrix<double> k_brav(3, 3);
+  lsms::matrix<Real> k_brav(3, 3);
 
   // Get the shortest axis
-  double a0 =
+  Real a0 =
       std::sqrt(bravais(0, 0) * bravais(0, 0) + bravais(1, 0) * bravais(1, 0) +
                 bravais(2, 0) * bravais(2, 0));
 
-  double a1 =
+  Real a1 =
       std::sqrt(bravais(0, 1) * bravais(0, 1) + bravais(1, 1) * bravais(1, 1) +
                 bravais(2, 1) * bravais(2, 1));
 
-  double a2 =
+  Real a2 =
       std::sqrt(bravais(0, 2) * bravais(0, 2) + bravais(1, 2) * bravais(1, 2) +
                 bravais(2, 2) * bravais(2, 2));
 
-  double scaling_fac = std::min({a0, a1, a2});
-  double eta = 0.5 + 0.1 * std::max({a0, a1, a2}) / scaling_fac;
+  Real scaling_fac = std::min({a0, a1, a2});
+  Real eta = 0.5 + 0.1 * std::max({a0, a1, a2}) / scaling_fac;
   scaling_fac /= 2.0 * M_PI;
 
   std::vector<int> nm(3);
@@ -55,7 +56,7 @@ double lsms::scaling_factor(const lsms::matrix<double> &bravais, int lmax,
 
     // Radius of real space truncation sphere
     nm = real_space_multiplication(r_brav, lmax, eta);
-    double rscut = rs_trunc_radius(r_brav, lmax, eta, nm);
+    Real rscut = rs_trunc_radius(r_brav, lmax, eta, nm);
 #ifdef LSMS_DEBUG
     std::cout << nm[0] << " " << nm[1] << " " << nm[2] << std::endl;
 #endif
@@ -65,7 +66,7 @@ double lsms::scaling_factor(const lsms::matrix<double> &bravais, int lmax,
 
     // Radius of reciprocal space
     nm = reciprocal_space_multiplication(k_brav, lmax, eta);
-    double kncut = kn_trunc_radius(k_brav, lmax, eta, nm);
+    Real kncut = kn_trunc_radius(k_brav, lmax, eta, nm);
 #ifdef LSMS_DEBUG
     std::printf("%f %f %f\n", k_brav(0, 0), k_brav(1, 1), k_brav(2, 2));
     std::cout << nm[0] << " " << nm[1] << " " << nm[2] << std::endl;
@@ -105,14 +106,14 @@ double lsms::scaling_factor(const lsms::matrix<double> &bravais, int lmax,
   return scaling_fac;
 }
 
-int lsms::num_latt_vectors(const lsms::matrix<double> &brav, double cut,
+int lsms::num_latt_vectors(const lsms::matrix<Real> &brav, Real cut,
                            const std::vector<int> &nm) {
   int number = 0;
 
   // To also include vectors on the boarder
-  double vcut2 = cut * cut + 1e-6;
+  Real vcut2 = cut * cut + 1e-6;
 
-  std::vector<double> vn(3, 0.0);
+  std::vector<Real> vn(3, 0.0);
 
   for (int x = -nm[0]; x <= nm[0]; x++) {
     for (int y = -nm[1]; y <= nm[1]; y++) {
@@ -134,9 +135,9 @@ int lsms::num_latt_vectors(const lsms::matrix<double> &brav, double cut,
 }
 
 std::vector<int> lsms::real_space_multiplication(
-    const lsms::matrix<double> &brav, int lmax, double eta) {
+    const lsms::matrix<Real> &brav, int lmax, Real eta) {
   std::vector<int> nm(3);
-  std::vector<double> r(3, 0.0);
+  std::vector<Real> r(3, 0.0);
 
   for (int i = 0; i < 3; i++) {
     r[i] = std::sqrt(brav(0, i) * brav(0, i) + brav(1, i) * brav(1, i) +
@@ -156,11 +157,11 @@ std::vector<int> lsms::real_space_multiplication(
   return nm;
 }
 
-double lsms::rs_trunc_radius(const lsms::matrix<double> &brav, int lmax,
-                             double eta, const std::vector<int> &nm) {
-  auto cut = 0.0;
+Real lsms::rs_trunc_radius(const lsms::matrix<Real> &brav, int lmax,
+                             Real eta, const std::vector<int> &nm) {
+  Real cut = 0.0;
 
-  std::vector<double> r(3, 0.0);
+  std::vector<Real> r(3, 0.0);
 
   for (int i = 0; i < 3; i++) {
     r[i] = sqrt(brav(0, i) * brav(0, i) + brav(1, i) * brav(1, i) +
@@ -190,11 +191,11 @@ double lsms::rs_trunc_radius(const lsms::matrix<double> &brav, int lmax,
   return cut;
 }
 
-double lsms::kn_trunc_radius(const lsms::matrix<double> &brav, int lmax,
-                             double eta, const std::vector<int> &nm) {
-  auto cut = 0.0;
+Real lsms::kn_trunc_radius(const lsms::matrix<Real> &brav, int lmax,
+                             Real eta, const std::vector<int> &nm) {
+  Real cut = 0.0;
 
-  std::vector<double> r(3, 0.0);
+  std::vector<Real> r(3, 0.0);
 
   for (int i = 0; i < 3; i++) {
     r[i] = sqrt(brav(0, i) * brav(0, i) + brav(1, i) * brav(1, i) +
@@ -225,9 +226,9 @@ double lsms::kn_trunc_radius(const lsms::matrix<double> &brav, int lmax,
 }
 
 std::vector<int> lsms::reciprocal_space_multiplication(
-    const lsms::matrix<double> &brav, int lmax, double eta) {
+    const lsms::matrix<Real> &brav, int lmax, Real eta) {
   std::vector<int> nm(3);
-  std::vector<double> r(3, 0.0);
+  std::vector<Real> r(3, 0.0);
 
   for (int i = 0; i < 3; i++) {
     r[i] = brav(0, i) * brav(0, i) + brav(1, i) * brav(1, i) +
@@ -249,7 +250,7 @@ std::vector<int> lsms::reciprocal_space_multiplication(
   return nm;
 }
 
-double lsms::calculate_eta(lsms::matrix<double> &bravais) {
+Real lsms::calculate_eta(lsms::matrix<Real> &bravais) {
   auto a0 = sqrt(bravais(0, 0) * bravais(0, 0) + bravais(1, 0) * bravais(1, 0) +
                  bravais(2, 0) * bravais(2, 0));
 

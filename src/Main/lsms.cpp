@@ -181,6 +181,12 @@ int main(int argc, char *argv[])
       exit(1);
     }
 
+#if SP
+    printf("Precision: Single\n");
+#else
+    printf("Precision: Double\n");
+#endif
+
     printf("System information:\n");
     printf("===================\n");
     printf("Number of atoms        : %10d\n", crystal.num_atoms);
@@ -418,6 +424,11 @@ int main(int argc, char *argv[])
   calculateMadelungMatrices(lsms, crystal, local);
 #else
   lsms::calculateMultiMadelungMatrices(lsms, crystal, local);
+
+  if (lsms.global.debug_madelung) {
+    printf("Printing MadelungMatrices: \n");
+    lsms::printMultiMadelungMatrices(lsms, local, comm);
+  }
 #endif
   timeCalculateMadelungMatrix = MPI_Wtime() - timeCalculateMadelungMatrix;
   if (lsms.global.iprint >= 0)
@@ -590,6 +601,8 @@ int main(int argc, char *argv[])
     double dTimeCCP = MPI_Wtime();
     // if(!lsms.global.checkIstop("buildKKRMatrix"))
 
+    fflush(stdout); exit(0);
+
     // Calculate chemical potential 
     lsms::calculateChemPot(comm, lsms, local, eband);
     dTimeCCP = MPI_Wtime() - dTimeCCP;
@@ -681,7 +694,7 @@ int main(int argc, char *argv[])
       // rms = 0.5 * (local.qrms[0] + local.qrms[1]);
       rms = 0.0;
       for(int i=0; i<local.num_local; i++)
-        rms = std::max(rms, 0.5*(local.atom[i].qrms[0]+local.atom[i].qrms[1]));
+        rms = std::max(rms, toReal(0.5)*(local.atom[i].qrms[0]+local.atom[i].qrms[1]));
       globalMax(comm, rms);
     } else {
       // rms = local.qrms[0];

@@ -21,7 +21,7 @@ static void repeatBasisCell(LSMSSystemParameters &lsms,
   int numBasis = crystal.num_atoms;
   int numSites = numBasis * nx * ny * nz;
 
-  Matrix<Real> basis, basis_evecs;
+  Matrix<double> basis, basis_evecs;
   std::vector<int> basis_type;
   basis = crystal.position;
   basis_evecs = crystal.evecs;
@@ -870,6 +870,8 @@ int readInput(lua_State *L, LSMSSystemParameters &lsms, CrystalParameters &cryst
 
   lsms.mtasa = 0;
   luaGetInteger(L,"mtasa",&lsms.mtasa);
+  lsms.use_voronoi = 1;
+  luaGetInteger(L, "use_voronoi", &lsms.use_voronoi);
   lsms.fixRMT = 0;
   luaGetInteger(L,"fixRMT",&lsms.fixRMT);
 //       else if( mtasa .lt. -3 ) then

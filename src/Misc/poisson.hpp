@@ -19,9 +19,9 @@ namespace lsms {
  * ODE of radial poisson equation for l = 0
  */
 template<typename T>
-static inline void rad_func(double r, double rp, T n, T q, T (&f)[2]) {
+static inline void rad_func(Real r, Real rp, T n, T q, T (&f)[2]) {
   f[0] = rp * q;
-  f[1] = rp * (-n / (r * r) - 2.0 / r * q);
+  f[1] = rp * (-n / (r * r) - toReal(2.0) / r * q);
 }
 
 /**
@@ -193,11 +193,11 @@ void radial_poisson(std::vector<T> &VHartree, std::vector<T> &VHartreeDeriv,
   rad_func(R[idx], R[idx] * h, density[idx], VHartreeDeriv[idx], f1);
   lam = 5.0 / 12.0;
 
-  i0 = VHartree[idx] + 1.0 / 12.0 * (-f0[0] + 8.0 * f1[0]);
-  i1 = VHartreeDeriv[idx] + 1.0 / 12.0 * (-f0[1] + 8.0 * f1[1]) -
+  i0 = VHartree[idx] + toReal(1.0 / 12.0) * (-f0[0] + 8 * f1[0]);
+  i1 = VHartreeDeriv[idx] + toReal(1.0 / 12.0) * (-f0[1] + 8 * f1[1]) -
       R[idx + 1] * h * lam * density[idx + 1] / (R[idx + 1] * R[idx + 1]);
 
-  delta = 1 + lam * 2.0 * h;
+  delta = 1 + lam * toReal(2.0) * h;
 
   VHartree[idx + 1] = i0 + lam * R[idx + 1] * h * i1 / delta;
   VHartreeDeriv[idx + 1] = i1 / delta;
@@ -209,11 +209,11 @@ void radial_poisson(std::vector<T> &VHartree, std::vector<T> &VHartreeDeriv,
 
   lam = 9.0 / 24.0;
 
-  i0 = VHartree[idx] + 1.0 / 24.0 * (f0[0] - 5.0 * f1[0] + 19.0 * f2[0]);
-  i1 = VHartreeDeriv[idx] + 1.0 / 24.0 * (f0[1] - 5.0 * f1[1] + 19.0 * f2[1]) -
+  i0 = VHartree[idx] + toReal(1.0 / 24.0) * (f0[0] - 5 * f1[0] + 19 * f2[0]);
+  i1 = VHartreeDeriv[idx] + toReal(1.0 / 24.0) * (f0[1] - 5 * f1[1] + 19 * f2[1]) -
       R[idx + 1] * h * lam * density[idx + 1] / (R[idx + 1] * R[idx + 1]);
 
-  delta = 1 + lam * 2.0 * h;
+  delta = 1 + lam * toReal(2.0) * h;
 
   VHartree[idx + 1] = i0 + lam * R[idx + 1] * h * i1 / delta;
   VHartreeDeriv[idx + 1] = i1 / delta;
@@ -226,13 +226,13 @@ void radial_poisson(std::vector<T> &VHartree, std::vector<T> &VHartreeDeriv,
 
   i0 =
       VHartree[idx] +
-          1.0 / 720.0 * (-19.0 * f0[0] - 106.0 * f1[0] - 264 * f2[0] + 646 * f3[0]);
+          toReal(1.0 / 720.0) * (-19 * f0[0] - 106 * f1[0] - 264 * f2[0] + 646 * f3[0]);
   i1 = VHartreeDeriv[idx] +
-      1.0 / 720.0 *
-          (-19.0 * f0[1] - 106.0 * f1[1] - 264.0 * f2[0] + 646 * f3[1]) -
+      toReal(1.0 / 720.0) *
+          (-19 * f0[1] - 106 * f1[1] - 264 * f2[0] + 646 * f3[1]) -
       R[idx + 1] * h * lam * density[idx + 1] / (R[idx + 1] * R[idx + 1]);
 
-  delta = 1 + lam * 2.0 * h;
+  delta = 1 + lam * toReal(2.0) * h;
 
   VHartree[idx + 1] = i0 + lam * R[idx + 1] * h * i1 / delta;
   VHartreeDeriv[idx + 1] = i1 / delta;
@@ -243,17 +243,17 @@ void radial_poisson(std::vector<T> &VHartree, std::vector<T> &VHartreeDeriv,
 
     lam = 475.0 / 1440.0;
 
-    i0 = VHartree[idx] + 1.0 / 1440.0 *
-        (27.0 * f0[0] - 173.0 * f1[0] + 482.0 * f2[0] -
-            798.0 * f3[0] + 1427.0 * f4[0]);
+    i0 = VHartree[idx] + toReal(1.0 / 1440.0) *
+        (27 * f0[0] - 173 * f1[0] + 482 * f2[0] -
+            798 * f3[0] + 1427 * f4[0]);
 
     i1 = VHartreeDeriv[idx] +
-        1.0 / 1440.0 *
-            (27.0 * f0[1] - 173.0 * f1[1] + 482.0 * f2[1] - 798.0 * f3[1] +
-                1427.0 * f4[1]) -
+        toReal(1.0 / 1440.0) *
+            (27 * f0[1] - 173 * f1[1] + 482 * f2[1] - 798 * f3[1] +
+                1427 * f4[1]) -
         R[idx + 1] * h * lam * density[idx + 1] / (R[idx + 1] * R[idx + 1]);
 
-    delta = 1 + lam * 2.0 * h;
+    delta = 1 + lam * toReal(2.0) * h;
 
     VHartree[idx + 1] = i0 + lam * R[idx + 1] * h * i1 / delta;
     VHartreeDeriv[idx + 1] = i1 / delta;
@@ -277,7 +277,7 @@ void radial_poisson(std::vector<T> &VHartree, std::vector<T> &VHartreeDeriv,
 
   Vend -= VHartree[end - 1];
 
-  d = 1.0 / R[end - 1] - 1.0 / R[0];
+  d = toReal(1.0) / R[end - 1] - toReal(1.0) / R[0];
 
   c1 = (Vstart / R[end - 1] - Vend / R[0]) / d;
 

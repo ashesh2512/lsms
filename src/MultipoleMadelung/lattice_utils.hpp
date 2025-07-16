@@ -9,6 +9,7 @@
 #include <tuple>
 #include <vector>
 
+#include "Real.hpp"
 #include "common.hpp"
 
 namespace lsms {
@@ -16,33 +17,33 @@ namespace lsms {
 /**
  * Create all vectors in certain cutoff with a certain repeotition
  */
-__attribute__((unused)) matrix<double> create_lattice(
-    const matrix<double> &brav, double cutoff, const std::vector<int> &nm,
+__attribute__((unused)) matrix<Real> create_lattice(
+    const matrix<Real> &brav, Real cutoff, const std::vector<int> &nm,
     int size);
 
 /**
  * Create all vectors in certain cutoff with a certain repeotition
  */
-std::tuple<matrix<double>, std::vector<double>> create_lattice_and_sq(
-    matrix<double> &brav, double cutoff, const std::vector<int> &nm, int size);
+std::tuple<matrix<Real>, std::vector<Real>> create_lattice_and_sq(
+    matrix<Real> &brav, Real cutoff, const std::vector<int> &nm, int size);
 
 /**
  *  inserts a vector in a list of vectors such that they are in
  *  order of increasing length.
  */
-void insert_ordered(matrix<double> &latt_vec, std::vector<double> &latt_vec_sq,
-                    int len, std::vector<double> &vec, double &v_sq);
+void insert_ordered(matrix<Real> &latt_vec, std::vector<Real> &latt_vec_sq,
+                    int len, std::vector<Real> &vec, Real &v_sq);
 
 /**
  * Lattice volumes
  */
-double omega(matrix<double> &bravais);
+Real omega(matrix<Real> &bravais);
 
 /**
  * Calculate reciprocal lattice
  */
-void reciprocal_lattice(matrix<double> &bravais,
-                        matrix<double> &reciprocal_bravais, double &scale);
+void reciprocal_lattice(matrix<Real> &bravais,
+                        matrix<Real> &reciprocal_bravais, Real &scale);
 
 }  // namespace lsms
 

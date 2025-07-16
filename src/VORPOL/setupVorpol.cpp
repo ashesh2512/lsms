@@ -21,22 +21,13 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
 
   double timeSetupVorpol = MPI_Wtime();
 
-  Array3d<Real> vplanes(3,ipvp, local.num_local);
+  Array3d<double> vplanes(3,ipvp, local.num_local);
   std::vector<int> nvplanes(local.num_local);
 
-  Array3d<Real> vplanesTest(3,ipvp, local.num_local);
+  Array3d<double> vplanesTest(3,ipvp, local.num_local);
   std::vector<int> nvplanesTest(local.num_local);
 
   bool useOldAlgorithm = false;
-
-  if(lsms.global.iprint >= 0)
-  {
-    if(useOldAlgorithm)
-     printf("Constructing Voronoi polyhedra using the OLD algorithm.\n");
-    else
-     printf("Constructing Voronoi polyhedra using the NEW algorithm.\n");
-  }
-
 
   for(int i=0; i<local.num_local; i++)
   {
@@ -46,6 +37,16 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
     if(local.atom[i].vpClusterGlobalIdx.size() == 0)
       useOldAlgorithm = true;
   }
+
+  if(lsms.global.iprint >= 0)
+  {
+    if(useOldAlgorithm)
+     printf("Constructing Voronoi polyhedra using the OLD algorithm.\n");
+    else
+     printf("Constructing Voronoi polyhedra using the NEW algorithm.\n");
+  }
+  fflush(stdout);
+
 //  if(crystal.num_atoms < numSwitchAlgorithms)
 //    useOldAlgorithm = true;
 
@@ -61,16 +62,16 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
 // Testing the new VP construction:
   if(testingVorpol && (crystal.num_atoms < numSwitchAlgorithms) && !useOldAlgorithm)
   {
-    std::vector<Real> atom_position_1(crystal.num_atoms);
-    std::vector<Real> atom_position_2(crystal.num_atoms);
-    std::vector<Real> atom_position_3(crystal.num_atoms);
-    std::vector<Real> rad(crystal.num_atoms);
+    std::vector<double> atom_position_1(crystal.num_atoms);
+    std::vector<double> atom_position_2(crystal.num_atoms);
+    std::vector<double> atom_position_3(crystal.num_atoms);
+    std::vector<double> rad(crystal.num_atoms);
     for(int i=0; i<crystal.num_atoms; i++)
     {
       atom_position_1[i]=crystal.position(0,i);
       atom_position_2[i]=crystal.position(1,i);
       atom_position_3[i]=crystal.position(2,i);
-      rad[i] = crystal.types[crystal.type[i]].rad;
+      rad[i] = static_cast<double>(crystal.types[crystal.type[i]].rad);
     }
 
     for(int i=0; i<local.num_local; i++)
@@ -78,45 +79,49 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
       int my_atom = local.global_id[i]+1;
       int num_atoms=crystal.num_atoms;
       setup_boundary_(&my_atom, &num_atoms,
-                      &atom_position_1[0],
-                      &atom_position_2[0], &atom_position_3[0],
-                      &crystal.bravais(0,0),
-                      &crystal.bravais(0,1), &crystal.bravais(0,2),
+                      &atom_position_1[0], &atom_position_2[0], &atom_position_3[0],
+                      &crystal.bravais(0,0), &crystal.bravais(0,1), &crystal.bravais(0,2),
                       &vplanesTest(0,0,i), &ipvp, &nvplanesTest[i], &rad[0]);
     }
   }
 
   if(useOldAlgorithm)
   {
-    std::vector<Real> atom_position_1(crystal.num_atoms);
-    std::vector<Real> atom_position_2(crystal.num_atoms);
-    std::vector<Real> atom_position_3(crystal.num_atoms);
-    std::vector<Real> rad(crystal.num_atoms);
+    std::vector<double> atom_position_1(crystal.num_atoms);
+    std::vector<double> atom_position_2(crystal.num_atoms);
+    std::vector<double> atom_position_3(crystal.num_atoms);
+    std::vector<double> rad(crystal.num_atoms);
+    printf("\n");
     for(int i=0; i<crystal.num_atoms; i++)
     {
       atom_position_1[i]=crystal.position(0,i);
       atom_position_2[i]=crystal.position(1,i);
       atom_position_3[i]=crystal.position(2,i);
-      rad[i] = crystal.types[crystal.type[i]].rad;
+      rad[i] = static_cast<double>(crystal.types[crystal.type[i]].rad);
+
+      // DEBUG FOR SP
+      if (lsms.global.iprint >= 0) {
+        printf("atom_position_1[i], atom_position_2[i], atom_position_3[i], rad[i], %.15f, %.15f, %.15f, %.15f\n",atom_position_1[i], atom_position_2[i], atom_position_3[i],rad[i]);
+        fflush(stdout);
+      }
     }
+    printf("\n");
 
     for(int i=0; i<local.num_local; i++)
     {
       int my_atom = local.global_id[i]+1;
       int num_atoms=crystal.num_atoms;
       setup_boundary_(&my_atom, &num_atoms,
-                      &atom_position_1[0],
-                      &atom_position_2[0], &atom_position_3[0],
-                      &crystal.bravais(0,0),
-                      &crystal.bravais(0,1), &crystal.bravais(0,2),
+                      &atom_position_1[0], &atom_position_2[0], &atom_position_3[0],
+                      &crystal.bravais(0,0), &crystal.bravais(0,1), &crystal.bravais(0,2),
                       &vplanes(0,0,i), &ipvp, &nvplanes[i], &rad[0]);
     }
 
   } else {
-    std::vector<Real> atom_position_1(maxClusterSize);
-    std::vector<Real> atom_position_2(maxClusterSize);
-    std::vector<Real> atom_position_3(maxClusterSize);
-    std::vector<Real> rad(maxClusterSize);
+    std::vector<double> atom_position_1(maxClusterSize);
+    std::vector<double> atom_position_2(maxClusterSize);
+    std::vector<double> atom_position_3(maxClusterSize);
+    std::vector<double> rad(maxClusterSize);
     for(int i=0; i<local.num_local; i++)
     {
       int my_atom = 1;
@@ -127,13 +132,20 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
         atom_position_1[j] = local.atom[i].vpClusterPos(0, j);
         atom_position_2[j] = local.atom[i].vpClusterPos(1, j);
         atom_position_3[j] = local.atom[i].vpClusterPos(2, j);
-        rad[j] = crystal.types[crystal.type[idx]].rad;
+        rad[j] = static_cast<double>(crystal.types[crystal.type[idx]].rad);
+
+        // DEBUG FOR SP
+        if (lsms.global.iprint >= 0) {
+          printf("atom_position_1[i], atom_position_2[i], atom_position_3[i], rad[i], %.15f, %.15f, %.15f, %.15f\n",atom_position_1[i], atom_position_2[i], atom_position_3[i],rad[i]);
+          fflush(stdout);
+        }
       }
 
       setup_boundary_cluster_(&my_atom, &num_atoms,
                       &atom_position_1[0],
                       &atom_position_2[0], &atom_position_3[0],
                               &vplanes(0,0,i), &ipvp, &nvplanes[i], &rad[0]);
+
 // Testing:
       if(testingVorpol && (crystal.num_atoms < numSwitchAlgorithms) && (lsms.global.iprint>=0))
       {
@@ -147,6 +159,14 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
     }
   }
 
+#if SP
+  // convert variables to double precision
+  std::vector<double> clm_dp(SphericalHarmonicsCoeficients::clm.size());
+  std::transform(SphericalHarmonicsCoeficients::clm.begin(), SphericalHarmonicsCoeficients::clm.end(),
+                 clm_dp.begin(),
+                 [](float val) { return static_cast<double>(val); });
+#endif
+  
   for(int i=0; i<local.num_local; i++)
   {
     int lmax=2*local.atom[i].lmax;
@@ -157,6 +177,7 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
     local.atom[i].voronoi.grwylm.resize(lsms.ngaussr,iprcrit-1);
     int my_atom=local.global_id[i]+1;
     int num_atoms=crystal.num_atoms;
+
     /*
     setup_vorpol_(&my_atom,&num_atoms,
                   &atom_position_1[0],
@@ -172,6 +193,47 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
                   &lsms.global.iprint,lsms.global.istop,32);
     */
 
+#if SP
+    Array3d<DComplex> wylm_dp((2*lmax+1)*(lmax+1),lsms.ngaussr,iprcrit-1);
+    Matrix<double> gwwylm_dp(lsms.ngaussr,iprcrit-1); 
+    Matrix<double> grwylm_dp(lsms.ngaussr,iprcrit-1);
+
+    std::transform(local.atom[i].voronoi.wylm.get_data(),
+                   local.atom[i].voronoi.wylm.get_data() + local.atom[i].voronoi.wylm.size(),
+                   wylm_dp.get_data(),
+                   [](const FComplex &value)
+                   { return DComplex(static_cast<double>(value.real()), static_cast<double>(value.imag())); });
+    std::transform(local.atom[i].voronoi.gwwylm.get_data(),
+                   local.atom[i].voronoi.gwwylm.get_data() + local.atom[i].voronoi.gwwylm.size(),
+                   gwwylm_dp.get_data(),
+                   [](float value) { return static_cast<double>(value); });
+    std::transform(local.atom[i].voronoi.grwylm.get_data(),
+                   local.atom[i].voronoi.grwylm.get_data() + local.atom[i].voronoi.grwylm.size(),
+                   grwylm_dp.get_data(),
+                   [](float value) { return static_cast<double>(value); });
+
+    setup_vorpol_vplane_(&vplanes(0,0,i), &nvplanes[i],
+                         &lmax,&clm_dp[0],&lsms.ngaussq,&lsms.ngaussr,
+                         &local.atom[i].voronoi.rInscribedSphere,&local.atom[i].voronoi.omegaInt,
+                         local.atom[i].voronoi.dipint,
+                         &ipvp,&ipnode,&ipcorn,&ipedge,&iprcrit,
+                         &gwwylm_dp(0,0),&grwylm_dp(0,0),
+                         &local.atom[i].voronoi.ncrit,&wylm_dp(0,0,0),
+                         &local.atom[i].rCircumscribed,
+                         &lsms.global.iprint,lsms.global.istop,32);
+
+    std::transform(wylm_dp.get_data(), wylm_dp.get_data() + wylm_dp.size(),
+                   local.atom[i].voronoi.wylm.get_data(),
+                   [](const DComplex &value)
+                   { return FComplex(static_cast<float>(value.real()), static_cast<float>(value.imag())); });
+    std::transform(gwwylm_dp.get_data(), gwwylm_dp.get_data() + gwwylm_dp.size(),
+                   local.atom[i].voronoi.gwwylm.get_data(),
+                   [](double value) { return static_cast<float>(value); });
+    std::transform(grwylm_dp.get_data(), grwylm_dp.get_data() + grwylm_dp.size(),
+                   local.atom[i].voronoi.grwylm.get_data(),
+                   [](double value) { return static_cast<float>(value); });
+
+#else
     setup_vorpol_vplane_(&vplanes(0,0,i), &nvplanes[i],
                          &lmax,&SphericalHarmonicsCoeficients::clm[0],&lsms.ngaussq,&lsms.ngaussr,
                          &local.atom[i].voronoi.rInscribedSphere,&local.atom[i].voronoi.omegaInt,
@@ -181,6 +243,7 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
                          &local.atom[i].voronoi.ncrit,&local.atom[i].voronoi.wylm(0,0,0),
                          &local.atom[i].rCircumscribed,
                          &lsms.global.iprint,lsms.global.istop,32);
+#endif
 
     local.atom[i].rInscribed=local.atom[i].voronoi.rInscribedSphere;
 // set rmt according to value of fixRMT

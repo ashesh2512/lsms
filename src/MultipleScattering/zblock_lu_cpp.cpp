@@ -55,30 +55,58 @@ int zblock_lu_cpp(Matrix<Complex> &a, int *blk_sz, int nblk, int *ipvt,
       n = blk_sz[iblk - 1];
       joff = joff - n;
       // invert the diagonal blk_sz(iblk) x blk_sz(iblk) block
+#if SP
+      LAPACK::cgetrf_(&m, &m, &a(ioff, ioff), &lda, ipvt, &info);
+      if (info != 0) {
+        printf("cgetrf info=%d  ioff=%d\n", info, ioff);
+      }
+#else
       LAPACK::zgetrf_(&m, &m, &a(ioff, ioff), &lda, ipvt, &info);
       if (info != 0) {
         printf("zgetrf info=%d  ioff=%d\n", info, ioff);
       }
+#endif
       // calculate the inverse of above multiplying the row block
       // blk_sz(iblk) x ioff
+#if SP
+      LAPACK::cgetrs_("n", &m, &ioff, &a(ioff, ioff), &lda, ipvt, &a(ioff, 0),
+                      &lda, &info);
+      if (info != 0) {
+        printf("cgetrs info=%d  ioff=%d\n", info, ioff);
+      }
+#else
       LAPACK::zgetrs_("n", &m, &ioff, &a(ioff, ioff), &lda, ipvt, &a(ioff, 0),
                       &lda, &info);
       if (info != 0) {
         printf("zgetrs info=%d  ioff=%d\n", info, ioff);
       }
+#endif
+
       if (iblk > 1) {
         int off1 = ioff - k + 1;
         int off2 = na - ioff;
+#if SP
+        BLAS::cgemm_("n", "n", &n, &off1, &off2, &cmone, &a(joff, ioff), &lda,
+                     &a(ioff, k - 1), &lda, &cone, &a(joff, k - 1), &lda);
+        BLAS::cgemm_("n", "n", &joff, &n, &off2, &cmone, &a(0, ioff), &lda,
+                     &a(ioff, joff), &lda, &cone, &a(0, joff), &lda);
+#else
         BLAS::zgemm_("n", "n", &n, &off1, &off2, &cmone, &a(joff, ioff), &lda,
                      &a(ioff, k - 1), &lda, &cone, &a(joff, k - 1), &lda);
         BLAS::zgemm_("n", "n", &joff, &n, &off2, &cmone, &a(0, ioff), &lda,
                      &a(ioff, joff), &lda, &cone, &a(0, joff), &lda);
+#endif
       }
     }
     int off3 = blk_sz[0] - k + 1;
     int off4 = na - blk_sz[0];
+#if SP
+    BLAS::cgemm_("n", "n", &blk_sz[0], &off3, &off4, &cmone, &a(0, blk_sz[0]),
+                 &lda, &a(blk_sz[0], k - 1), &lda, &cone, &a(0, 0), &lda);
+#else
     BLAS::zgemm_("n", "n", &blk_sz[0], &off3, &off4, &cmone, &a(0, blk_sz[0]),
                  &lda, &a(blk_sz[0], k - 1), &lda, &cone, &a(0, 0), &lda);
+#endif
   }
 
   //     write(6,*) "k out =",k

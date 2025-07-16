@@ -659,9 +659,9 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < local.num_local; i++) {
       if (lsms.n_spin_pola == 2) {
         qrms = std::max(qrms,
-                        0.5 * (local.atom[i].qrms[0] + local.atom[i].qrms[1]));
+                        toReal(0.5) * (local.atom[i].qrms[0] + local.atom[i].qrms[1]));
         vrms = std::max(vrms,
-                        0.5 * (local.atom[i].vrms[0] + local.atom[i].vrms[1]));
+                        toReal(0.5) * (local.atom[i].vrms[0] + local.atom[i].vrms[1]));
       } else {
         qrms = std::max(qrms, local.atom[i].qrms[0]);
         vrms = std::max(vrms, local.atom[i].vrms[0]);

@@ -18,11 +18,18 @@ void calculateAllTauMatrices(
 
 extern "C" {
 void makegij_(int *lmaxi, int *kkri, int *lmaxj, int *kkrj, int *lmax,
-              int *kkrsz, int *ndlj, int *ndlm, Complex *prel, double *rij,
+              int *kkrsz, int *ndlj, int *ndlm, DComplex *prel, double *rij,
               double *sinmp, double *cosmp, double *clm, double *plm,
-              double *cgnt, int *lmax_cg, int *lofk, int *mofk, Complex *ilp1,
-              Complex *illp, Complex *hfn, Complex *dlm, Complex *gij,
+              double *cgnt, int *lmax_cg, int *lofk, int *mofk, DComplex *ilp1,
+              DComplex *illp, DComplex *hfn, DComplex *dlm, DComplex *gij,
               double *pi4, int *iprint, char *istop, int len_sitop);
+
+void makegij_sp_(int *lmaxi, int *kkri, int *lmaxj, int *kkrj, int *lmax,
+              int *kkrsz, int *ndlj, int *ndlm, FComplex *prel, float *rij,
+              float *sinmp, float *cosmp, float *clm, float *plm,
+              float *cgnt, int *lmax_cg, int *lofk, int *mofk, FComplex *ilp1,
+              FComplex *illp, FComplex *hfn, FComplex *dlm, FComplex *gij,
+              float *pi4, int *iprint, char *istop, int len_sitop);
 
 void setgij_(Complex *gij, Complex *bgij, int *kkr1, int *kkr1_ns, int *kkr2,
              int *kkr2_ns, int *n_spin_cant, int *nrel_rel, Complex *psq,

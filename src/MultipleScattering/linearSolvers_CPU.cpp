@@ -41,6 +41,39 @@ static void buildKKRSizeTMatrix(LSMSSystemParameters &lsms,
   }
 }
 
+static void buildKKRSizeTMatrixDP(LSMSSystemParameters &lsms,
+                                LocalTypeInfo &local, AtomData &atom, int iie,
+                                Matrix<DComplex> &tMatrix, int ispin) {
+  // assume Matrix<Complex> tMatrix(nrmat_ns, kkrsz_ns);
+  int nrmat_ns = lsms.n_spin_cant * atom.nrmat;  // total size of the kkr matrix
+  int kkrsz_ns = lsms.n_spin_cant * atom.kkrsz;  // size of t00 block
+  int i0 = 0;  // start index of the current atom's block
+
+  tMatrix = 0.0;
+
+  if (lsms.n_spin_pola == lsms.n_spin_cant) {  // non polarized or spin canted
+
+    for (int i = 0; i < kkrsz_ns; i++) {
+      for (int j = 0; j < kkrsz_ns; j++) {
+        tMatrix(i, j) =
+            local.tmatStore(i + j * kkrsz_ns + iie * local.blkSizeTmatStore,
+                            atom.LIZStoreIdx[0]);
+      }
+    }
+
+  } else {
+    int jsm = kkrsz_ns * kkrsz_ns * ispin;
+
+    for (int i = 0; i < kkrsz_ns; i++) {
+      for (int j = 0; j < kkrsz_ns; j++) {
+        tMatrix(i, j) = local.tmatStore(
+            i + j * kkrsz_ns + iie * local.blkSizeTmatStore + jsm,
+            atom.LIZStoreIdx[0]);
+      }
+    }
+  }
+}
+
 static void buildNRMatSizeTMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local, AtomData &atom, int iie,
                                 Matrix<Complex> &tMatrix, int ispin) {
   // assume Matrix<Complex> tMatrix(nrmat_ns, kkrsz_ns);
@@ -87,8 +120,13 @@ void solveTau00zgesv(LSMSSystemParameters &lsms, LocalTypeInfo &local,
 
   int ipiv[nrmat_ns];
   int info;
+#if SP
+  LAPACK::cgesv_(&nrmat_ns, &kkrsz_ns, &m(0, 0), &nrmat_ns, ipiv, &tau(0, 0),
+                 &nrmat_ns, &info);
+#else
   LAPACK::zgesv_(&nrmat_ns, &kkrsz_ns, &m(0, 0), &nrmat_ns, ipiv, &tau(0, 0),
                  &nrmat_ns, &info);
+#endif
 
   // copy result into tau00
   for (int i = 0; i < kkrsz_ns; i++)
@@ -110,12 +148,18 @@ void solveTau00zgetrf(LSMSSystemParameters &lsms, LocalTypeInfo &local,
   int ipiv[nrmat_ns];
   Matrix<Complex> work(nrmat_ns, kkrsz_ns);
   std::vector<std::complex<float> > swork(nrmat_ns * (nrmat_ns + kkrsz_ns));
-  std::vector<double> rwork(nrmat_ns);
+  std::vector<Real> rwork(nrmat_ns);
   int info, iter;
 
+#if SP
+  LAPACK::cgetrf_(&nrmat_ns, &nrmat_ns, &m(0, 0), &nrmat_ns, &ipiv[0], &info);
+  LAPACK::cgetrs_("N", &nrmat_ns, &kkrsz_ns, &m(0, 0), &nrmat_ns, &ipiv[0],
+                  &tau(0, 0), &nrmat_ns, &info);
+#else
   LAPACK::zgetrf_(&nrmat_ns, &nrmat_ns, &m(0, 0), &nrmat_ns, &ipiv[0], &info);
   LAPACK::zgetrs_("N", &nrmat_ns, &kkrsz_ns, &m(0, 0), &nrmat_ns, &ipiv[0],
                   &tau(0, 0), &nrmat_ns, &info);
+#endif
 
   // copy result into tau00
   for (int i = 0; i < kkrsz_ns; i++)
@@ -135,11 +179,16 @@ void solveTauFullzgetrf(LSMSSystemParameters &lsms, LocalTypeInfo &local, AtomDa
   int ipiv[nrmat_ns];
   Matrix<Complex> work(nrmat_ns, kkrsz_ns);
   std::vector<std::complex<float> > swork(nrmat_ns * (nrmat_ns + kkrsz_ns));
-  std::vector<double> rwork(nrmat_ns);
+  std::vector<Real> rwork(nrmat_ns);
   int info, iter;
 
+#if SP
+  LAPACK::cgetrf_(&nrmat_ns, &nrmat_ns, &m(0, 0), &nrmat_ns, &ipiv[0], &info);
+  LAPACK::cgetrs_("N", &nrmat_ns, &nrmat_ns, &m(0, 0), &nrmat_ns, &ipiv[0], &tau(0, 0), &nrmat_ns, &info);
+#else
   LAPACK::zgetrf_(&nrmat_ns, &nrmat_ns, &m(0, 0), &nrmat_ns, &ipiv[0], &info);
   LAPACK::zgetrs_("N", &nrmat_ns, &nrmat_ns, &m(0, 0), &nrmat_ns, &ipiv[0], &tau(0, 0), &nrmat_ns, &info);
+#endif
 
 }
 
@@ -153,20 +202,39 @@ void solveTau00zcgesv(LSMSSystemParameters &lsms, LocalTypeInfo &local,
 
   // reference algorithm. Use LU factorization and linear solve for dense
   // matrices in LAPACK
-  Matrix<Complex> tau(nrmat_ns, kkrsz_ns);
-  Matrix<Complex> t(nrmat_ns, kkrsz_ns);
+  Matrix<DComplex> tau(nrmat_ns, kkrsz_ns);
+  Matrix<DComplex> t(nrmat_ns, kkrsz_ns);
   // copy t[0] into the top part of t
-  buildKKRSizeTMatrix(lsms, local, atom, iie, tau, ispin);
+  buildKKRSizeTMatrixDP(lsms, local, atom, iie, tau, ispin);
   tau = 0.0;
 
   int ipiv[nrmat_ns];
-  Matrix<Complex> work(nrmat_ns, kkrsz_ns);
+  Matrix<DComplex> work(nrmat_ns, kkrsz_ns);
   std::vector<std::complex<float> > swork(nrmat_ns * (nrmat_ns + kkrsz_ns));
   std::vector<double> rwork(nrmat_ns);
   int info, iter;
+
+#if SP
+  Matrix<DComplex> m_double(m.n_row(), m.n_col(), m.l_dim());
+  for (int r = 0; r < m.n_row(); ++r) {
+    for (int c = 0; c < m.n_col(); ++c) {
+        Complex val_float = m(r,c);
+        // construct complex<double> from float real and imag parts
+        DComplex val_double(static_cast<double>(val_float.real()),
+                            static_cast<double>(val_float.imag()));
+        m_double(r,c) = val_double;
+    }
+  }
+  LAPACK::zcgesv_(&nrmat_ns, &kkrsz_ns, &m_double(0, 0), &nrmat_ns, ipiv, &t(0, 0),
+                  &nrmat_ns, &tau(0, 0), &nrmat_ns, &work(0, 0), &swork[0],
+                  &rwork[0], &iter, &info);
+#else
   LAPACK::zcgesv_(&nrmat_ns, &kkrsz_ns, &m(0, 0), &nrmat_ns, ipiv, &t(0, 0),
                   &nrmat_ns, &tau(0, 0), &nrmat_ns, &work(0, 0), &swork[0],
                   &rwork[0], &iter, &info);
+#endif
+
+
 
   // copy result into tau00
   for (int i = 0; i < kkrsz_ns; i++)
@@ -194,7 +262,7 @@ void solveTau00zblocklu_f77(LSMSSystemParameters &lsms, LocalTypeInfo &local,
   int nblk = 3;
   Matrix<Complex> delta(kkrsz_ns, kkrsz_ns);
   int iwork[nrmat_ns];
-  Real rwork[nrmat_ns];
+  double rwork[nrmat_ns];
   Complex work1[nrmat_ns];
 
   int blk_sz[1000];
@@ -236,7 +304,11 @@ void solveTau00zblocklu_f77(LSMSSystemParameters &lsms, LocalTypeInfo &local,
   // c     create tau00 => {[1-t*G]**(-1)}*t : for central site only.......
   // c     ----------------------------------------------------------------
 
+#if SP
+  LAPACK::cgetrf_(&kkrsz_ns, &kkrsz_ns, &wbig(0, 0), &kkrsz_ns, ipvt, &info);
+#else
   LAPACK::zgetrf_(&kkrsz_ns, &kkrsz_ns, &wbig(0, 0), &kkrsz_ns, ipvt, &info);
+#endif
 
   int jsm;
   if (lsms.n_spin_pola == lsms.n_spin_cant) {  // non polarized or spin canted
@@ -251,8 +323,13 @@ void solveTau00zblocklu_f77(LSMSSystemParameters &lsms, LocalTypeInfo &local,
           local.tmatStore(i + j * kkrsz_ns + iie * local.blkSizeTmatStore + jsm,
                           atom.LIZStoreIdx[0]);
 
+#if SP
+  LAPACK::cgetrs_("N", &kkrsz_ns, &kkrsz_ns, &wbig(0, 0), &kkrsz_ns, ipvt,
+                  &tau00(0, 0), &kkrsz_ns, &info);
+#else
   LAPACK::zgetrs_("N", &kkrsz_ns, &kkrsz_ns, &wbig(0, 0), &kkrsz_ns, ipvt,
                   &tau00(0, 0), &kkrsz_ns, &info);
+#endif
 }
 
 void block_inverse(Matrix<Complex> &a, int *blk_sz, int nblk,
@@ -311,7 +388,11 @@ void solveTau00zblocklu_cpp(LSMSSystemParameters &lsms, LocalTypeInfo &local,
   // c     create tau00 => {[1-t*G]**(-1)}*t : for central site only.......
   // c     ----------------------------------------------------------------
 
+#if SP
+  LAPACK::cgetrf_(&kkrsz_ns, &kkrsz_ns, &wbig(0, 0), &kkrsz_ns, ipvt, &info);
+#else
   LAPACK::zgetrf_(&kkrsz_ns, &kkrsz_ns, &wbig(0, 0), &kkrsz_ns, ipvt, &info);
+#endif
 
   int jsm;
   if (lsms.n_spin_pola == lsms.n_spin_cant) {  // non polarized or spin canted
@@ -326,6 +407,11 @@ void solveTau00zblocklu_cpp(LSMSSystemParameters &lsms, LocalTypeInfo &local,
           local.tmatStore(i + j * kkrsz_ns + iie * local.blkSizeTmatStore + jsm,
                           atom.LIZStoreIdx[0]);
 
+#if SP
+  LAPACK::cgetrs_("N", &kkrsz_ns, &kkrsz_ns, &wbig(0, 0), &kkrsz_ns, ipvt,
+                  &tau00(0, 0), &kkrsz_ns, &info);
+#else
   LAPACK::zgetrs_("N", &kkrsz_ns, &kkrsz_ns, &wbig(0, 0), &kkrsz_ns, ipvt,
                   &tau00(0, 0), &kkrsz_ns, &info);
+#endif
 }

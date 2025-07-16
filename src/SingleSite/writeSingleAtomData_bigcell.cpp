@@ -13,6 +13,15 @@ int writeSingleAtomData_bigcell(const char *fname, AtomData &atom)
   v_dim=atom.vr.l_dim();
   c_dim=atom.ec.l_dim();
 
+#if SP
+  f_writesingleatomdata_bigcell_sp_(fname,&fname_l,
+                                 atom.header,&header_l,&atom.jmt,&atom.jws,&atom.xstart,
+                                 &atom.rmt,&atom.alat,&atom.efermi,&atom.vdif,&atom.ztotss,&atom.zcorss,
+                                 &atom.nspin,&atom.numc,atom.xvalws,
+                                 &atom.vr(0,0),&atom.rhotot(0,0),&atom.corden(0,0), &v_dim,
+                                 atname,&atom.zsemss,&atom.zvalss,
+                                 &atom.ec(0,0),&atom.nc(0,0),&atom.lc(0,0),&atom.kc(0,0),&c_dim,2);
+#else
   f_writesingleatomdata_bigcell_(fname,&fname_l,
                                  atom.header,&header_l,&atom.jmt,&atom.jws,&atom.xstart,
                                  &atom.rmt,&atom.alat,&atom.efermi,&atom.vdif,&atom.ztotss,&atom.zcorss,
@@ -20,5 +29,6 @@ int writeSingleAtomData_bigcell(const char *fname, AtomData &atom)
                                  &atom.vr(0,0),&atom.rhotot(0,0),&atom.corden(0,0), &v_dim,
                                  atname,&atom.zsemss,&atom.zvalss,
                                  &atom.ec(0,0),&atom.nc(0,0),&atom.lc(0,0),&atom.kc(0,0),&c_dim,2);
+#endif
   return -1;
 }

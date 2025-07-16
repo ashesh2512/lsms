@@ -12,14 +12,16 @@
 #include <numeric>
 #include <vector>
 
+#include "Real.hpp"
+
 template <typename Iter_T>
 auto norm(Iter_T first, Iter_T last) {
-  return std::sqrt(std::inner_product(first, last, first, 0.0));
+  return sqrt_t(std::inner_product(first, last, first, toReal(0.0)));
 }
 
 template <typename Iter_T>
 auto norm_sq(Iter_T first, Iter_T last) {
-  return std::inner_product(first, last, first, 0.0);
+  return std::inner_product(first, last, first, toReal(0.0));
 }
 
 /**

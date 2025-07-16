@@ -11,11 +11,17 @@
 #include "Matrix.hpp"
 
 extern "C" {
-void cgaunt_(int *lmax, Real *clm, Real *plmg, Real *tg, Real *wg, Real *cgnt,
+void cgaunt_(int *lmax, double *clm, double *plmg, double *tg, double *wg, double *cgnt,
              int *lofk, int *mofk, int *iprint, char *istop);
 
-void ifacts_(int *lmax, Complex *illp, Complex *ilp1, int *iprint, char *istop,
+void cgaunt_sp_(int *lmax, float *clm, float *plmg, float *tg, float *wg, float *cgnt,
+int *lofk, int *mofk, int *iprint, char *istop);
+
+void ifacts_(int *lmax, DComplex *illp, DComplex *ilp1, int *iprint, char *istop,
              int istop_len);
+
+void ifacts_sp_(int *lmax, FComplex *illp, FComplex *ilp1, int *iprint, char *istop,
+               int istop_len);
 }
 
 class SphericalHarmonicsCoeficients {
@@ -83,11 +89,18 @@ class GauntCoeficients {
     cgnt.resize(lmax + 1, (lmax + 1) * (lmax + 1), (lmax + 1) * (lmax + 1));
     plmg.resize(((2 * lmax + 1) * (2 * lmax + 2)) / 2, 2 * lmax + 1);
 
+#if SP
+    cgaunt_sp_(&lmax, &SphericalHarmonicsCoeficients::clm[0], &plmg(0, 0), &tg[0],
+            &wg[0], &cgnt(0, 0, 0), &AngularMomentumIndices::lofk[0],
+            &AngularMomentumIndices::mofk[0], &lsms.global.iprint,
+            lsms.global.istop);
+#else
     cgaunt_(&lmax, &SphericalHarmonicsCoeficients::clm[0], &plmg(0, 0), &tg[0],
             &wg[0], &cgnt(0, 0, 0), &AngularMomentumIndices::lofk[0],
             &AngularMomentumIndices::mofk[0], &lsms.global.iprint,
             lsms.global.istop);
     // }
+#endif
   }
 };
 
@@ -101,8 +114,14 @@ class IFactors {
     lmax = _lmax;
     ilp1.resize(2 * _lmax + 1);
     illp.resize((_lmax + 1) * (_lmax + 1), (_lmax + 1) * (_lmax + 1));
+
+#if SP
+    ifacts_sp_(&_lmax, &illp(0, 0), &ilp1[0], &lsms.global.iprint,
+            lsms.global.istop, 32);
+#else
     ifacts_(&_lmax, &illp(0, 0), &ilp1[0], &lsms.global.iprint,
             lsms.global.istop, 32);
+#endif
   }
 };
 

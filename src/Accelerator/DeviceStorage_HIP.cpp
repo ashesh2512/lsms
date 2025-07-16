@@ -215,8 +215,8 @@ int DeviceStorage::allocate(int kkrsz_max,int nspin, int numLIZ, int _nThreads, 
 	//			    dev_work[i], &dev_workBytes[i]);
 #endif
 
-	dev_workBytes[i] = std::max(dev_workBytes[i]*sizeof(deviceDoubleComplex),
-				    lWork*sizeof(deviceDoubleComplex));
+	dev_workBytes[i] = std::max(dev_workBytes[i]*sizeof(deviceComplex),
+				    lWork*sizeof(deviceComplex));
 	err = deviceMalloc((void**)&dev_work[i], dev_workBytes[i]);
         if(err!=deviceSuccess)
         {
@@ -391,9 +391,9 @@ void DeviceAtom::copyFromAtom(AtomData &atom)
 
 int *DeviceConstants::lofk;
 int *DeviceConstants::mofk;
-deviceDoubleComplex *DeviceConstants::ilp1;
+deviceComplex* DeviceConstants::ilp1;
 // DeviceMatrix<Complex> illp(ndlj, ndlj);
-deviceDoubleComplex* DeviceConstants::illp;
+deviceComplex* DeviceConstants::illp;
 int DeviceConstants::ndlj_illp;
 // DeviceArray3d<Real> cgnt(lmax+1,ndlj,ndlj);
 Real* DeviceConstants::cgnt;
@@ -421,33 +421,33 @@ int DeviceConstants::allocate()
                   AngularMomentumIndices::mofk.size()*sizeof(int),err);
           exit(1);
         }
-  err = deviceMalloc((void**)&ilp1, IFactors::ilp1.size()*sizeof(deviceDoubleComplex));
+  err = deviceMalloc((void**)&ilp1, IFactors::ilp1.size()*sizeof(deviceComplex));
   if(err!=deviceSuccess)
         {
           printf("failed to allocate DeviceConstant ilp1, size=%zu, err=%d\n",
-                  IFactors::ilp1.size()*sizeof(deviceDoubleComplex),err);
+                  IFactors::ilp1.size()*sizeof(deviceComplex),err);
           exit(1);
         }
-  err = deviceMalloc((void**)&illp, IFactors::illp.size()*sizeof(deviceDoubleComplex));
+  err = deviceMalloc((void**)&illp, IFactors::illp.size()*sizeof(deviceComplex));
   if(err!=deviceSuccess)
         {
           printf("failed to allocate DeviceConstant illp, size=%zu, err=%d\n",
-                  IFactors::illp.size()*sizeof(deviceDoubleComplex),err);
+                  IFactors::illp.size()*sizeof(deviceComplex),err);
           exit(1);
         }
-  err = deviceMalloc((void**)&cgnt, GauntCoeficients::cgnt.size()*sizeof(double));
+  err = deviceMalloc((void**)&cgnt, GauntCoeficients::cgnt.size()*sizeof(Real));
   if(err!=deviceSuccess)
         {
           printf("failed to allocate DeviceConstant cgnt, size=%zu, err=%d\n",
-                  GauntCoeficients::cgnt.size()*sizeof(double),err);
+                  GauntCoeficients::cgnt.size()*sizeof(Real),err);
           exit(1);
         }
 
   err = deviceMemcpy(lofk, &AngularMomentumIndices::lofk[0], AngularMomentumIndices::lofk.size()*sizeof(int), deviceMemcpyHostToDevice);
   err = deviceMemcpy(mofk, &AngularMomentumIndices::mofk[0], AngularMomentumIndices::mofk.size()*sizeof(int), deviceMemcpyHostToDevice);
-  err = deviceMemcpy(ilp1, &IFactors::ilp1[0], IFactors::ilp1.size()*sizeof(deviceDoubleComplex), deviceMemcpyHostToDevice);
-  err = deviceMemcpy(illp, &IFactors::illp[0], IFactors::illp.size()*sizeof(deviceDoubleComplex), deviceMemcpyHostToDevice);
-  err = deviceMemcpy(cgnt, &GauntCoeficients::cgnt[0], GauntCoeficients::cgnt.size()*sizeof(double), deviceMemcpyHostToDevice);
+  err = deviceMemcpy(ilp1, &IFactors::ilp1[0], IFactors::ilp1.size()*sizeof(deviceComplex), deviceMemcpyHostToDevice);
+  err = deviceMemcpy(illp, &IFactors::illp[0], IFactors::illp.size()*sizeof(deviceComplex), deviceMemcpyHostToDevice);
+  err = deviceMemcpy(cgnt, &GauntCoeficients::cgnt[0], GauntCoeficients::cgnt.size()*sizeof(Real), deviceMemcpyHostToDevice);
 
   return 0;
 }

@@ -89,7 +89,7 @@ c
 c
 !      call getclm(lmax,clm)
 ! meis: changed to normalized associated Legendre functions
-      call ylm_coefficients(lmax,clm)
+      call ylm_coefficients_dp(lmax,clm)
       call lmfacts(lmax,ndlj,ndlm,lofj,mofj,lofk,mofk)
 !     if(max_atoms.lt.num_atoms) then
 !        write(6,'('' CAL_MADELUNG_MATRIX:: max_atoms < num_atoms'',

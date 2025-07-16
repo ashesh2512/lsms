@@ -41,14 +41,19 @@ void interpolatePotential(LSMSSystemParameters &lsms, AtomData &atom) {
   for (int is = 0; is < lsms.n_spin_pola; is++) {
     for (int ir = 0; ir < atom.jmt; ir++) {
       if (atom.r_mesh[ir] < r_mesh_old[jmt0 - 1])
+#if SP
+        interp_sp_(&r_mesh_old[0], &vr_old(0, is), &jmt0, &atom.r_mesh[ir],
+                   &atom.vr(ir, is), &dvr, &f);
+#else
         interp_(&r_mesh_old[0], &vr_old(0, is), &jmt0, &atom.r_mesh[ir],
                 &atom.vr(ir, is), &dvr, &f);
+#endif
       else
         atom.vr(ir, is) =
             vr_old(jmt0 - 1, is) * atom.r_mesh[ir] / r_mesh_old[jmt0 - 1];
       // YingWai's check
-      // printf("ir = %8d r_mesh_old = %35.25f r_mesh = %35.25f vr_old = %35.25f
-      // vr = %35.25f\n", ir, r_mesh_old[ir], atom.r_mesh[ir], vr_old(ir,is),
+      // printf("ir = %8d r_mesh_old = %35.25f r_mesh = %35.25f vr_old = %35.25f "
+      // "vr = %35.25f\n", ir, r_mesh_old[ir], atom.r_mesh[ir], vr_old(ir,is),
       // atom.vr(ir,is));
     }
   }
@@ -58,13 +63,18 @@ void interpolatePotential(LSMSSystemParameters &lsms, AtomData &atom) {
     for (int is = 0; is < lsms.n_spin_pola; is++) {
       for (int ir = 0; ir < atom.jmt; ir++) {
         if (atom.r_mesh[ir] < r_mesh_old[jmt0 - 1])
+#if SP
+          interp_sp_(&r_mesh_old[0], &rhotot_old(0, is), &jmt0, &atom.r_mesh[ir],
+                     &atom.rhotot(ir, is), &dvr, &f);
+#else
           interp_(&r_mesh_old[0], &rhotot_old(0, is), &jmt0, &atom.r_mesh[ir],
                   &atom.rhotot(ir, is), &dvr, &f);
+#endif
         else
           atom.rhotot(ir, is) = rhotot_old(jmt0 - 1, is);
         // YingWai's check
-        // printf("ir = %8d r_mesh_old = %30.25f r_mesh = %35.25f rhotot_old =
-        // %35.25f rhotot = %30.25f\n", ir, r_mesh_old[ir], atom.r_mesh[ir],
+        // printf("ir = %8d r_mesh_old = %30.25f r_mesh = %35.25f rhotot_old ="
+        // "%35.25f rhotot = %30.25f\n", ir, r_mesh_old[ir], atom.r_mesh[ir],
         // rhotot_old(ir,is), atom.rhotot(ir,is));
       }
     }

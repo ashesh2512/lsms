@@ -15,18 +15,18 @@ class REWL {
 
   void assignSwapPartner();
 
-  void swapEnergy(double &energyForSwap);
+  void swapEnergy(Real &energyForSwap);
 
-  bool determineAcceptance(double myDOSRatio);
+  bool determineAcceptance(Real myDOSRatio);
 
-  void swapConfig(double evecsForSwap[], int numElements);
+  void swapConfig(Real evecsForSwap[], int numElements);
 
-  void swapPotentialShifts(double potentialShiftForSwap[], int numElements);
+  void swapPotentialShifts(Real potentialShiftForSwap[], int numElements);
 
  private:
   // Random number generator
   std::mt19937 rng;
-  std::uniform_real_distribution<double>
+  std::uniform_real_distribution<Real>
       rnd;  // rnd11(-1.0,1.0),rnd0pi(0.0,2.0*M_PI);
 
   REWLCommunication REWLcomm;

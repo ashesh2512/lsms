@@ -5,8 +5,10 @@
 #include "SingleSite/AtomData.hpp"
 
 extern "C" {
-void interp_(Real *r, Real *f, int *nr, Real *rs, Real *ps, Real *dps,
+void interp_(double *r, double *f, int *nr, double *rs, double *ps, double *dps,
              int *deriv);
+void interp_sp_(float *r, float *f, int *nr, float *rs, float *ps, float *dps,
+                int *deriv);
 }
 
 void interpolatePotential(LSMSSystemParameters &lsms, AtomData &atom);

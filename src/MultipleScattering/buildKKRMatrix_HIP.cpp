@@ -59,13 +59,13 @@ inline bool comp(Real val, Real test) {
   (((k) * (lDim) * (mDim)) + ((j) * (lDim)) + (i))
 
 __device__ __inline__ deviceDoubleComplex complexExp(deviceDoubleComplex z) {
-  double mExp = exp(hipCreal(z));
+  Real mExp = exp(hipCreal(z));
   return (deviceDoubleComplex) make_hipDoubleComplex(mExp * cos(hipCimag(z)),
                                mExp * sin(hipCimag(z)));
 }
 
-__device__ inline void calculateHankelHip(deviceDoubleComplex prel, double r,
-                                          int lend, deviceDoubleComplex *ilp1,
+__device__ inline void calculateHankelHip(deviceDoubleComplex prel, Real r,
+                                          int lend, deviceComplex *ilp1,
                                           deviceDoubleComplex *hfn) {
   if (hipThreadIdx_x == 0) {
     const deviceDoubleComplex sqrtm1 =  make_hipDoubleComplex(0.0, 1.0);
@@ -85,7 +85,11 @@ __device__ inline void calculateHankelHip(deviceDoubleComplex prel, double r,
     z = complexExp( hipCmul(sqrtm1, z)) / r;
     // z = complexExp(sqrtm1 * z) / r;
     for (int l = 0; l <= lend; l++) {
+#if SP
+      hfn[l] = hipCmul( hipCmul((-hfn[l]), z), hipComplexFloatToDouble(ilp1[l]) );
+#else
       hfn[l] = hipCmul( hipCmul((-hfn[l]), z), ilp1[l] );
+#endif
       // hfn[l] = ((-hfn[l]) * z) * ilp1[l];
     }
   }
@@ -160,9 +164,9 @@ __device__ void associatedLegendreFunctionNormalizedHip(Real x, int lmax,
 }
 
 __device__ __inline__ deviceDoubleComplex dlmFunction(deviceDoubleComplex *hfn,
-                                                      double *cosmp,
-                                                      double *sinmp,
-                                                      double *plm, int l,
+                                                      Real *cosmp,
+                                                      Real *sinmp,
+                                                      Real *plm, int l,
                                                       int m) {
   int mAbs = abs(m);
 
@@ -191,13 +195,13 @@ size_t sharedMemoryBGijHip(LSMSSystemParameters &lsms, size_t *hfnOffset,
   size += sizeof(deviceDoubleComplex) * (2 * lsms.maxlmax + 1);
 
   *sinmpOffset = size;
-  size += sizeof(double) * (2 * lsms.maxlmax + 1);
+  size += sizeof(Real) * (2 * lsms.maxlmax + 1);
 
   *cosmpOffset = size;
-  size += sizeof(double) * (2 * lsms.maxlmax + 1);
+  size += sizeof(Real) * (2 * lsms.maxlmax + 1);
 
   *plmOffset = size;
-  size += sizeof(double) * (AngularMomentumIndices::ndlm);
+  size += sizeof(Real) * (AngularMomentumIndices::ndlm);
 
   // *dlmOffset = size;
   // size += sizeof(deviceDoubleComplex) * (AngularMomentumIndices::ndlj);
@@ -252,8 +256,8 @@ __global__ void setBGijHip(bool fullRelativity, int n_spin_cant, int *LIZlmax,
 }
 
 __global__ void buildGijHipKernel(
-    Real *LIZPos, int *LIZlmax, int *lofk, int *mofk, deviceDoubleComplex *ilp1,
-    deviceDoubleComplex *illp, Real *cgnt, int ndlj_illp, int lmaxp1_cgnt,
+    Real *LIZPos, int *LIZlmax, int *lofk, int *mofk, deviceComplex *ilp1,
+    deviceComplex *illp, Real *cgnt, int ndlj_illp, int lmaxp1_cgnt,
     int ndlj_cgnt, size_t hfnOffset, size_t sinmpOffset, size_t cosmpOffset,
     size_t plmOffset, size_t dlmOffset,
 #if !defined(COMPARE_ORIGINAL)
@@ -425,8 +429,13 @@ __global__ void buildGijHipKernel(
       // devBgij[IDX(iOffset + lm2, jOffset + lm1, nrmat_ns)] =
       // devBgij[IDX(iOffset + lm2, jOffset + lm1, nrmat_ns)] *devBgijPointer =
       // *devBgijPointer
+#if SP
+      devBgij[IDX(iOffset + lm2, jOffset + lm1, nrmat_ns)] =
+	      pi4 * hipCmul(devBgijValue, hipComplexFloatToDouble(illp[IDX(lm2, lm1, ndlj_illp)]));
+#else
       devBgij[IDX(iOffset + lm2, jOffset + lm1, nrmat_ns)] =
 	      pi4 * hipCmul(devBgijValue, illp[IDX(lm2, lm1, ndlj_illp)]);
+#endif
           // devBgijValue * pi4 * illp[IDX(lm2, lm1, ndlj_illp)];
     }
 

@@ -146,6 +146,8 @@
     size_type n_row() const { return nRow; }
     size_type n_col() const { return nCol; }
     size_type l_dim() const { return lDim; }
+    T* get_data() { return this->data; }
+    const T* get_data() const { return this->data; }
     
   // \subsection{Operations on Matrices}
 

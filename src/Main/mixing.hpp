@@ -70,11 +70,16 @@ public:
   void invert(Matrix<Real> &A, int nn) {
     int LDIM = A.l_dim();
     int LWORK = LDIM * LDIM;
-    double *WORK = new double[LWORK];
+    Real *WORK = new Real[LWORK];
     int INFO;
 
+#if SP
+    LAPACK::sgetrf_(&nn, &nn, &A(0, 0), &LDIM, &ipiv[0], &INFO);
+    LAPACK::sgetri_(&nn, &A(0, 0), &LDIM, &ipiv[0], WORK, &LWORK, &INFO);
+#else
     LAPACK::dgetrf_(&nn, &nn, &A(0, 0), &LDIM, &ipiv[0], &INFO);
     LAPACK::dgetri_(&nn, &A(0, 0), &LDIM, &ipiv[0], WORK, &LWORK, &INFO);
+#endif
 
     delete[] WORK;
   }

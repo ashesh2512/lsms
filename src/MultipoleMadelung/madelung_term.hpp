@@ -31,8 +31,8 @@ namespace lsms {
  */
 template <class T>
 inline T reciprocal_space_term(matrix<T> &knlat, std::vector<T> &knlatsq,
-                               std::vector<T> &aij, int nknlat, double eta,
-                               double omega) {
+                               std::vector<T> &aij, int nknlat, Real eta,
+                               Real omega) {
   auto term12 = 0.0;
   auto fac = eta * eta / 4.0;
 
@@ -69,7 +69,7 @@ inline T real_space_term(matrix<T> &rslat, std::vector<T> &aij, int nrslat,
 
   auto rterm = 0.0;
 
-  double rslatmd;
+  Real rslatmd;
 
   for (auto i = ibegin; i < nrslat; i++) {
     rslatmd = std::sqrt((rslat(0, i) - aij[0]) * (rslat(0, i) - aij[0]) +
@@ -86,8 +86,8 @@ inline T real_space_term(matrix<T> &rslat, std::vector<T> &aij, int nrslat,
  * Dl sum
  */
 void dlsum(std::vector<Real> &aij, matrix<Real> &rslat, int nrslat, int ibegin,
-           matrix<Real> &knlat, int nknlat, double omega, int lmax_mad,
-           double eta, std::vector<Complex> &dlm);
+           matrix<Real> &knlat, int nknlat, Real omega, int lmax_mad,
+           Real eta, std::vector<Complex> &dlm);
 
 }  // namespace lsms
 

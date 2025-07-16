@@ -65,6 +65,7 @@ void printLSMSSystemParameters(FILE *f, LSMSSystemParameters &lsms) {
   else
     fprintf(f, "Pot. Out  : not written.\n");
   fprintf(f, "spin_cant    : %d\n", lsms.n_spin_cant);
+  fprintf(f, "constraint   : %d\n", lsms.constraint);
   fprintf(f, "Relativity   : ");
   switch (lsms.relativity) {
     case none:

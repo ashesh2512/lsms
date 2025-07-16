@@ -39,5 +39,13 @@ void f_readsingleatomdata_bigcell_(const char *fname_c,int *fname_l,
                                    int *nspin,int *numc,double *xvalws,
                                    double *vr,double *rhotot,double *corden,int *v_dim,
                                    double *ec,int *nc,int *lc,int *kc,int *c_dim,int);
+
+void f_readsingleatomdata_bigcell_sp_(const char *fname_c,int *fname_l,
+                                   char *header,int *jmt,int *jws, float *xstart,
+                                   float *rmt,float *alat,float *efermi,
+                                   float *vdif,float *ztotss,float *zcorss,
+                                   int *nspin,int *numc,float *xvalws,
+                                   float *vr,float *rhotot,float *corden,int *v_dim,
+                                   float *ec,int *nc,int *lc,int *kc,int *c_dim,int);
 };
 #endif

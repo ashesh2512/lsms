@@ -52,7 +52,7 @@ subroutine cgaunt(lmax, clm, &
    !     ================================================================
    !     generate the gaussian integration pts and weights...............
    !     ----------------------------------------------------------------
-   call gauss_legendre_points(-1.d0, 1.d0, tg, wg, 2 * (2 * lmax + 1))
+   call gauss_legendre_points_dp(-1.d0, 1.d0, tg, wg, 2 * (2 * lmax + 1))
    !     ----------------------------------------------------------------
    !
    !     ================================================================
@@ -60,7 +60,7 @@ subroutine cgaunt(lmax, clm, &
    n1 = 2 * lmax + 1
    do ng = 1, n1
       ! meis: changed to normalized associated Legendre functions
-      call plm_normalized(2 * lmax, tg(ng), plmg(1, ng))
+      call plm_normalized_dp(2 * lmax, tg(ng), plmg(1, ng))
    enddo
    !
    if(iprint.ge.1) then

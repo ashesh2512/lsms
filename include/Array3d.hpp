@@ -133,6 +133,8 @@
     size_type n_slice() const {return nSlice;}
     size_type l_dim1() const { return lDim1; }
     size_type l_dim2() const { return lDim2;}
+    T* get_data() { return this->data; }
+    const T* get_data() const { return this->data; }
     
   // \subsection{Operations on 3 dim. arrays}
 

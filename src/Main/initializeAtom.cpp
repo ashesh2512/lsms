@@ -108,6 +108,11 @@ void dstevx_(const char *jobz, const char *range, int *n, double *d, double *e,
              double *vl, double *vu, int *il, int *iu, double *abstol, int *m,
              double *w, double *z, int *ldz, double *work, int *iwork,
              int *ifail, int *info);
+
+void sstevx_(const char *jobz, const char *range, int *n, float *d, float *e,
+             float *vl, float *vu, int *il, int *iu, float *abstol, int *m,
+             float *w, float *z, int *ldz, float *work, int *iwork,
+             int *ifail, int *info);
 }
 
 void findSchroedingerEigenvalues(std::vector<Real> &r_mesh,
@@ -123,9 +128,17 @@ void findSchroedingerEigenvalues(std::vector<Real> &r_mesh,
   std::vector<Real> work(5 * n);
   std::vector<int> iwork(5 * n);
   std::vector<int> ifail(n);
+
+#if SP
+  sstevx_("V", "I", &n, &hDiagonal[0], &hSubdiagonal[0], &zero, &zero, &one,
+          &numSolutions, &abstol, &numSolutionsFound, &energy[0], &f(0, 0), &n,
+          &work[0], &iwork[0], &ifail[0], &info);
+#else
   dstevx_("V", "I", &n, &hDiagonal[0], &hSubdiagonal[0], &zero, &zero, &one,
           &numSolutions, &abstol, &numSolutionsFound, &energy[0], &f(0, 0), &n,
           &work[0], &iwork[0], &ifail[0], &info);
+#endif
+
 }
 
 // generate lmax for fixed atom
@@ -701,7 +714,7 @@ void initializeNewPotentials(LSMSCommunication &comm, LSMSSystemParameters &lsms
     local.atom[i].evec[2] = 1.0;
 
     // Generate atomic density
-    std::vector<double> v_pot(local.atom[i].r_mesh.size());
+    std::vector<Real> v_pot(local.atom[i].r_mesh.size());
 
     auto [ks_energies, total_energy] = atomic_dft.solve(local.atom[i].ztotss,
                                                         local.atom[i].r_mesh,
@@ -767,11 +780,11 @@ void initializeNewPotentials(LSMSCommunication &comm, LSMSSystemParameters &lsms
         local.atom[i].rhoNew(ir, i_spin_pol) = local.atom[i].rhotot(ir, 0) / lsms.n_spin_pola;
       }
 
-      double full_norm = lsms::radialIntegral(local.atom[i].rhoNew,
+      Real full_norm = lsms::radialIntegral(local.atom[i].rhoNew,
                                               local.atom[i].r_mesh,
                                               local.atom[i].r_mesh.size(), i_spin_pol);
 
-      double norm = lsms::radialIntegral(local.atom[i].rhoNew,
+      Real norm = lsms::radialIntegral(local.atom[i].rhoNew,
                                          local.atom[i].r_mesh,
                                          local.atom[i].jmt, i_spin_pol);
 
@@ -783,7 +796,7 @@ void initializeNewPotentials(LSMSCommunication &comm, LSMSSystemParameters &lsms
             + factor * local.atom[i].r_mesh[ir] * local.atom[i].r_mesh[ir];
       }
 
-      double norm_scaled = lsms::radialIntegral(local.atom[i].rhoNew,
+      Real norm_scaled = lsms::radialIntegral(local.atom[i].rhoNew,
                                                 local.atom[i].r_mesh,
                                                 local.atom[i].jmt, i_spin_pol);
 
@@ -803,10 +816,10 @@ void initializeNewPotentials(LSMSCommunication &comm, LSMSSystemParameters &lsms
         local.atom[i].rhoNew(ir, 1) *= down_factor * 2.0;
       }
 
-      double norm_up = lsms::radialIntegral(local.atom[i].rhoNew,
+      Real norm_up = lsms::radialIntegral(local.atom[i].rhoNew,
                                             local.atom[i].r_mesh,
                                             local.atom[i].jmt, 0);
-      double norm_down = lsms::radialIntegral(local.atom[i].rhoNew,
+      Real norm_down = lsms::radialIntegral(local.atom[i].rhoNew,
                                               local.atom[i].r_mesh,
                                               local.atom[i].jmt, 1);
 

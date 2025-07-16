@@ -12,7 +12,15 @@
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 
+#include "Real.hpp"
+
 typedef cuDoubleComplex deviceDoubleComplex;
+
+#if SP
+    typedef cuFloatComplex deviceComplex;
+#else
+    typedef cuDoubleComplex deviceComplex;
+#endif
 
 const auto deviceMemcpyHostToDevice = cudaMemcpyHostToDevice;
 const auto deviceMemcpyDeviceToHost = cudaMemcpyDeviceToHost;
@@ -66,6 +74,12 @@ inline deviceError_t deviceStreamDestroy(cudaStream_t stream)
 #include <hipblas/hipblas.h>
 
 typedef hipDoubleComplex deviceDoubleComplex;
+
+#if SP
+    typedef hipFloatComplex deviceComplex;
+#else
+    typedef hipDoubleComplex deviceComplex;
+#endif
 
 const auto deviceMemcpyHostToDevice = hipMemcpyHostToDevice;
 const auto deviceMemcpyDeviceToHost = hipMemcpyDeviceToHost;

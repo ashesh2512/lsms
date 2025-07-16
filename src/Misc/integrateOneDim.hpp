@@ -105,21 +105,21 @@ void integrateOneDimSpherical(Real *grid, Real *integrand, Real *integral,
     for (size_t i = 0; i < n - 1; i++) {
       fit.set(
           grid, integrand,
-          [](Real r, Real f) { return 4.0 * M_PI * r * r * f; }, i, n);
+          [](Real r, Real f) { return toReal(4.0) * toReal(M_PI) * r * r * f; }, i, n);
       integral[i + 1] = integral[i] + fit.integral(grid[i], grid[i + 1]);
     }
   else if (stepSubdivision == 1)
     for (size_t i = 0; i < n - 1; i++) {
       fit.set(
           grid, integrand,
-          [](Real r, Real f) { return 4.0 * M_PI * r * r * f; }, i, n);
+          [](Real r, Real f) { return toReal(4.0) * toReal(M_PI) * r * r * f; }, i, n);
       integral[i + 1] = integral[i] + integrateStep(grid[i], grid[i + 1], fit);
     }
   else
     for (size_t i = 0; i < n - 1; i++) {
       fit.set(
           grid, integrand,
-          [](Real r, Real f) { return 4.0 * M_PI * r * r * f; }, i, n);
+          [](Real r, Real f) { return toReal(4.0) * toReal(M_PI) * r * r * f; }, i, n);
       Real h = (grid[i + 1] - grid[i]) * invStepSubdivision;
       Real x0 = grid[i];
       Real x1 = x0 + h;

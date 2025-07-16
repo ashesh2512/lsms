@@ -14,7 +14,8 @@
 
 extern "C"
 {
-void spin_trafo_(Real *evec, Complex * u, Complex *ud);
+void spin_trafo_(double *evec, DComplex * u, DComplex *ud);
+void spin_trafo_sp_(float *evec, FComplex * u, FComplex *ud);
 }
 
 
@@ -29,7 +30,7 @@ public:
   void reset()
   {
     b_con[0] = b_con[1] = b_con[2] = 0.0;
-    for(double & b_basi : b_basis)
+    for(Real & b_basi : b_basis)
       b_basi = 0.0;
     b_basis[0] = b_basis[4] = b_basis[8] = 1.0;
     mConstraint = -1.0;
@@ -38,7 +39,7 @@ public:
 
   void reset_b_basis()
   {
-    for(double & b_basi : b_basis) b_basi = 0.0;
+    for(Real & b_basi : b_basis) b_basi = 0.0;
     b_basis[0] = b_basis[4] = b_basis[8] = 1.0;
   }
 
@@ -49,7 +50,7 @@ public:
     Real norm=std::sqrt(norm2);
     evec[0]=evec[0]/norm; evec[1]=evec[1]/norm; evec[2]=evec[2]/norm;
     Real cost=evec[2];
-    Real sint = std::sqrt(1.0-cost*cost);
+    Real sint = std::sqrt(toReal(1.0)-cost*cost);
     Real cosp=1.0;
     Real sinp=0.0;
     if(std::abs(sint)>tol)
@@ -178,13 +179,13 @@ public:
 	vr(i,1) = vr(i,0);
       for(int i=0; i<rhotot.l_dim(); i++)
       {
-	rhotot(i,1) = rhotot(i,0) = 0.5*rhotot(i,0);
+	rhotot(i,1) = rhotot(i,0) = toReal(0.5)*rhotot(i,0);
       }
       for(int i=0; i<vrNew.l_dim(); i++)
 	vrNew(i,1) = vrNew(i,0);
       for(int i=0; i<rhoNew.l_dim(); i++)
       {
-	rhoNew(i,1) = rhoNew(i,0) = 0.5*rhoNew(i,0);
+	rhoNew(i,1) = rhoNew(i,0) = toReal(0.5)*rhoNew(i,0);
       }
       for(int i=0; i<exchangeCorrelationPotential.l_dim(); i++)
 	exchangeCorrelationPotential(i,1) = exchangeCorrelationPotential(i,0);
@@ -205,33 +206,33 @@ public:
       ecorv[1] = ecorv[0]; esemv[1] = esemv[0];
       for(int i=0; i<corden.l_dim(); i++)
       {
-	corden(i,1) = corden(i,0) = 0.5*corden(i,0);
+	corden(i,1) = corden(i,0) = toReal(0.5)*corden(i,0);
       }
       for(int i=0; i<semcor.l_dim(); i++)
-	semcor(i,1) = semcor(i,0) = 0.5*semcor(i,0);
+	semcor(i,1) = semcor(i,0) = toReal(0.5)*semcor(i,0);
 
       nspin = 2;
     }
     if(nspinNew == 1) // extend from non spin polarized to spin polarized
     {
-      xvalws[0] = 0.5*(xvalws[0]+xvalws[1]);
-      xvalwsNew[0] = 0.5*(xvalwsNew[0]+xvalwsNew[1]);
-      xvalmt[0] = 0.5*(xvalmt[0]+xvalmt[1]);
+      xvalws[0] = toReal(0.5)*(xvalws[0]+xvalws[1]);
+      xvalwsNew[0] = toReal(0.5)*(xvalwsNew[0]+xvalwsNew[1]);
+      xvalmt[0] = toReal(0.5)*(xvalmt[0]+xvalmt[1]);
       for(int i=0; i<vr.l_dim(); i++)
-	vr(i,0) = 0.5*(vr(i,0)+vr(i,1));;
+	vr(i,0) = toReal(0.5)*(vr(i,0)+vr(i,1));;
       for(int i=0; i<rhotot.l_dim(); i++)
-	rhotot(i,0) = 0.5*(rhotot(i,0)+rhotot(i,1));
+	rhotot(i,0) = toReal(0.5)*(rhotot(i,0)+rhotot(i,1));
       for(int i=0; i<vrNew.l_dim(); i++)
-	vrNew(i,0) = 0.5*(vrNew(i,0)+vrNew(i,1));
+	vrNew(i,0) = toReal(0.5)*(vrNew(i,0)+vrNew(i,1));
       for(int i=0; i<rhoNew.l_dim(); i++)
-	rhoNew(i,0) = 0.5*(rhoNew(i,0)+rhoNew(i,1));
+	rhoNew(i,0) = toReal(0.5)*(rhoNew(i,0)+rhoNew(i,1));
 
       for(int i=0; i<exchangeCorrelationPotential.l_dim(); i++)
-	exchangeCorrelationPotential(i,0) = 0.5*(exchangeCorrelationPotential(i,0)+exchangeCorrelationPotential(i,1));
+	exchangeCorrelationPotential(i,0) = toReal(0.5)*(exchangeCorrelationPotential(i,0)+exchangeCorrelationPotential(i,1));
       for(int i=0; i<exchangeCorrelationEnergy.l_dim(); i++)
 	exchangeCorrelationEnergy(i,0) = exchangeCorrelationEnergy(i,0)+exchangeCorrelationEnergy(i,1);
 
-      exchangeCorrelationV[0] = 0.5*(exchangeCorrelationV[0]+exchangeCorrelationV[1]);
+      exchangeCorrelationV[0] = toReal(0.5)*(exchangeCorrelationV[0]+exchangeCorrelationV[1]);
 
       /*
       for(int i=0; i<ec.l_dim(); i++)
@@ -246,9 +247,9 @@ public:
 
       ecorv[0] = ecorv[0]+ecorv[1]; esemv[0] = esemv[0]+esemv[1];
       for(int i=0; i<corden.l_dim(); i++)
-	corden(i,0) = 0.5*(corden(i,0)+corden(i,1));
+	corden(i,0) = toReal(0.5)*(corden(i,0)+corden(i,1));
       for(int i=0; i<semcor.l_dim(); i++)
-	semcor(i,0) = 0.5*(semcor(i,0)+semcor(i,1));
+	semcor(i,0) = toReal(0.5)*(semcor(i,0)+semcor(i,1));
 
       nspin = 1;
     }
@@ -258,50 +259,50 @@ public:
   {
     if(nspin == 1) return;
 
-    xvalws[0] = 0.5*(xvalws[0]+xvalws[1]);
+    xvalws[0] = toReal(0.5)*(xvalws[0]+xvalws[1]);
     xvalws[1] = xvalws[0];
-    xvalwsNew[0] = 0.5*(xvalwsNew[0]+xvalwsNew[1]);
+    xvalwsNew[0] = toReal(0.5)*(xvalwsNew[0]+xvalwsNew[1]);
     xvalwsNew[1] = xvalwsNew[0];
-    xvalmt[0] = 0.5*(xvalmt[0]+xvalmt[1]);
+    xvalmt[0] = toReal(0.5)*(xvalmt[0]+xvalmt[1]);
     xvalmt[1] = xvalmt[0];
     for(int i=0; i<vr.l_dim(); i++)
     {
-      vr(i,0) = 0.5*(vr(i,0)+vr(i,1));
+      vr(i,0) = toReal(0.5)*(vr(i,0)+vr(i,1));
       vr(i,1) = vr(i,0);
     }
     for(int i=0; i<rhotot.l_dim(); i++)
     {
-      rhotot(i,0) = 0.5*(rhotot(i,0)+rhotot(i,1));
+      rhotot(i,0) = toReal(0.5)*(rhotot(i,0)+rhotot(i,1));
       rhotot(i,1) = rhotot(i,0);
     }
     for(int i=0; i<vrNew.l_dim(); i++)
     {
-      vrNew(i,0) = 0.5*(vrNew(i,0)+vrNew(i,1));
+      vrNew(i,0) = toReal(0.5)*(vrNew(i,0)+vrNew(i,1));
       vrNew(i,1) = vrNew(i,0);
     }
     for(int i=0; i<rhoNew.l_dim(); i++)
     {
-      rhoNew(i,0) = 0.5*(rhoNew(i,0)+rhoNew(i,1));
+      rhoNew(i,0) = toReal(0.5)*(rhoNew(i,0)+rhoNew(i,1));
       rhoNew(i,1) = rhoNew(i,0);
     }
 
     for(int i=0; i<exchangeCorrelationPotential.l_dim(); i++)
     {
-      exchangeCorrelationPotential(i,0) = 0.5*(exchangeCorrelationPotential(i,0)+exchangeCorrelationPotential(i,1));
+      exchangeCorrelationPotential(i,0) = toReal(0.5)*(exchangeCorrelationPotential(i,0)+exchangeCorrelationPotential(i,1));
       exchangeCorrelationPotential(i,1) = exchangeCorrelationPotential(i,0);
     }
 
-    exchangeCorrelationV[0] = 0.5*(exchangeCorrelationV[0]+exchangeCorrelationV[1]);
+    exchangeCorrelationV[0] = toReal(0.5)*(exchangeCorrelationV[0]+exchangeCorrelationV[1]);
     exchangeCorrelationV[1] = exchangeCorrelationV[0];
 
     for(int i=0; i<corden.l_dim(); i++)
     {
-      corden(i,0) = 0.5*(corden(i,0)+corden(i,1));
+      corden(i,0) = toReal(0.5)*(corden(i,0)+corden(i,1));
       corden(i,1) = corden(i,0);
     }
     for(int i=0; i<semcor.l_dim(); i++)
     {
-      semcor(i,0) = 0.5*(semcor(i,0)+semcor(i,1));
+      semcor(i,0) = toReal(0.5)*(semcor(i,0)+semcor(i,1));
       semcor(i,1) = semcor(i,0);
     }
   }
@@ -433,7 +434,11 @@ public:
     evec[0] = x;
     evec[1] = y;
     evec[2] = z;
+#if SP
+    spin_trafo_sp_(evec, ubr, ubrd);
+#else
     spin_trafo_(evec, ubr, ubrd);
+#endif
   }
 
 
@@ -451,7 +456,7 @@ public:
   int jmt{},jws{};
   Real xstart{},rmt{},h{};
   Real rInscribed{}; // LSMS_1.9: rins
-  Real rCircumscribed{};
+  double rCircumscribed{};
   std::vector<Real> r_mesh, x_mesh;
   bool generateNewMesh{};
 

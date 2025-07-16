@@ -25,13 +25,13 @@ int readSingleAtomData_hdf5(hid_t loc_id, AtomData &atom)
   read_scalar<int>(loc_id,"jws",atom.jws,dti);
   read_scalar<int>(loc_id,"Nspin",atom.nspin,dti);
   read_scalar<int>(loc_id,"NumC",atom.numc,dti);
-  read_scalar<double>(loc_id,"alat",atom.alat,dtf);
-  read_scalar<double>(loc_id,"Efermi",atom.efermi,dtf);
-  read_scalar<double>(loc_id,"Vdif",atom.vdif,dtf);
-  read_scalar<double>(loc_id,"Ztot",atom.ztotss,dtf);
-  read_scalar<double>(loc_id,"Zcore",atom.zcorss,dtf);
-  read_scalar<double>(loc_id,"Xstart",atom.xstart,dtf);
-  read_scalar<double>(loc_id,"rmt",atom.rmt,dtf);
+  read_scalar<Real>(loc_id,"alat",atom.alat,dtf);
+  read_scalar<Real>(loc_id,"Efermi",atom.efermi,dtf);
+  read_scalar<Real>(loc_id,"Vdif",atom.vdif,dtf);
+  read_scalar<Real>(loc_id,"Ztot",atom.ztotss,dtf);
+  read_scalar<Real>(loc_id,"Zcore",atom.zcorss,dtf);
+  read_scalar<Real>(loc_id,"Xstart",atom.xstart,dtf);
+  read_scalar<Real>(loc_id,"rmt",atom.rmt,dtf);
 
   int npts=std::max(atom.jmt,atom.jws);
   if(npts>atom.vr.n_row())
@@ -43,23 +43,23 @@ int readSingleAtomData_hdf5(hid_t loc_id, AtomData &atom)
   // if(atom.numc<atom.nc.n_row())
   atom.resizeCore(atom.numc);
 
-  num_read=read_vector<double>(loc_id,"xvalws",atom.xvalws,atom.nspin,dtf);
+  num_read=read_vector<Real>(loc_id,"xvalws",atom.xvalws,atom.nspin,dtf);
   if(atom.nspin!=num_read) printf("WARNING in single_pot_read, xvalws\n");
 
   for(int ns=0; ns<atom.nspin; ns++)
   {
     snprintf(gname,40,"V%1.1d", ns+1);
-    num_read=read_vector<double>(loc_id,gname,&atom.vr(0,ns),atom.jmt,dtf);
+    num_read=read_vector<Real>(loc_id,gname,&atom.vr(0,ns),atom.jmt,dtf);
     if(atom.jmt!=num_read) printf("WARNING in single_pot_read, vr\n");
     snprintf(gname,40,"rhotot%1.1d", ns+1);
-    num_read=read_vector<double>(loc_id,gname,&atom.rhotot(0,ns),atom.jws,dtf);
+    num_read=read_vector<Real>(loc_id,gname,&atom.rhotot(0,ns),atom.jws,dtf);
     if(atom.jws!=num_read) printf("WARNING in single_pot_read, rhotot\n");
 
 //  read core states if numc>0
     if(atom.numc>0)
     {
       snprintf(gname,40,"ec%1.1d", ns+1);
-      num_read=read_vector<double>(loc_id,gname,&atom.ec(0,ns),atom.numc,dtf);
+      num_read=read_vector<Real>(loc_id,gname,&atom.ec(0,ns),atom.numc,dtf);
       if(atom.numc!=num_read) printf("WARNING in single_pot_read, ec\n");
       snprintf(gname,40,"nc%1.1d", ns+1);
       num_read=read_vector<int>(loc_id,gname,&atom.nc(0,ns),atom.numc,dti);
@@ -72,7 +72,7 @@ int readSingleAtomData_hdf5(hid_t loc_id, AtomData &atom)
       if(atom.numc!=num_read) printf("WARNING in single_pot_read, kc\n");
     }
   }
-  num_read=read_vector<double>(loc_id,"evec",atom.evec,3,dtf);
+  num_read=read_vector<Real>(loc_id,"evec",atom.evec,3,dtf);
   if(3!=num_read) printf("WARNING in single_pot_read, evec\n");
   num_read=read_vector<char>(loc_id,"Header",atom.header,80,dtc);
   if(80!=num_read) printf("WARNING in single_pot_read, header\n");

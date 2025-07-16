@@ -35,6 +35,14 @@ void getcor_(int *n_spin_pola, int *mtasa, int *jmt, int *jws, double *r_mesh,
              double *semcor, int *nrelc, double *qcpsc_mt, double *qcpsc_ws,
              double *mcpsc_mt, double *mcpsc_ws, int *iprpts, int *ipcore,
              int *iprint, char *istop, int itop_length);
+
+void getcor_sp_(int *n_spin_pola, int *mtasa, int *jmt, int *jws, float *r_mesh,
+               float *h, float *xstart, float *vr, int *numc, int *nc, int *lc,
+               int *kc, float *ec, float *ztotss, float *zsemss,
+               float *zcorss, float *ecorv, float *esemv, float *corden,
+               float *semcor, int *nrelc, float *qcpsc_mt, float *qcpsc_ws,
+               float *mcpsc_mt, float *mcpsc_ws, int *iprpts, int *ipcore,
+               int *iprint, char *istop, int itop_length);
 }
 
 #endif

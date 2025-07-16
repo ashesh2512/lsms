@@ -22,7 +22,7 @@ class XCBase {
 
   XCBase(int n_spin, std::vector<int> xc_functional);
 
-  virtual void evaluate(const std::vector<Real> &r_mesh, double h,
+  virtual void evaluate(const std::vector<Real> &r_mesh, Real h,
                         const Matrix<Real> &rho_in, int jmt,
                         Matrix<Real> &xc_energy_out, Matrix<Real> &xc_pot_out) = 0;
 
