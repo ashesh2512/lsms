@@ -347,7 +347,7 @@ int writePotentials(LSMSCommunication &comm, LSMSSystemParameters &lsms,
                     CrystalParameters &crystal, LocalTypeInfo &local) {
   AtomData pot_data;
   if (lsms.pot_out_type < 0) return 0;  // don't write potential
-  if (lsms.pot_out_type > 1) return 1;  // unknown potential type
+  if (lsms.pot_out_type > 2) return 1;  // unknown potential type
 
   int lsmsFileFormat = 1;
   if (crystal.num_types > 100000) lsmsFileFormat = 2;
@@ -420,6 +420,26 @@ int writePotentials(LSMSCommunication &comm, LSMSSystemParameters &lsms,
           if (local_id != crystal.types[i].local_id)
             printf("WARNING: local_id doesn't match in writePotentials!\n");
           writeSingleAtomData_bigcell(fname, pot_data);
+          // update evec in crystal
+          updateCrystalFromAtom(lsms, crystal, pot_data, i);
+        }
+      } else if (lsms.pot_out_type == 2) {  // POTTXT style Text (for use in MuST.jl)
+        snprintf(fname, 250, "%s.%d.pot", lsms.potential_file_out, id);
+        fname_l = strlen(fname);
+        // printf("BIGCELL format file '%s'\n",fname);
+        if (crystal.types[i].node == comm.rank) {
+          writeSingleAtomData_pottxt(fname,
+                                      local.atom[crystal.types[i].local_id]);
+          // update evec in crystal
+          updateCrystalFromAtom(lsms, crystal,
+                                local.atom[crystal.types[i].local_id], i);
+        } else {
+          int local_id;
+          communicateSingleAtomData(comm, crystal.types[i].node, comm.rank,
+                                    local_id, pot_data, i);
+          if (local_id != crystal.types[i].local_id)
+            printf("WARNING: local_id doesn't match in writePotentials!\n");
+          writeSingleAtomData_pottxt(fname, pot_data);
           // update evec in crystal
           updateCrystalFromAtom(lsms, crystal, pot_data, i);
         }

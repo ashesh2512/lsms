@@ -21,6 +21,7 @@ target_sources(
          writeSingleAtomData_hdf5.cpp
          writeSingleAtomData_bigcell.cpp
          F_writeSingleAtomData_bigcell.f90
+         writeSingleAtomData_pottxt.cpp
          checkAntiFerromagneticStatus.cpp
          AtomData.hpp
          checkAntiFerromagneticStatus.hpp

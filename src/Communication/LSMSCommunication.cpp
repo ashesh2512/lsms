@@ -32,7 +32,7 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
                            lsms::MixingParameterPack &mix,
                            AlloyMixingDesc &alloyDesc) {
   const int s = sizeof(LSMSSystemParameters) + 9 * sizeof(Real) + sizeof(int) +
-                10 + sizeof(lsms::MixingParameterPack) + 5 * sizeof(int) +
+                sizeof(lsms::MixingParameterPack) +
                 sizeof(int);  // <-- +1 for no. alloy classes
 
   char buf[s];
@@ -389,7 +389,7 @@ void communicateParameters(LSMSCommunication &comm, LSMSSystemParameters &lsms,
                            AlloyMixingDesc &alloyDesc)
 {
   const int s = sizeof(LSMSSystemParameters) + 9*sizeof(Real) + sizeof(int)
-      + 10 + sizeof(MixingParameters) + 5*sizeof(int)
+      + mix.numQuantities * (2 * sizeof(int) + sizeof(Real))
       + sizeof(int); // <-- +1 for no. alloy classes
   char buf[s];
   int nalloy_classes;

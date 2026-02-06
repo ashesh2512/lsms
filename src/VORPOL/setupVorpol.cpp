@@ -29,15 +29,6 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
 
   bool useOldAlgorithm = false;
 
-  if(lsms.global.iprint >= 0)
-  {
-    if(useOldAlgorithm)
-     printf("Constructing Voronoi polyhedra using the OLD algorithm.\n");
-    else
-     printf("Constructing Voronoi polyhedra using the NEW algorithm.\n");
-  }
-
-
   for(int i=0; i<local.num_local; i++)
   {
     if(local.atom[i].vpClusterGlobalIdx.size() > maxClusterSize)
@@ -49,6 +40,14 @@ void setupVorpol(LSMSSystemParameters &lsms, CrystalParameters &crystal, LocalTy
 //  if(crystal.num_atoms < numSwitchAlgorithms)
 //    useOldAlgorithm = true;
 
+  if(lsms.global.iprint >= 0)
+  {
+    if(useOldAlgorithm)
+     printf("Constructing Voronoi polyhedra using the OLD algorithm.\n");
+    else
+     printf("Constructing Voronoi polyhedra using the NEW algorithm.\n");
+  }
+  
   crystal.omega=
     (crystal.bravais(1,0)*crystal.bravais(2,1)
      -crystal.bravais(2,0)*crystal.bravais(1,1))*crystal.bravais(0,2)+

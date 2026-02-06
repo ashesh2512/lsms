@@ -31,7 +31,8 @@ c
 
       integer   iprint
 
-      dimension vr(ns),br(ns),bopr(ns,2)
+!     dimension vr(ns),br(ns),bopr(ns,2)
+      dimension vr(iprpts),br(iprpts),bopr(iprpts,2)
       complex*16 tminv2(2,2)
       complex*16 tminv(kmymax,kmymax)
       complex*16 gz2(iprpts,2,2),fz2(iprpts,2,2)
@@ -57,16 +58,21 @@ c     write(6,'(2f10.6,i5)') dx,rs,ns
 c     write(6,'(4d20.10)') (vr(j),j=1,ns)
 c     write(6,'(4d20.10)') (br(j),j=1,ns)
 c
-!     write(6,*) 'meis'
-!     write(6,*)ce,psq,lmax,idpot,v0
-!     write(6,*)vr(1),vr(ns),br(1),br(ns)
-!     write(6,*)dx,ns,rs
+      write(6,*) 'meis'
+      write(6,*)ce,psq,lmax,idpot,v0
+      write(6,*)vr(1),vr(ns),br(1),br(ns)
+      write(6,*)dx,ns,rs,iprpts
 
 !     write(6,*) 'entering ',sname
 
       kmax=2*lmax+1
 !     kmymax=2*(lmax+1)*(lmax+1)
       call zeroout(tminv,2*kmymax*kmymax)
+
+      call zeroout(gz, 2*iprpts*nuzp*kmymax)
+      call zeroout(fz, 2*iprpts*nuzp*kmymax)
+      call zeroout(gj, 2*iprpts*nuzp*kmymax)
+      call zeroout(fj, 2*iprpts*nuzp*kmymax)
 c
 !     idpot .eq. 0 -> Vacuum
       if(idpot.eq.0) then
@@ -112,6 +118,12 @@ c
      >                   tminv2,gz2,fz2,gj2,fj2,iflag,iprpts,lmax)
 c
 !         write(6,*) sname,2
+          write(6,*) 'l,my=',l,my
+          write(6,*) 'gz2(1,1,1):',gz2(1,1,1)
+          write(6,*) 'gz2(1,1,2):',gz2(1,1,2)
+          write(6,*) 'gz2(1,2,1):',gz2(1,2,1)
+          write(6,*) 'gz2(1,2,2):',gz2(1,2,2)
+          write(6,*)
 
             if(iabs(my).eq.2*l+1) then
 c

@@ -11,7 +11,8 @@
 #include "Potential/getXCName.hpp"
 
 const char *potentialTypeName[] = {"HDF5 (LSMS_1 format)",
-                                   "Text (BIGCELL format)"};
+                                   "Text (BIGCELL format)",
+                                   "Text (POTTXT format)"};
 
 void printLSMSGlobals(FILE *f, LSMSSystemParameters &lsms) {
   fprintf(f, "LSMS Globals:\n");

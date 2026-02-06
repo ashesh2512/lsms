@@ -51,14 +51,14 @@ c
       data sqrtm1/(0.d0,1.d0)/
 c
 c     write(6,*) 
-c     write(6,*) ' L,MU=:',l,my
+      write(6,*) ' L,MU=:',l,my
 c     write(6,*) 
 c
-!     write(6,*) 'entering ',sname
-!     write(6,*) 'ns=',ns
+      write(6,*) 'entering ',sname
+      write(6,*) 'ns=',ns
 
       scale=dabs(1.0d0-socsc).gt.1.0d-3
-!     write(6,*) 'SPZWAFU scale=',scale
+      write(6,*) 'SPZWAFU scale=',scale
 c
       call zeroout(gz,8*iprpts)
       call zeroout(fz,8*iprpts)
@@ -116,8 +116,8 @@ c       write(6,'('' gpmt reg '',2d15.8)') ff1*rs
       else
         gg1=g11(ns)/rs
         ff1=f11(ns)/rs
-c       write(6,'('' gmt reg  '',2d15.8)') gg1*rs
-c       write(6,'('' fmt reg  '',2d15.8)') ff1*rs
+        write(6,'('' gmt reg  '',2d15.8)') gg1*rs
+        write(6,'('' fmt reg  '',2d15.8)') ff1*rs
         ggam1=ff1/gg1 
         aa2=p*(ggam1*fn(l)-smlm1*p*fn(l+1)/c)/
      >        (ggam1*fb(l)-smlm1*p*fb(l+1)/c)   
@@ -154,8 +154,8 @@ c       write(6,'('' gpmt irr  '',2d15.8)') ff2*rs
       else
         gg2=g12(ns)/rs
         ff2=f12(ns)/rs
-!       write(6,'('' gmt irr  '',2d15.8)') gg2*rs
-!       write(6,'('' fmt irr  '',2d15.8)') ff2*rs*c
+        write(6,'('' gmt irr  '',2d15.8)') gg2*rs
+        write(6,'('' fmt irr  '',2d15.8)') ff2*rs*c
         ggam2=ff2/gg2 
         ggamb=smlm1*p*fb(l+1)/(c*fb(l))
         aa1=p*(ggamb*fn(l)-smlm1*p*fn(l+1)/c)/(ggamb*gg1-ff1)   
@@ -209,8 +209,8 @@ c         write(6,'('' gpmt reg  '',2d15.8)') gp1(ii,jj)
         do jj=1,2
           g1mat(ii,jj)=g1(ii,jj,ns)/rs 
           f1mat(ii,jj)=f1(ii,jj,ns)/rs 
-c         write(6,'('' gmt reg  '',2d15.8)') g1(ii,jj,ns)
-c         write(6,'('' fmt reg  '',2d15.8)') f1(ii,jj,ns)
+          write(6,'('' gmt reg  '',2d15.8)') g1(ii,jj,ns)
+          write(6,'('' fmt reg  '',2d15.8)') f1(ii,jj,ns)
         end do
         end do
       end if

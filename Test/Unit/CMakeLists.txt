@@ -216,7 +216,7 @@ FetchContent_Declare(matplotplusplus
 
 FetchContent_GetProperties(matplotplusplus)
 if(NOT matplotplusplus_POPULATED)
-    FetchContent_Populate(matplotplusplus)
+    FetchContent_MakeAvailable(matplotplusplus)
     add_subdirectory(${matplotplusplus_SOURCE_DIR} ${matplotplusplus_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 

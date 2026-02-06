@@ -9,6 +9,8 @@ int writeSingleAtomData_hdf5(hid_t loc_id, AtomData &atom, int present_atom);
 
 int writeSingleAtomData_bigcell(const char *fname, AtomData &atom);
 
+int writeSingleAtomData_pottxt(const char *fname, AtomData &atom);
+
 extern "C"
 {
 void f_writesingleatomdata_bigcell_(const char *fname_c,int *fname_l,

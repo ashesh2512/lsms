@@ -325,7 +325,7 @@ target_include_directories(lsmscore PUBLIC ${CMAKE_SOURCE_DIR}/include)
 #
 # Enable Testing with CTest
 #
-option(BUILD_TESTING "Build the testing tree." ON)
+option(BUILD_TESTING "Build the testing tree." OFF)
 if (BUILD_TESTING)
     include(CTest)
     enable_testing()

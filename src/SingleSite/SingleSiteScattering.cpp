@@ -119,7 +119,7 @@ void calculateSingleScattererSolution(LSMSSystemParameters &lsms, AtomData &atom
                          &solution.nuz[0], &solution.indz(0,0), &iflag, &soscal,
                          &iprpts, &lsms.global.iprint,lsms.global.istop,32);
 
-/*
+//*
     for(int j1=0; j1<solution.gz.n_row(); j1++)
       for(int j2=0; j2<solution.gz.n_col(); j2++)
         for(int j3=0; j3<solution.gz.n_slice(); j3++)
@@ -129,8 +129,9 @@ void calculateSingleScattererSolution(LSMSSystemParameters &lsms, AtomData &atom
           printf("fz(%d,%d,%d) = %f %f\n",j1,j2,j3,solution.fz(j1,j2,j3).real(), solution.fz(j1,j2,j3).imag());
           printf("fj(%d,%d,%d) = %f %f\n",j1,j2,j3,solution.fj(j1,j2,j3).real(), solution.fj(j1,j2,j3).imag());
         }
-*/
-   // exit(0);
+
+    exit(0);
+//*/
    // now we have tinv but we need t:
    Complex detl;
    gjinv_(&solution.tmat_g(0,0), &kmymax, &kmymax,&detl);

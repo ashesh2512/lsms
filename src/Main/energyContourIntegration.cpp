@@ -16,6 +16,9 @@
 #include "PhysicalConstants.hpp"
 #include "SingleSite/SingleSiteScattering.hpp"
 #include "calculateDensities.hpp"
+#include "rotateToGlobal.hpp"
+#include "solveSingleScatterers.hpp"
+
 // #include <omp.h>
 #ifdef USE_NVTX
 #include <nvToolsExt.h>
@@ -28,19 +31,14 @@
 #include "Accelerator/DeviceStorage.hpp"
 extern DeviceStorage *deviceStorage;
 #endif
-void solveSingleScatterers(
-    LSMSSystemParameters &lsms, LocalTypeInfo &local,
-    std::vector<Matrix<Real> > &vr, Complex energy,
-    std::vector<NonRelativisticSingleScattererSolution> &solution, int iie);
-void solveSingleScatterers(
-    LSMSSystemParameters &lsms, LocalTypeInfo &local,
-    std::vector<Matrix<Real> > &vr, Complex energy,
-    std::vector<RelativisticSingleScattererSolution> &solution, int iie);
-
-void rotateToGlobal(AtomData &atom, Matrix<Complex> &dos,
-                    Matrix<Complex> &dosck, Matrix<Complex> &dos_orb,
-                    Matrix<Complex> &dosck_rob, Array3d<Complex> &green,
-                    Array3d<Complex> &dens_orb, int i);
+//void solveSingleScatterers(
+//    LSMSSystemParameters &lsms, LocalTypeInfo &local,
+//    std::vector<Matrix<Real> > &vr, Complex energy,
+//    std::vector<NonRelativisticSingleScattererSolution> &solution, int iie);
+//void solveSingleScatterers(
+//    LSMSSystemParameters &lsms, LocalTypeInfo &local,
+//    std::vector<Matrix<Real> > &vr, Complex energy,
+//    std::vector<RelativisticSingleScattererSolution> &solution, int iie);
 
 extern "C" {
 //     cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -145,6 +143,7 @@ void energyContourIntegration(LSMSCommunication &comm,
 
   // calculate coefficients and matrices for spherical relativistic calculations
   if (lsms.relativity == full) {
+    printf("lsms.maxlmax = %d\n", lsms.maxlmax);
     clebsch_();
     gfill_(&lsms.maxlmax);
     gafill_(&lsms.maxlmax);
@@ -564,15 +563,19 @@ void energyContourIntegration(LSMSCommunication &comm,
             }
 
             if (lsms.lsmsMode == LSMSMode::gf_out) {
-              fprintf(gfOutFile[i], "Energy #%04d (%lf,%lf)\n", ie,
+              fprintf(gfOutFile[i], "# Energy #%04d (%lf,%lf)\n", ie,
                       std::real(energy), std::imag(energy));
               for (int isp = 0; isp < lsms.n_spin_cant * lsms.n_spin_cant;
                    isp++)
                 for (int lm1 = 0; lm1 < local.atom[i].kkrsz; lm1++)
                   for (int lm2 = 0; lm2 < local.atom[i].kkrsz; lm2++)
+                  {
+                    fprintf(gfOutFile[i], "%04d %lf %lf  ", ie,
+                      std::real(energy), std::imag(energy));
                     fprintf(gfOutFile[i], "%1d %3d %3d %lg %lg\n", isp, lm1,
                             lm2, std::real(greenIntLLp(lm1, lm2, isp)),
                             std::imag(greenIntLLp(lm1, lm2, isp)));
+                  }
             }
 
             if (local.atom[i].forceZeroMoment && (lsms.n_spin_pola > 1)) {
@@ -652,7 +655,7 @@ void energyContourIntegration(LSMSCommunication &comm,
                 &dos_orb(0, i), &dosck_orb(0, i), &dens_orb(0, 0, i),
                 &lsms.global.iprint, lsms.global.istop, 32);
 
-            rotateToGlobal(local.atom[i], dos, dosck, dos_orb, dosck_orb, green,
+            rotateToGlobal(&evec_r(0,i), dos, dosck, dos_orb, dosck_orb, green,
                            dens_orb, i);
 
             // this is the non-rel version now

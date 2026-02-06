@@ -19,7 +19,7 @@
 #include "Array3d.hpp"
 #include "Complex.hpp"
 #include "Matrix.hpp"
-#include "SingleSite/AtomData.hpp"
+// #include "SingleSite/AtomData.hpp"
 
 static void calculateRotationMatrix(Matrix<Real> &drot, Real *tvec, Real phi) {
   Real sp = sin(phi);
@@ -42,23 +42,23 @@ static void calculateRotationMatrix(Matrix<Real> &drot, Real *tvec, Real phi) {
   drot(2, 1) = tx + 2.0 * ty2 * tz2;
 }
 
-void rotateToGlobal(AtomData &atom, Matrix<Complex> &dos,
+void rotateToGlobal(Real *evec_r, Matrix<Complex> &dos,
                     Matrix<Complex> &dosck, Matrix<Complex> &dos_orb,
                     Matrix<Complex> &dosck_orb, Array3d<Complex> &green,
                     Array3d<Complex> &dens_orb, int i) {
   Real axis[3];
   Matrix<Real> rot(3, 3);
 
-  Real a = std::sqrt(atom.evec[0] * atom.evec[0] + atom.evec[1] * atom.evec[1]);
-  Real phi = std::acos(atom.evec[2]);
+  Real a = std::sqrt(evec_r[0] * evec_r[0] + evec_r[1] * evec_r[1]);
+  Real phi = std::acos(evec_r[2]);
 
   if (a == 0.0) {
     axis[0] = axis[1] = 0.0;
-    axis[2] = copysign(1.0, atom.evec[2]);
+    axis[2] = copysign(1.0, evec_r[2]);
     a = 1.0;
   } else {
-    axis[0] = -atom.evec[1];
-    axis[1] = atom.evec[0];
+    axis[0] = -evec_r[1];
+    axis[1] =  evec_r[0];
     axis[2] = 0.0;
     a = 1.0 / a;
   }

@@ -116,6 +116,8 @@ c
 c
       if(iplmax_ext.gt.iplmax) then
         print *,'maxlmax .gt. iplmax!'
+        print *, iplmax_ext
+        print *, iplmax
         print *,'please change iplmax in gfill.h'
         call fstop('gfill')
       end if

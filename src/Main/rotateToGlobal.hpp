@@ -20,7 +20,7 @@
 #ifndef LSMS_ROTATE_TO_GLOBAL_HPP
 #define LSMS_ROTATE_TO_GLOBAL_HPP
 
-void rotateToGlobal(AtomData &atom, Matrix<Complex> &dos,
+void rotateToGlobal(Real *evec_r, Matrix<Complex> &dos,
                     Matrix<Complex> &dosck, Matrix<Complex> &dos_orb,
                     Matrix<Complex> &dosck_rob, Array3d<Complex> &green,
                     Array3d<Complex> &dens_orb, int i);
