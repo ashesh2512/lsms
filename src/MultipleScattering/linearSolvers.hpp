@@ -66,8 +66,8 @@ void solveTau00zblocklu_cpp(LSMSSystemParameters &lsms, LocalTypeInfo &local,
 // #endif
 
 // #ifdef ACCELERATOR_HIP
-#define MST_LINEAR_SOLVER_ZGETRF_HIPBLAS 0x20
 #define MST_LINEAR_SOLVER_ZGETRF_ROCSOLVER 0x20
+#define MST_LINEAR_SOLVER_CGETRF_ROCSOLVER 0x21
 // #endif
 
 #ifdef ACCELERATOR_CUDA_C
@@ -145,13 +145,26 @@ void unitMatrixCuda(T *devM, int lDim, int nCol) {
 #ifdef ACCELERATOR_HIP
 void transferMatrixToGPUHip(Complex *devM, Matrix<Complex> &m);
 void transferMatrixFromGPUHip(Matrix<Complex> &m, hipDoubleComplex *devM);
+
+// Single-precision transfer functions
+void transferMatrixToGPUHipFloat(FloatComplex *devMF, Matrix<Complex> &m);
+void transferT0MatrixToGPUHipFloat(FloatComplex *devT0F, LSMSSystemParameters &lsms, LocalTypeInfo &local, AtomData &atom, int iie, int ispin);
+
 void transferT0MatrixToGPUHip(Complex *devT0, LSMSSystemParameters &lsms, LocalTypeInfo &local, AtomData &atom, int iie, int ispin);
+
 void transferFullTMatrixToGPUHip(Complex *devT, LSMSSystemParameters &lsms, LocalTypeInfo &local,
                                   AtomData &atom, int ispin);
+
+__global__ void convertHipDoubleToHipFloat(hipFloatComplex *dst, const hipDoubleComplex *src, int n);
 
 void solveTau00zgetrf_rocsolver(LSMSSystemParameters &lsms,
                                 LocalTypeInfo &local, DeviceStorage &d,
                                 AtomData &atom, Complex *tMatrix, Complex *devM,
+                                Matrix<Complex> &tau00);
+
+void solveTau00cgetrf_rocsolver(LSMSSystemParameters &lsms,
+                                LocalTypeInfo &local, DeviceStorage &d,
+                                AtomData &atom, FloatComplex *tMatrixF, FloatComplex *devMF,
                                 Matrix<Complex> &tau00);
 
 void solveTauFullzgetrf_rocsolver(LSMSSystemParameters &lsms, LocalTypeInfo &local, DeviceStorage &d, AtomData &atom,
@@ -240,6 +253,9 @@ inline std::string linearSolverName(unsigned int solverId) {
 
     case MST_LINEAR_SOLVER_ZGETRF_ROCSOLVER:
       name += "ROCSOLVER zgetrf";
+      break;
+    case MST_LINEAR_SOLVER_CGETRF_ROCSOLVER:
+      name += "ROCSOLVER cgetrf (single precision)";
       break;
 
     case MST_LINEAR_SOLVER_BLOCK_INVERSE_F77:

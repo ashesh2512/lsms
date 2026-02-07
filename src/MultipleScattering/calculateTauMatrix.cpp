@@ -347,6 +347,7 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
 
   Matrix<Complex> tau00(kkrsz_ns, kkrsz_ns);
   Complex *devM, *devT0;
+  FloatComplex *devMF, *devT0F;
 
   // =======================================
   // build the KKR matrix
@@ -421,6 +422,12 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
       buildKKRMatrixHip(lsms, local, atom, *deviceStorage,
                         deviceAtoms[localAtomIndex], ispin, iie, energy, prel,
                         devM);
+      devMF = deviceStorage->getDevMF();
+      {
+        int totalElements = nrmat_ns * nrmat_ns;
+        convertHipDoubleToHipFloat<<<totalElements, 1>>>
+          ((hipFloatComplex *) devMF, (hipDoubleComplex *) devM, totalElements);
+      }
       break;
 #endif
     default:
@@ -466,6 +473,12 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
           devT0 = deviceStorage->getDevT0();
           transferT0MatrixToGPUHip(devT0, lsms, local, atom, iie, ispin);
           break;
+        case MST_LINEAR_SOLVER_CGETRF_ROCSOLVER:
+          devMF = deviceStorage->getDevMF();
+          transferMatrixToGPUHipFloat(devMF, m);
+          devT0F = deviceStorage->getDevT0F();
+          transferT0MatrixToGPUHipFloat(devT0F, lsms, local, atom, iie, ispin);
+          break;
 #endif
         default:
           break;  // do nothing. We are using the CPU matrix
@@ -499,6 +512,7 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
           break;
 #ifdef ACCELERATOR_HIP
         case MST_LINEAR_SOLVER_ZGETRF_ROCSOLVER:
+        case MST_LINEAR_SOLVER_CGETRF_ROCSOLVER:
           printf("MIXING HIP AND CUDA KERNELS (%x)!!!\n", buildKKRMatrixKernel);
           exit(1);
 #endif
@@ -521,6 +535,10 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
         case MST_LINEAR_SOLVER_ZGETRF_ROCSOLVER:
           devT0 = deviceStorage->getDevT0();
           transferT0MatrixToGPUHip(devT0, lsms, local, atom, iie, ispin);
+          break;
+        case MST_LINEAR_SOLVER_CGETRF_ROCSOLVER:
+          devT0F = deviceStorage->getDevT0F();
+          transferT0MatrixToGPUHipFloat(devT0F, lsms, local, atom, iie, ispin);
           break;
 #ifdef ACCELERATOR_CUDA_C
         case MST_LINEAR_SOLVER_ZGETRF_CUBLAS:
@@ -713,6 +731,10 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
       case MST_LINEAR_SOLVER_ZGETRF_ROCSOLVER:
         solveTau00zgetrf_rocsolver(lsms, local, *deviceStorage, atom, devT0,
                                    devM, tau00);
+        break;
+      case MST_LINEAR_SOLVER_CGETRF_ROCSOLVER:
+        solveTau00cgetrf_rocsolver(lsms, local, *deviceStorage, atom, devT0F,
+                                   devMF, tau00);
         break;
 #endif
       default:

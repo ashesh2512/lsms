@@ -81,6 +81,25 @@ void transferT0MatrixToGPUHip(Complex *devT0, LSMSSystemParameters &lsms,
             hipMemcpyHostToDevice);
 }
 
+void transferT0MatrixToGPUHipFloat(FloatComplex *devT0F, LSMSSystemParameters &lsms,
+                              LocalTypeInfo &local, AtomData &atom, int iie, int ispin) {
+  int kkrsz_ns = lsms.n_spin_cant * atom.kkrsz;
+  int jsm =  kkrsz_ns * kkrsz_ns * ispin;
+  int matrixSize = kkrsz_ns * kkrsz_ns;
+
+  // Allocate temporary host buffer and convert from double to float
+  std::vector<FloatComplex> hostT0F(matrixSize);
+  Complex *src = &local.tmatStore(iie * local.blkSizeTmatStore + jsm, atom.LIZStoreIdx[0]);
+  for (int i = 0; i < matrixSize; i++) {
+    hostT0F[i] = FloatComplex((float)std::real(src[i]), (float)std::imag(src[i]));
+  }
+
+  // Copy float data to GPU
+  hipError_t ret = hipMemcpy(devT0F, hostT0F.data(),
+            matrixSize * sizeof(hipFloatComplex),
+            hipMemcpyHostToDevice);
+}
+
 void transferFullTMatrixToGPUHip(Complex *devT, LSMSSystemParameters &lsms, LocalTypeInfo &local,
                                   AtomData &atom, int ispin)
 {
@@ -123,12 +142,37 @@ void transferMatrixToGPUHip(Complex *devM, Matrix<Complex> &m)
   hipError_t ret = hipMemcpy(devM, &m(0,0), m.l_dim()*m.n_col()*sizeof(hipDoubleComplex), hipMemcpyHostToDevice);
 }
 
+void transferMatrixToGPUHipFloat(FloatComplex *devM, Matrix<Complex> &m)
+{
+  int matrixSize = m.l_dim() * m.n_col();
+
+  // Allocate temporary host buffer and convert from double to float
+  std::vector<FloatComplex> hostMF(matrixSize);
+  Complex *src = &m(0, 0);
+  for (int i = 0; i < matrixSize; i++) {
+    hostMF[i] = FloatComplex((float)std::real(src[i]), (float)std::imag(src[i]));
+  }
+
+  // Copy float data to GPU
+  hipError_t ret = hipMemcpy(devM, hostMF.data(), matrixSize * sizeof(hipFloatComplex), hipMemcpyHostToDevice);
+}
+
+
 void transferMatrixFromGPUHip(Matrix<Complex> &m, hipDoubleComplex *devM) {
   hipError_t ret = hipMemcpy(&m(0, 0), devM, m.l_dim() * m.n_col() * sizeof(hipDoubleComplex),
             hipMemcpyDeviceToHost);
 }
 
 __global__ void copyTMatrixToTauHip(hipDoubleComplex *tau, hipDoubleComplex *t,
+                                    int kkrsz, int nrmat) {
+  int i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+  if (i < kkrsz) {
+    for (int j = 0; j < kkrsz; j++) tau[IDX(i, j, nrmat)] = t[IDX(i, j, kkrsz)];
+  }
+}
+
+// Single-precision (complex float) variants of the copy helpers
+__global__ void copyTMatrixToTauHipFloat(hipFloatComplex *tau, hipFloatComplex *t,
                                     int kkrsz, int nrmat) {
   int i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
   if (i < kkrsz) {
@@ -154,6 +198,32 @@ __global__ void copyTauToTau00Hip(hipDoubleComplex *tau00, hipDoubleComplex *tau
   {
     for(int j=0; j<kkrsz; j++)
       tau00[IDX(i,j,kkrsz)] = tau[IDX(i,j,nrmat)];
+  }
+}
+
+__global__ void copyTauToTau00HipFloat(hipFloatComplex *tau00, hipFloatComplex *tau, int kkrsz, int nrmat) {
+  int i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+  if (i < kkrsz) {
+    for (int j = 0; j < kkrsz; j++)
+      tau00[IDX(i, j, kkrsz)] = tau[IDX(i, j, nrmat)];
+  }
+}
+
+// Conversion kernel: complex float -> complex double (device-side)
+__global__ void convertHipFloatToHipDouble(hipDoubleComplex *dst, const hipFloatComplex *src, int n) {
+  int i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+  if (i < n) {
+    hipFloatComplex v = src[i];
+    dst[i] = make_hipDoubleComplex((double)v.x, (double)v.y);
+  }
+}
+
+// Conversion kernel: complex double -> complex float (device-side)
+__global__ void convertHipDoubleToHipFloat(hipFloatComplex *dst, const hipDoubleComplex *src, int n) {
+  int i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+  if (i < n) {
+    hipDoubleComplex v = src[i];
+    dst[i] = make_hipFloatComplex((float)v.x, (float)v.y);
   }
 }
 
@@ -317,6 +387,75 @@ void solveTau00zgetrf_rocsolver(LSMSSystemParameters &lsms,
 
   // printf("LSMS solveTau00zgetrf_rocsolver: leaving\n");
   //  fflush(stdout);
+}
+
+// Single-precision pathway using rocsolver_cgetrf / rocsolver_cgetrs
+void solveTau00cgetrf_rocsolver(LSMSSystemParameters &lsms,
+                                LocalTypeInfo &local, DeviceStorage &d,
+                                AtomData &atom, FloatComplex *tMatrix, FloatComplex *devM,
+                                Matrix<Complex> &tau00) {
+  rocblas_handle rocblasHandle = DeviceStorage::getRocBlasHandle();
+  int nrmat_ns = lsms.n_spin_cant * atom.nrmat;
+  int kkrsz_ns = lsms.n_spin_cant * atom.kkrsz;
+
+  hipFloatComplex *devTauF = nullptr;
+  hipFloatComplex *devTau00F = nullptr;
+  hipDoubleComplex *devTau00D = nullptr;
+
+  int *devIpiv = d.getDevIpvt();
+  int *devInfo = d.getDevInfo();
+
+  hipError_t ret;
+  ret = hipMalloc(&devTauF, sizeof(hipFloatComplex) * nrmat_ns * kkrsz_ns);
+  ret = hipMalloc(&devTau00F, sizeof(hipFloatComplex) * kkrsz_ns * kkrsz_ns);
+  ret = hipMalloc(&devTau00D, sizeof(hipDoubleComplex) * kkrsz_ns * kkrsz_ns);
+
+  ret = hipMemset(devTauF, 0, sizeof(hipFloatComplex) * nrmat_ns * kkrsz_ns);
+
+#ifdef INCLUDE_ADDITIONAL_SYNCHRONIZE
+  ret = hipDeviceSynchronize();
+#endif
+
+  copyTMatrixToTauHipFloat<<<kkrsz_ns, 1>>>(devTauF, (hipFloatComplex *) tMatrix, kkrsz_ns, nrmat_ns);
+
+#ifdef INCLUDE_ADDITIONAL_SYNCHRONIZE
+  ret = hipDeviceSynchronize();
+#endif
+
+  rocsolver_cgetrf(rocblasHandle, nrmat_ns, nrmat_ns,
+                   (rocblas_float_complex *)devM, nrmat_ns, devIpiv, devInfo);
+
+#ifdef INCLUDE_ADDITIONAL_SYNCHRONIZE
+  ret = hipDeviceSynchronize();
+#endif
+
+  rocsolver_cgetrs(rocblasHandle, rocblas_operation_none, nrmat_ns, kkrsz_ns,
+                   (rocblas_float_complex *)devM, nrmat_ns, devIpiv,
+                   (rocblas_float_complex *)devTauF, nrmat_ns);
+
+#ifdef INCLUDE_ADDITIONAL_SYNCHRONIZE
+  ret = hipDeviceSynchronize();
+#endif
+
+  copyTauToTau00HipFloat<<<kkrsz_ns, 1>>>(devTau00F, devTauF, kkrsz_ns, nrmat_ns);
+
+#ifdef INCLUDE_ADDITIONAL_SYNCHRONIZE
+  ret = hipDeviceSynchronize();
+#endif
+
+  // Convert result to double on device and reuse existing transfer
+  int tau00Size = kkrsz_ns * kkrsz_ns;
+  convertHipFloatToHipDouble<<<tau00Size, 1>>>(devTau00D, devTau00F, tau00Size);
+
+#ifdef INCLUDE_ADDITIONAL_SYNCHRONIZE
+  ret = hipDeviceSynchronize();
+#endif
+
+  transferMatrixFromGPUHip(tau00, devTau00D);
+
+  ret = hipFree(devTauF);
+  ret = hipFree(devTau00F);
+  ret = hipFree(devTau00D);
 }
 
 void solveTauFullzgetrf_rocsolver(LSMSSystemParameters &lsms, LocalTypeInfo &local, DeviceStorage &d, AtomData &atom,
