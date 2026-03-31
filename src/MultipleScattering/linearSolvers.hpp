@@ -29,6 +29,7 @@
 #define MST_BUILD_KKR_MATRIX_F77 0x1000
 #define MST_BUILD_KKR_MATRIX_CPP 0x2000
 #define MST_BUILD_KKR_MATRIX_ACCELERATOR 0x3000
+// #define MST_BUILD_KKR_MATRIX_ACCELERATOR_SP 0x4000
 
 #define MST_LINEAR_SOLVER_ZGESV 1
 void solveTau00zgesv(LSMSSystemParameters &lsms, LocalTypeInfo &local,
@@ -147,8 +148,8 @@ void transferMatrixToGPUHip(Complex *devM, Matrix<Complex> &m);
 void transferMatrixFromGPUHip(Matrix<Complex> &m, hipDoubleComplex *devM);
 
 // Single-precision transfer functions
-void transferMatrixToGPUHipFloat(FloatComplex *devMF, Matrix<Complex> &m);
-void transferT0MatrixToGPUHipFloat(FloatComplex *devT0F, LSMSSystemParameters &lsms, LocalTypeInfo &local, AtomData &atom, int iie, int ispin);
+void transferMatrixToGPUHip_SP(ComplexF *devMF, Matrix<Complex> &m);
+void transferT0MatrixToGPUHip_SP(ComplexF *devT0F, LSMSSystemParameters &lsms, LocalTypeInfo &local, AtomData &atom, int iie, int ispin);
 
 void transferT0MatrixToGPUHip(Complex *devT0, LSMSSystemParameters &lsms, LocalTypeInfo &local, AtomData &atom, int iie, int ispin);
 
@@ -164,7 +165,7 @@ void solveTau00zgetrf_rocsolver(LSMSSystemParameters &lsms,
 
 void solveTau00cgetrf_rocsolver(LSMSSystemParameters &lsms,
                                 LocalTypeInfo &local, DeviceStorage &d,
-                                AtomData &atom, FloatComplex *tMatrixF, FloatComplex *devMF,
+                                AtomData &atom, ComplexF *tMatrixF, ComplexF *devMF,
                                 Matrix<Complex> &tau00);
 
 void solveTauFullzgetrf_rocsolver(LSMSSystemParameters &lsms, LocalTypeInfo &local, DeviceStorage &d, AtomData &atom,

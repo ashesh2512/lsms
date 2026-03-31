@@ -5,5 +5,5 @@
 #include "Real.hpp"
 
 typedef std::complex<Real> Complex;
-typedef std::complex<float> FloatComplex;
+typedef std::complex<float> ComplexF;
 #endif

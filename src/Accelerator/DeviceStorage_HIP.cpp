@@ -144,11 +144,11 @@ int DeviceStorage::allocate(int kkrsz_max,int nspin, int numLIZ, int _nThreads, 
                 i,(size_t)N*(size_t)N*sizeof(Complex),err);
           exit(1);
         }
-        err = deviceMalloc((void**)&dev_mF[i],(size_t)N*(size_t)N*sizeof(FloatComplex));
+        err = deviceMalloc((void**)&dev_mF[i],(size_t)N*(size_t)N*sizeof(ComplexF));
         if(err!=deviceSuccess)
         {
           printf("failed to allocate dev_mF[%d], size=%zu, err=%d\n",
-                i,(size_t)N*(size_t)N*sizeof(FloatComplex),err);
+                i,(size_t)N*(size_t)N*sizeof(ComplexF),err);
           exit(1);
         }
         err = deviceMalloc((void**)&dev_ipvt[i],(size_t)N*sizeof(int));
@@ -206,11 +206,11 @@ int DeviceStorage::allocate(int kkrsz_max,int nspin, int numLIZ, int _nThreads, 
                   i,4*kkrsz_max*kkrsz_max*sizeof(Complex),err);
           exit(1);
         }
-        err = deviceMalloc((void**)&dev_t0F[i], 4*kkrsz_max*kkrsz_max*sizeof(FloatComplex));
+        err = deviceMalloc((void**)&dev_t0F[i], 4*kkrsz_max*kkrsz_max*sizeof(ComplexF));
 	if(err!=deviceSuccess)
         {
           printf("failed to allocate dev_t0F[%d], size=%zu, err=%d\n",
-                  i,4*kkrsz_max*kkrsz_max*sizeof(FloatComplex),err);
+                  i,4*kkrsz_max*kkrsz_max*sizeof(ComplexF),err);
           exit(1);
         }
 
@@ -327,11 +327,11 @@ int DeviceStorage::copyTmatStoreToDevice(Matrix<Complex> &tmatStore,
 
 bool DeviceStorage::initialized = false;
 Complex *DeviceStorage::dev_m[MAX_THREADS], *DeviceStorage::dev_bgij[MAX_THREADS], *DeviceStorage::dev_tmat_n[MAX_THREADS];
-FloatComplex *DeviceStorage::dev_mF[MAX_THREADS];
+ComplexF *DeviceStorage::dev_mF[MAX_THREADS];
 Complex *DeviceStorage::dev_tau[MAX_THREADS], *DeviceStorage::dev_tau00[MAX_THREADS];
 Complex *DeviceStorage::dev_tauFull[MAX_THREADS], *DeviceStorage::dev_tFull[MAX_THREADS];
 Complex *DeviceStorage::dev_t0[MAX_THREADS];
-FloatComplex *DeviceStorage::dev_t0F[MAX_THREADS];
+ComplexF *DeviceStorage::dev_t0F[MAX_THREADS];
 Complex *DeviceStorage::dev_t[MAX_THREADS];
 void *DeviceStorage::dev_work[MAX_THREADS];
 size_t DeviceStorage::dev_workBytes[MAX_THREADS];

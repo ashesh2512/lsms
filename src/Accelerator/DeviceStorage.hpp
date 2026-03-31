@@ -57,9 +57,9 @@ class DeviceStorage {
 private:
   static int nThreads;
   static Complex *dev_m[MAX_THREADS], *dev_bgij[MAX_THREADS], *dev_tmat_n[MAX_THREADS];
-  static FloatComplex *dev_mF[MAX_THREADS];
+  static ComplexF *dev_mF[MAX_THREADS];
   static Complex *dev_tau[MAX_THREADS], *dev_tau00[MAX_THREADS], *dev_t0[MAX_THREADS], *dev_t[MAX_THREADS];
-  static FloatComplex *dev_t0F[MAX_THREADS];
+  static ComplexF *dev_t0F[MAX_THREADS];
   // for conductivity
   static Complex *dev_tauFull[MAX_THREADS], *dev_tFull[MAX_THREADS];
   static int *dev_ipvt[MAX_THREADS];
@@ -102,7 +102,7 @@ public:
   void free();
 
   static Complex* getDevM() { return dev_m[omp_get_thread_num()]; } 
-  static FloatComplex* getDevMF() { return dev_mF[omp_get_thread_num()]; }
+  static ComplexF* getDevMF() { return dev_mF[omp_get_thread_num()]; }
 
   static Complex* getDevBGij() { if(!initialized) {printf("DeviceStorage not initialized\n"); exit(1);}
                                  return dev_bgij[omp_get_thread_num()]; } 
@@ -112,7 +112,7 @@ public:
   static Complex* getDevTau00() { return dev_tau00[omp_get_thread_num()]; }
   static Complex* getDevT() { return dev_t[omp_get_thread_num()]; }
   static Complex* getDevT0() { return dev_t0[omp_get_thread_num()]; }
-  static FloatComplex* getDevT0F() { return dev_t0F[omp_get_thread_num()]; }
+  static ComplexF* getDevT0F() { return dev_t0F[omp_get_thread_num()]; }
   static Complex* getDevTFull() { return dev_tFull[omp_get_thread_num()]; }
   static int* getDevIpvt() { return dev_ipvt[omp_get_thread_num()]; }
   static int* getDevInfo() { return dev_info[omp_get_thread_num()]; }
