@@ -173,9 +173,15 @@ int DeviceStorage::allocate(int kkrsz_max,int nspin, int numLIZ, int _nThreads, 
                   i,(size_t)N*(size_t)N*sizeof(Complex),err);
             exit(1);
           }
+	  err = deviceMalloc((void**)&dev_bgijF[i],(size_t)N*(size_t)N*sizeof(ComplexF));
+          if(err!=deviceSuccess)
+          {
+            printf("failed to allocate dev_bgijF[%d], size=%zu, err=%d\n",
+                  i,(size_t)N*(size_t)N*sizeof(ComplexF),err);
+            exit(1);
+          }
 	}
 #ifdef BUILDKKRMATRIX_GPU
-        // cudaMalloc((void**)&dev_bgij[i],4*kkrsz_max*kkrsz_max*numLIZ*numLIZ*sizeof(Complex));
         err = deviceMalloc((void**)&dev_tmat_n[i],4*kkrsz_max*kkrsz_max*numLIZ*sizeof(Complex)); 
 #endif
         err = deviceMalloc((void**)&dev_tau[i], 4*(size_t)N*kkrsz_max*sizeof(Complex));
@@ -261,6 +267,7 @@ int DeviceStorage::allocate(int kkrsz_max,int nspin, int numLIZ, int _nThreads, 
         err = deviceFree(dev_info[i]);
 #ifdef BUILDKKRMATRIX_GPU
         err = deviceFree(dev_bgij[i]);
+        err = deviceFree(dev_bgijF[i]);
         err = deviceFree(dev_tmat_n[i]);
 #endif
 	err = deviceFree(dev_work[i]);
@@ -273,6 +280,7 @@ int DeviceStorage::allocate(int kkrsz_max,int nspin, int numLIZ, int _nThreads, 
       }
       // dev_tmat_store.clear();
       err = deviceFree(devTmatStore);
+      err = deviceFree(devTmatStoreF);
       deviceCheckError();
       initialized=false;
     }
@@ -325,9 +333,51 @@ int DeviceStorage::copyTmatStoreToDevice(Matrix<Complex> &tmatStore,
   return 0;
 }
 
+int DeviceStorage::copyTmatStoreToDevice_SP(Matrix<Complex> &tmatStore,
+    int blkSize)
+{ 
+  deviceError_t err;
+
+  if((tmatStoreSizeF > 0) && (tmatStoreSizeF < tmatStore.size()))
+  { 
+    err = deviceFree(devTmatStoreF);
+    tmatStoreSizeF = 0;
+  }
+  if(tmatStoreSizeF == 0)
+  { 
+    err = deviceMalloc((void **)&devTmatStoreF, tmatStore.size()*sizeof(ComplexF));
+    tmatStoreSizeF = tmatStore.size();
+    if(err!=deviceSuccess)
+        {
+          printf("failed to allocate devTmatStoreF, size=%zu, err=%d\n",
+                  tmatStore.size()*sizeof(ComplexF),err);
+          exit(1);
+        }
+  }
+
+  // Use a temporary host buffer for the SP values
+  std::vector<ComplexF> tempTmatStore(tmatStore.size());
+  Complex* tmatPtr = &tmatStore(0,0);
+  // for(size_t i = 0; i < tmatStore.size(); i++)
+  // {
+  //   tempTmatStore[i] = static_cast<ComplexF>(tmatPtr[i]);
+  // }
+  std::transform(tmatPtr, tmatPtr + tmatStore.size(),
+                 tempTmatStore.begin(),
+                 [](auto const &v)
+                 {return static_cast<ComplexF>(v);});
+
+  err = deviceMemcpy(devTmatStoreF, tempTmatStore.data(),
+    tmatStore.size()*sizeof(ComplexF), deviceMemcpyHostToDevice);
+  blkSizeTmatStore = blkSize;
+  tmatStoreLDim = tmatStore.l_dim();
+
+  return 0;
+}
+
 bool DeviceStorage::initialized = false;
 Complex *DeviceStorage::dev_m[MAX_THREADS], *DeviceStorage::dev_bgij[MAX_THREADS], *DeviceStorage::dev_tmat_n[MAX_THREADS];
-ComplexF *DeviceStorage::dev_mF[MAX_THREADS];
+ComplexF *DeviceStorage::dev_mF[MAX_THREADS], *DeviceStorage::dev_bgijF[MAX_THREADS];
 Complex *DeviceStorage::dev_tau[MAX_THREADS], *DeviceStorage::dev_tau00[MAX_THREADS];
 Complex *DeviceStorage::dev_tauFull[MAX_THREADS], *DeviceStorage::dev_tFull[MAX_THREADS];
 Complex *DeviceStorage::dev_t0[MAX_THREADS];
@@ -343,7 +393,9 @@ deviceEvent_t DeviceStorage::event[MAX_THREADS];
 deviceStream_t DeviceStorage::stream[MAX_THREADS][2];
 // DeviceMatrix<Complex> DeviceStorage::dev_tmat_store;
 Complex *DeviceStorage::devTmatStore;
+ComplexF *DeviceStorage::devTmatStoreF;
 size_t DeviceStorage::tmatStoreSize = 0;
+size_t DeviceStorage::tmatStoreSizeF = 0;
 int DeviceStorage::blkSizeTmatStore = 0;
 int DeviceStorage::tmatStoreLDim = 0;
 int DeviceStorage::nThreads=1;

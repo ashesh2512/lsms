@@ -434,12 +434,12 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
         }
       }
       break;
-    // case MST_BUILD_KKR_MATRIX_ACCELERATOR_SP:
-    //   devMF = deviceStorage->getDevMF();
-    //   buildKKRMatrixHip_SP(lsms, local, atom, *deviceStorage,
-    //               deviceAtoms[localAtomIndex], ispin, iie, energy, prel,
-    //               devMF);
-    //   break;
+    case MST_BUILD_KKR_MATRIX_ACCELERATOR_SP:
+      devMF = deviceStorage->getDevMF();
+      buildKKRMatrixHip_SP(lsms, local, atom, *deviceStorage,
+                  deviceAtoms[localAtomIndex], ispin, iie, energy, prel,
+                  devMF);
+      break;
 #endif
     default:
       printf("UNKNOWN KKR MARIX BUILD KERNEL (%x)!!!\n", buildKKRMatrixKernel);
@@ -533,7 +533,7 @@ void calculateTauMatrix(LSMSSystemParameters &lsms, LocalTypeInfo &local,
       break;
 #endif
 #if defined(ACCELERATOR_HIP)
-    // case MST_BUILD_KKR_MATRIX_ACCELERATOR_SP:
+    case MST_BUILD_KKR_MATRIX_ACCELERATOR_SP:
     case MST_BUILD_KKR_MATRIX_ACCELERATOR:
       // built on GPU:
       switch (linearSolver) {

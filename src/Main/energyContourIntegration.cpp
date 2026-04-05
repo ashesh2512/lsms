@@ -471,6 +471,13 @@ void energyContourIntegration(LSMSCommunication &comm,
       for (int i = 0; i < local.num_local; i++)
         deviceAtoms[i].copyFromAtom(local.atom[i]);
     }
+    if (buildKKRMatrixKernel == MST_BUILD_KKR_MATRIX_ACCELERATOR_SP) {
+      if (lsms.global.iprint >= 0) printf("copying atom data to accelerator\n");
+      deviceStorage->copyTmatStoreToDevice_SP(local.tmatStore,
+                                              local.blkSizeTmatStore);
+      for (int i = 0; i < local.num_local; i++)
+        deviceAtoms[i].copyFromAtom(local.atom[i]);
+    }
 #endif
 
     for (int ie = eGroupIdx[ig]; ie < eGroupIdx[ig + 1]; ie++) {

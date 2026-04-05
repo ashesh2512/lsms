@@ -57,7 +57,7 @@ class DeviceStorage {
 private:
   static int nThreads;
   static Complex *dev_m[MAX_THREADS], *dev_bgij[MAX_THREADS], *dev_tmat_n[MAX_THREADS];
-  static ComplexF *dev_mF[MAX_THREADS];
+  static ComplexF *dev_mF[MAX_THREADS], *dev_bgijF[MAX_THREADS];
   static Complex *dev_tau[MAX_THREADS], *dev_tau00[MAX_THREADS], *dev_t0[MAX_THREADS], *dev_t[MAX_THREADS];
   static ComplexF *dev_t0F[MAX_THREADS];
   // for conductivity
@@ -92,7 +92,9 @@ private:
   static void *dev_work[MAX_THREADS];
   // static DeviceMatrix<Complex> dev_tmat_store;
   static Complex *devTmatStore;
+  static ComplexF *devTmatStoreF;
   static size_t tmatStoreSize;
+  static size_t tmatStoreSizeF;
   static int blkSizeTmatStore;
   static int tmatStoreLDim;
   static bool initialized;
@@ -106,6 +108,9 @@ public:
 
   static Complex* getDevBGij() { if(!initialized) {printf("DeviceStorage not initialized\n"); exit(1);}
                                  return dev_bgij[omp_get_thread_num()]; } 
+  static ComplexF* getDevBGijF() { if(!initialized) {printf("DeviceStorage not initialized\n"); exit(1);}
+                                 return dev_bgijF[omp_get_thread_num()]; } 
+
   static Complex* getDevTmatN() { return dev_tmat_n[omp_get_thread_num()]; } 
   static Complex* getDevTau() { return dev_tau[omp_get_thread_num()]; }
   static Complex* getDevTauFull() { return dev_tauFull[omp_get_thread_num()]; }
@@ -141,10 +146,12 @@ public:
   static void *getDevWork() {  return dev_work[omp_get_thread_num()]; }
 //  static DeviceMatrix<Complex>* getDevTmatStore() { return &dev_tmat_store; }
   static Complex* getDevTmatStore() { return devTmatStore; }
+  static ComplexF* getDevTmatStore_SP() { return devTmatStoreF; }
   static int getBlkSizeTmatStore() { return blkSizeTmatStore; }
   static int getTmatStoreLDim() { return tmatStoreLDim; }
 
   int copyTmatStoreToDevice(Matrix<Complex> &tmatStore, int blkSize);
+  int copyTmatStoreToDevice_SP(Matrix<Complex> &tmatStore, int blkSize);
 
 };
 

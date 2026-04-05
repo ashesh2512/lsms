@@ -674,7 +674,7 @@ void initializeNewPotentials(LSMSCommunication &comm, LSMSSystemParameters &lsms
         0.5 * local.atom[i].zvalss;
     local.atom[i].mag_mom = crystal.types[local.global_id[i]].mag_mom;
     local.atom[i].lmax = crystal.types[local.global_id[i]].lmax;
-    local.atom[i].kkrsz = (local.atom[i].lmax + 1) * (local.atom[i].lmax + 1);
+    local.atom[i].kkrsz = (local.atom[i].lmax + 1) * (local.atom[i].lmax + 1); // +1 because angular momentum number starts at 0
     local.atom[i].forceZeroMoment =
         crystal.types[local.global_id[i]].forceZeroMoment;
 

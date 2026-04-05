@@ -27,7 +27,9 @@
 void buildKKRMatrixCPU(LSMSSystemParameters &lsms, LocalTypeInfo &local,
                        AtomData &atom, int ispin, int iie, Complex energy,
                        Complex prel, Matrix<Complex> &m);
+                       
 #define MST_BUILD_KKR_MATRIX_ACCELERATOR 0x3000
+#define MST_BUILD_KKR_MATRIX_ACCELERATOR_SP 0x4000
 #ifdef ACCELERATOR_CUDA_C
 void buildKKRMatrixCuda(LSMSSystemParameters &lsms, LocalTypeInfo &local,
                         AtomData &atom, DeviceStorage &d, DeviceAtom &devAtom,
@@ -40,6 +42,11 @@ void buildKKRMatrixHip(LSMSSystemParameters &lsms, LocalTypeInfo &local,
                        AtomData &atom, DeviceStorage &d, DeviceAtom &devAtom,
                        int ispin, int iie, Complex energy, Complex prel,
                        Complex *devM);
+
+void buildKKRMatrixHip_SP(LSMSSystemParameters &lsms, LocalTypeInfo &local,
+                          AtomData &atom, DeviceStorage &d, DeviceAtom &devAtom,
+                          int ispin, int iie, Complex energy, Complex prel,
+                          ComplexF *devMF);
 #endif
 
 inline std::string buildKKRMatrixName(unsigned int buildKKRMatrixId) {
@@ -60,6 +67,9 @@ inline std::string buildKKRMatrixName(unsigned int buildKKRMatrixId) {
       break;
     case MST_BUILD_KKR_MATRIX_ACCELERATOR:
       name += "Accelerator buildKKRMatrix";
+      break;
+    case MST_BUILD_KKR_MATRIX_ACCELERATOR_SP:
+      name += "Accelerator buildKKRMatrix SP";
       break;
     default:
       name += "unknwon buildKKRMatrix";

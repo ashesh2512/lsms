@@ -66,6 +66,7 @@ inline deviceError_t deviceStreamDestroy(cudaStream_t stream)
 #include <hipblas/hipblas.h>
 
 typedef hipDoubleComplex deviceDoubleComplex;
+typedef hipFloatComplex deviceFloatComplex;
 
 const auto deviceMemcpyHostToDevice = hipMemcpyHostToDevice;
 const auto deviceMemcpyDeviceToHost = hipMemcpyDeviceToHost;

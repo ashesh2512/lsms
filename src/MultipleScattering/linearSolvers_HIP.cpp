@@ -212,15 +212,6 @@ __global__ void copyTauToTau00AndConvertHip_SP(hipDoubleComplex *tau00D, const h
   }
 }
 
-// Conversion kernel: complex float -> complex double (device-side)
-__global__ void convertHipFloatToHipDouble(hipDoubleComplex *dst, const hipFloatComplex *src, int n) {
-  int i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
-  if (i < n) {
-    hipFloatComplex v = src[i];
-    dst[i] = make_hipDoubleComplex((double)v.x, (double)v.y);
-  }
-}
-
 // Conversion kernel: complex double -> complex float (device-side)
 __global__ void convertHipDoubleToHipFloat(hipFloatComplex *dst, const hipDoubleComplex *src, int n) {
   int i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;

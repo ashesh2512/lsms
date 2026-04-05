@@ -55,6 +55,7 @@ if (USE_ACCELERATOR_HIP)
             lsmscore
             PUBLIC
             buildKKRMatrix_HIP.cpp
+            buildKKRMatrix_HIP_SP.cpp
             linearSolvers_HIP.cpp
     )
 endif ()
